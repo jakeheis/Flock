@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftCLI
 
 CLI.setup(name: "flock")
 
