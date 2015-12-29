@@ -8,6 +8,28 @@
 
 /* Begin PBXBuildFile section */
 		EF0AB57F1C31952000E0C5DB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB57E1C31952000E0C5DB /* main.swift */; };
+		EF0AB5BC1C31956C00E0C5DB /* CommandArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5AA1C31956C00E0C5DB /* CommandArguments.swift */; };
+		EF0AB5BD1C31956C00E0C5DB /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5AB1C31956C00E0C5DB /* Options.swift */; };
+		EF0AB5BE1C31956C00E0C5DB /* RawArguments.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5AC1C31956C00E0C5DB /* RawArguments.swift */; };
+		EF0AB5BF1C31956C00E0C5DB /* CLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5AE1C31956C00E0C5DB /* CLI.swift */; };
+		EF0AB5C01C31956C00E0C5DB /* CommandSignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5AF1C31956C00E0C5DB /* CommandSignature.swift */; };
+		EF0AB5C11C31956C00E0C5DB /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B01C31956C00E0C5DB /* Extensions.swift */; };
+		EF0AB5C21C31956C00E0C5DB /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B11C31956C00E0C5DB /* Router.swift */; };
+		EF0AB5C31C31956C00E0C5DB /* ChainableCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B31C31956C00E0C5DB /* ChainableCommand.swift */; };
+		EF0AB5C41C31956C00E0C5DB /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B41C31956C00E0C5DB /* Command.swift */; };
+		EF0AB5C51C31956C00E0C5DB /* CommandMessageGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B51C31956C00E0C5DB /* CommandMessageGenerator.swift */; };
+		EF0AB5C61C31956C00E0C5DB /* HelpCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B61C31956C00E0C5DB /* HelpCommand.swift */; };
+		EF0AB5C71C31956C00E0C5DB /* LightweightCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B71C31956C00E0C5DB /* LightweightCommand.swift */; };
+		EF0AB5C81C31956C00E0C5DB /* VersionCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5B81C31956C00E0C5DB /* VersionCommand.swift */; };
+		EF0AB5C91C31956C00E0C5DB /* Input.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5BA1C31956C00E0C5DB /* Input.swift */; };
+		EF0AB5CA1C31956C00E0C5DB /* Output.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5BB1C31956C00E0C5DB /* Output.swift */; };
+		EF0AB5CC1C3195BE00E0C5DB /* RunTaskCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5CB1C3195BE00E0C5DB /* RunTaskCommand.swift */; };
+		EF0AB5CE1C31985800E0C5DB /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5CD1C31985800E0C5DB /* Group.swift */; };
+		EF0AB5D01C31988500E0C5DB /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5CF1C31988500E0C5DB /* Task.swift */; };
+		EF0AB5D21C319B6D00E0C5DB /* DeployGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5D11C319B6D00E0C5DB /* DeployGroup.swift */; };
+		EF0AB5D41C319BD800E0C5DB /* Flockfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5D31C319BD800E0C5DB /* Flockfile.swift */; };
+		EF0AB5D81C319C8B00E0C5DB /* Flock.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5D71C319C8B00E0C5DB /* Flock.swift */; };
+		EF0AB5DA1C319CEF00E0C5DB /* FlockCurassow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF0AB5D91C319CEF00E0C5DB /* FlockCurassow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +47,28 @@
 /* Begin PBXFileReference section */
 		EF0AB57B1C31952000E0C5DB /* Flock */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Flock; sourceTree = BUILT_PRODUCTS_DIR; };
 		EF0AB57E1C31952000E0C5DB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		EF0AB5AA1C31956C00E0C5DB /* CommandArguments.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandArguments.swift; sourceTree = "<group>"; };
+		EF0AB5AB1C31956C00E0C5DB /* Options.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; };
+		EF0AB5AC1C31956C00E0C5DB /* RawArguments.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RawArguments.swift; sourceTree = "<group>"; };
+		EF0AB5AE1C31956C00E0C5DB /* CLI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CLI.swift; sourceTree = "<group>"; };
+		EF0AB5AF1C31956C00E0C5DB /* CommandSignature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandSignature.swift; sourceTree = "<group>"; };
+		EF0AB5B01C31956C00E0C5DB /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		EF0AB5B11C31956C00E0C5DB /* Router.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		EF0AB5B31C31956C00E0C5DB /* ChainableCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChainableCommand.swift; sourceTree = "<group>"; };
+		EF0AB5B41C31956C00E0C5DB /* Command.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		EF0AB5B51C31956C00E0C5DB /* CommandMessageGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandMessageGenerator.swift; sourceTree = "<group>"; };
+		EF0AB5B61C31956C00E0C5DB /* HelpCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelpCommand.swift; sourceTree = "<group>"; };
+		EF0AB5B71C31956C00E0C5DB /* LightweightCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightweightCommand.swift; sourceTree = "<group>"; };
+		EF0AB5B81C31956C00E0C5DB /* VersionCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionCommand.swift; sourceTree = "<group>"; };
+		EF0AB5BA1C31956C00E0C5DB /* Input.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Input.swift; sourceTree = "<group>"; };
+		EF0AB5BB1C31956C00E0C5DB /* Output.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Output.swift; sourceTree = "<group>"; };
+		EF0AB5CB1C3195BE00E0C5DB /* RunTaskCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunTaskCommand.swift; sourceTree = "<group>"; };
+		EF0AB5CD1C31985800E0C5DB /* Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		EF0AB5CF1C31988500E0C5DB /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		EF0AB5D11C319B6D00E0C5DB /* DeployGroup.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeployGroup.swift; sourceTree = "<group>"; };
+		EF0AB5D31C319BD800E0C5DB /* Flockfile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flockfile.swift; sourceTree = "<group>"; };
+		EF0AB5D71C319C8B00E0C5DB /* Flock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Flock.swift; sourceTree = "<group>"; };
+		EF0AB5D91C319CEF00E0C5DB /* FlockCurassow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlockCurassow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,8 +102,71 @@
 			isa = PBXGroup;
 			children = (
 				EF0AB57E1C31952000E0C5DB /* main.swift */,
+				EF0AB5CB1C3195BE00E0C5DB /* RunTaskCommand.swift */,
+				EF0AB5CD1C31985800E0C5DB /* Group.swift */,
+				EF0AB5D31C319BD800E0C5DB /* Flockfile.swift */,
+				EF0AB5D71C319C8B00E0C5DB /* Flock.swift */,
+				EF0AB5CF1C31988500E0C5DB /* Task.swift */,
+				EF0AB5D11C319B6D00E0C5DB /* DeployGroup.swift */,
+				EF0AB5D91C319CEF00E0C5DB /* FlockCurassow.swift */,
+				EF0AB5A81C31956C00E0C5DB /* SwiftCLI */,
 			);
 			path = Flock;
+			sourceTree = "<group>";
+		};
+		EF0AB5A81C31956C00E0C5DB /* SwiftCLI */ = {
+			isa = PBXGroup;
+			children = (
+				EF0AB5A91C31956C00E0C5DB /* Arguments */,
+				EF0AB5AD1C31956C00E0C5DB /* CLI */,
+				EF0AB5B21C31956C00E0C5DB /* Commands */,
+				EF0AB5B91C31956C00E0C5DB /* IO */,
+			);
+			name = SwiftCLI;
+			path = ../../../Apps/SwiftCLI/SwiftCLI;
+			sourceTree = "<group>";
+		};
+		EF0AB5A91C31956C00E0C5DB /* Arguments */ = {
+			isa = PBXGroup;
+			children = (
+				EF0AB5AA1C31956C00E0C5DB /* CommandArguments.swift */,
+				EF0AB5AB1C31956C00E0C5DB /* Options.swift */,
+				EF0AB5AC1C31956C00E0C5DB /* RawArguments.swift */,
+			);
+			path = Arguments;
+			sourceTree = "<group>";
+		};
+		EF0AB5AD1C31956C00E0C5DB /* CLI */ = {
+			isa = PBXGroup;
+			children = (
+				EF0AB5AE1C31956C00E0C5DB /* CLI.swift */,
+				EF0AB5AF1C31956C00E0C5DB /* CommandSignature.swift */,
+				EF0AB5B01C31956C00E0C5DB /* Extensions.swift */,
+				EF0AB5B11C31956C00E0C5DB /* Router.swift */,
+			);
+			path = CLI;
+			sourceTree = "<group>";
+		};
+		EF0AB5B21C31956C00E0C5DB /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				EF0AB5B31C31956C00E0C5DB /* ChainableCommand.swift */,
+				EF0AB5B41C31956C00E0C5DB /* Command.swift */,
+				EF0AB5B51C31956C00E0C5DB /* CommandMessageGenerator.swift */,
+				EF0AB5B61C31956C00E0C5DB /* HelpCommand.swift */,
+				EF0AB5B71C31956C00E0C5DB /* LightweightCommand.swift */,
+				EF0AB5B81C31956C00E0C5DB /* VersionCommand.swift */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
+		EF0AB5B91C31956C00E0C5DB /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				EF0AB5BA1C31956C00E0C5DB /* Input.swift */,
+				EF0AB5BB1C31956C00E0C5DB /* Output.swift */,
+			);
+			path = IO;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +226,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF0AB5C91C31956C00E0C5DB /* Input.swift in Sources */,
+				EF0AB5C61C31956C00E0C5DB /* HelpCommand.swift in Sources */,
+				EF0AB5C51C31956C00E0C5DB /* CommandMessageGenerator.swift in Sources */,
+				EF0AB5D81C319C8B00E0C5DB /* Flock.swift in Sources */,
+				EF0AB5C21C31956C00E0C5DB /* Router.swift in Sources */,
+				EF0AB5C71C31956C00E0C5DB /* LightweightCommand.swift in Sources */,
+				EF0AB5C81C31956C00E0C5DB /* VersionCommand.swift in Sources */,
+				EF0AB5C01C31956C00E0C5DB /* CommandSignature.swift in Sources */,
+				EF0AB5D01C31988500E0C5DB /* Task.swift in Sources */,
+				EF0AB5BC1C31956C00E0C5DB /* CommandArguments.swift in Sources */,
+				EF0AB5CA1C31956C00E0C5DB /* Output.swift in Sources */,
+				EF0AB5D21C319B6D00E0C5DB /* DeployGroup.swift in Sources */,
+				EF0AB5CE1C31985800E0C5DB /* Group.swift in Sources */,
+				EF0AB5DA1C319CEF00E0C5DB /* FlockCurassow.swift in Sources */,
+				EF0AB5C41C31956C00E0C5DB /* Command.swift in Sources */,
+				EF0AB5BE1C31956C00E0C5DB /* RawArguments.swift in Sources */,
+				EF0AB5BF1C31956C00E0C5DB /* CLI.swift in Sources */,
+				EF0AB5BD1C31956C00E0C5DB /* Options.swift in Sources */,
+				EF0AB5C31C31956C00E0C5DB /* ChainableCommand.swift in Sources */,
 				EF0AB57F1C31952000E0C5DB /* main.swift in Sources */,
+				EF0AB5C11C31956C00E0C5DB /* Extensions.swift in Sources */,
+				EF0AB5D41C319BD800E0C5DB /* Flockfile.swift in Sources */,
+				EF0AB5CC1C3195BE00E0C5DB /* RunTaskCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
