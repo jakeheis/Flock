@@ -9,7 +9,7 @@
 import Foundation
 import SwiftCLI
 
-class Flock {
+public class Flock {
     
     public static func buildCommands() -> [CommandType] {
       let groups = [DeployGroup()] // Actually find groups here
