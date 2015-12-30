@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol Task {
+public protocol Task {
     var name: String { get }
     
     func run()

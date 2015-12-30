@@ -9,7 +9,7 @@
 import Foundation
 import SwiftCLI
 
-protocol Group {
+public protocol Group {
     
     var name: String { get }
     var tasks: [Task] { get }
