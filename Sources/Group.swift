@@ -14,12 +14,15 @@ public protocol Group {
     var name: String { get }
     var tasks: [Task] { get }
     
+    init()
+    
 }
 
 extension Group {
     func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
     }
+    
 }
 
 extension Group {

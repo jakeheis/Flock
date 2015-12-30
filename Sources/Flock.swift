@@ -15,8 +15,8 @@ public class Flock {
   
     // MARK: - Public
     
-    public static func use(group: Group) {
-        groups.append(group)
+    public static func use<T: Group>(groupType: T.Type) {
+        groups.append(groupType.init())
     }
     
     public static func run() {
@@ -30,7 +30,7 @@ public class Flock {
     // MARK: - Internal
     
     static func setupDefaults() {
-        use(DeployGroup())
+        use(DeployGroup)
     }
     
     static func buildCommands() -> [CommandType] {

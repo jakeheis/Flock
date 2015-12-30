@@ -11,6 +11,7 @@ import Foundation
 class DeployGroup: Group {
     let name = "deploy"
     let tasks: [Task] = [SSHTask()]
+    required init() {}
 }
 
 class SSHTask: Task {
