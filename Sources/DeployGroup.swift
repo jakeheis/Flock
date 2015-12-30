@@ -10,5 +10,11 @@ import Foundation
 
 class DeployGroup: Group {
     let name = "deploy"
-    let tasks: [Task] = []
+    let tasks: [Task] = [SSHTask()]
+}
+
+class SSHTask: Task {
+  let name = "ssh"
+  
+  func run() { print("SSHing in") }
 }

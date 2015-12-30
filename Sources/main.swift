@@ -11,7 +11,6 @@ import SwiftCLI
 
 CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
 
-CLI.defaultCommand = RunTaskCommand()
-CLI.registerCommand(CLI.defaultCommand)
+CLI.registerCommands(Flock.buildCommands())
 
 CLI.go()
