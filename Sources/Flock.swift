@@ -11,7 +11,7 @@ import SwiftCLI
 
 public class Flock {
   
-    var groups: [Group] = []
+    static var groups: [Group] = []
   
     // MARK: - Public
     
@@ -30,11 +30,10 @@ public class Flock {
     // MARK: - Internal
     
     static func setupDefaults() {
-        use(DeployGroup)
+        use(DeployGroup())
     }
     
     static func buildCommands() -> [CommandType] {
-      let groups = [DeployGroup()] // Actually find groups here
       return groups.map { $0.toCommand() }
     }
     
