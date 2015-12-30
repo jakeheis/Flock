@@ -8,6 +8,10 @@
 
 import Foundation
 
+extension Flock {
+  static let Deploy = DeployGroup()
+}
+
 class DeployGroup: Group {
     let name = "deploy"
     let tasks: [Task] = [SSHTask()]
