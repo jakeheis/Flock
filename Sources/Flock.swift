@@ -11,12 +11,12 @@ import SwiftCLI
 
 class Flock {
     
-    static func buildCommands() -> [CommandType] {
+    public static func buildCommands() -> [CommandType] {
       let groups = [DeployGroup()] // Actually find groups here
       return groups.map { $0.toCommand() }
     }
     
-    func use<T>(type: T.Type) {
+    public func use<T>(type: T.Type) {
         
     }
     
