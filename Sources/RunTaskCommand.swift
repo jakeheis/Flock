@@ -11,24 +11,24 @@ import SwiftCLI
 
 class RunTaskCommand: CommandType {
     
-    let commandName = ""
-    let commandSignature = "<execute>"
+    let commandName = "deploy"
+    let commandSignature = "[<task>]"
     let commandShortDescription = ""
     
     var groups: [Group] = []
     
     func execute(arguments: CommandArguments) throws {
-        let execute = arguments.requiredArgument("execute")
+        // let execute = arguments.requiredArgument("execute")
         
-        var group: String
-        var task: String?
+        let group = "deploy"
+        let task = arguments.optionalArgument("task")
         
-        if let colonIndex = execute.characters.indexOf(":") {
-            group = execute.substringToIndex(colonIndex)
-            task = execute.substringFromIndex(colonIndex.successor())
-        } else {
-            group = execute
-        }
+        // if let colonIndex = execute.characters.indexOf(":") {
+        //     group = execute.substringToIndex(colonIndex)
+        //     task = execute.substringFromIndex(colonIndex.successor())
+        // } else {
+        //     group = execute
+        // }
         
         try runGroup(group, singleTask: task)
     }
