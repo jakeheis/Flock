@@ -2,6 +2,10 @@ class TaskScheduler {
     
     private var schedule: [ScheduleTime: [KeyedTask]] = [:]
     
+    init(clusters: [Cluster]) {
+        self.schedule(clusters)
+    }
+    
     func schedule(clusters: [Cluster]) {
         let allTasks = clusters.flatMap { $0.keyedTasks() }
         

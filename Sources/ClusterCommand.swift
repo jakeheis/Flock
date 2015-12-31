@@ -7,12 +7,15 @@ final class ClusterCommand: OptionCommandType {
     let commandShortDescription = ""
     
     private let cluster: Cluster
+    private let taskExecutor: TaskExecutor
+    
     private var printPath = false
   
-    init(cluster: Cluster) {
-      self.commandName = cluster.name
-      
-      self.cluster = cluster
+    init(cluster: Cluster, taskExecutor: TaskExecutor) {
+        self.commandName = cluster.name
+        
+        self.cluster = cluster
+        self.taskExecutor = taskExecutor
     }
     
     func setupOptions(options: Options) {
@@ -26,29 +29,18 @@ final class ClusterCommand: OptionCommandType {
             guard let task = cluster.keyedTasks().filter({ $0.task.name == taskName }).first else {
                 throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
-            runTask(task)
+            taskExecutor.runTask(task, mode: currentMode())
         } else {
-            for task in cluster.keyedTasks() {
-              runTask(task)
-            }
+            taskExecutor.runCluster(cluster, mode: currentMode())
         }
     }
     
-    private func runTask(keyedTask: KeyedTask) {        
-        runTasksScheduledAtTime(.Before(keyedTask.key))
+    func currentMode() -> TaskExecutor.Mode {
         if printPath {
-            print(keyedTask.key)
-        } else {
-            keyedTask.task.run()
+            return .Print
         }
-        runTasksScheduledAtTime(.After(keyedTask.key))
-    }
-    
-    private func runTasksScheduledAtTime(scheduleTime: ScheduleTime) {
-        let tasks = Flock.scheduler.scheduledTasksAtTime(scheduleTime)
-        for task in tasks {
-            runTask(task)
-        }
+        
+        return .Execute
     }
   
 }
