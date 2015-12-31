@@ -1,17 +1,24 @@
 import SwiftCLI
 
-final class GroupCommand: CommandType {
+final class GroupCommand: OptionCommandType {
   
     let commandName: String
     let commandSignature = "[<task>]"
     let commandShortDescription = ""
     
     private let group: Group
+    private var printPath = false
   
     init(group: Group) {
       self.commandName = group.name
       
       self.group = group
+    }
+    
+    func setupOptions(options: Options) {
+        options.onFlags(["-p", "--path"]) {(flag) in
+            self.printPath = true
+        }
     }
     
     func execute(arguments: CommandArguments) throws {
@@ -31,7 +38,11 @@ final class GroupCommand: CommandType {
       let taskString = group.taskToString(task)
 
       runHooksAtTime(.Before(taskString))
-      task.run()
+      if printPath {
+          print(taskString)
+      } else {
+          task.run()
+      }
       runHooksAtTime(.After(taskString))
     }
     
