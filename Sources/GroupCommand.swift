@@ -28,7 +28,15 @@ final class GroupCommand: CommandType {
     }
     
     func runTask(task: Task) {
+      let hookTime: HookTime = .Before(group.taskToString(task))
+      let beforeTasks = Flock.hookableTasks.filter { $0.hookTimes.contains(hookTime) }
+      beforeTasks.forEach { runTask($0) }
+
       task.run()
+      
+      let hookTimeAfter: HookTime = .After(group.taskToString(task))
+      let afterTasks = Flock.hookableTasks.filter { $0.hookTimes.contains(hookTimeAfter) }
+      afterTasks.forEach { runTask($0) }
     }
   
 }

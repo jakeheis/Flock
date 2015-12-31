@@ -23,9 +23,3 @@ extension Group {
     }
     
 }
-
-extension Group {
-  func toCommand() -> CommandType {
-      return GroupCommand(group: self)
-  }
-}

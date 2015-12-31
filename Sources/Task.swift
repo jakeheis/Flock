@@ -22,3 +22,13 @@ public enum HookTime {
     case Before(String)
     case After(String)
 }
+
+extension HookTime: Equatable {}
+
+public func == (lhs: HookTime, rhs: HookTime) -> Bool { 
+  switch (lhs, rhs) {
+    case let (.Before(t1), .Before(t2)) where t1 == t2: return true
+    case let (.After(t1), .After(t2)) where t1 == t2: return true
+    default: return false
+  }
+}

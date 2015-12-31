@@ -40,7 +40,7 @@ public class Flock {
     // MARK: - Internal
     
     static func buildCommands() -> [CommandType] {
-      return groups.map { $0.toCommand() }
+      return groups.map { GroupCommand(group: $0) }
     }
     
 }
