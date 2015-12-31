@@ -23,36 +23,32 @@ final class ClusterCommand: OptionCommandType {
     
     func execute(arguments: CommandArguments) throws {
         if let taskName = arguments.optionalArgument("task") {
-            guard let task = cluster.tasks.filter({ $0.name == taskName }).first else {
+            guard let task = cluster.keyedTasks().filter({ $0.task.name == taskName }).first else {
                 throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
             runTask(task)
         } else {
-            for task in cluster.tasks {
+            for task in cluster.keyedTasks() {
               runTask(task)
             }
         }
     }
     
-    private func runTask(task: Task) {
-      let taskString = cluster.taskToString(task)
-
-      runHooksAtTime(.Before(taskString))
-      if printPath {
-          print(taskString)
-      } else {
-          task.run()
-      }
-      runHooksAtTime(.After(taskString))
+    private func runTask(keyedTask: KeyedTask) {        
+        runTasksScheduledAtTime(.Before(keyedTask.key))
+        if printPath {
+            print(keyedTask.key)
+        } else {
+            keyedTask.task.run()
+        }
+        runTasksScheduledAtTime(.After(keyedTask.key))
     }
     
-    private func runHooksAtTime(hookTime: HookTime) {
-      let hooks = Flock.hookables.filter { $0.hookTimes.contains(hookTime) }
-      for hook in hooks {
-        if let task = hook as? Task {
-          runTask(task)
+    private func runTasksScheduledAtTime(scheduleTime: ScheduleTime) {
+        let tasks = Flock.scheduler.scheduledTasksAtTime(scheduleTime)
+        for task in tasks {
+            runTask(task)
         }
-      }
     }
   
 }

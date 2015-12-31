@@ -14,8 +14,17 @@ public protocol Cluster {
 }
 
 extension Cluster {
-    func taskToString(task: Task) -> String {
+    public func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
     }
     
+    public func keyTask(task: Task) -> KeyedTask {
+        return KeyedTask(key: taskToString(task), task: task)
+    }
+}
+
+extension Cluster {
+    func keyedTasks() -> [KeyedTask] {
+        return tasks.map { keyTask($0) }
+    }
 }

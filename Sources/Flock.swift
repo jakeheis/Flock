@@ -11,7 +11,7 @@ import SwiftCLI
 public class Flock {
   
     static var clusters: [Cluster] = []
-    static var hookables: [Hookable] = []
+    static let scheduler = TaskScheduler()
   
     // MARK: - Public
     
@@ -19,12 +19,6 @@ public class Flock {
     
     public static func use(cluster: Cluster) {
         clusters.append(cluster)
-        
-        for task in cluster.tasks {
-          if let hookableTask = task as? Hookable {
-            hookables.append(hookableTask)
-          }
-        }
     }
     
     public static func use(clusters: [Cluster]) {
@@ -32,15 +26,20 @@ public class Flock {
     }
     
     public static func run() {
-      CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
-      CLI.registerCommands(buildCommands())
-      CLI.go()
+        resolveSchedules()
+        CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
+        CLI.registerCommands(buildCommands())
+        CLI.go()
     }
     
     // MARK: - Internal
     
+    static func resolveSchedules() {
+        scheduler.schedule(clusters)
+    }
+    
     static func buildCommands() -> [CommandType] {
-      return clusters.map { ClusterCommand(cluster: $0) }
+        return clusters.map { ClusterCommand(cluster: $0) }
     }
     
 }
