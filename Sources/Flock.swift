@@ -11,6 +11,7 @@ import SwiftCLI
 public class Flock {
   
     static var clusters: [Cluster] = []
+    static var configurations: [ConfigurationTime: Configuration] = [:]
   
     // MARK: - Public
     
@@ -24,7 +25,13 @@ public class Flock {
         clusters.forEach { use($0) }
     }
     
+    public static func addConfiguration(configuration: Configuration, _ time: ConfigurationTime) {
+        configurations[time] = configuration
+    }
+    
     public static func run() {
+        configureForEnvironment("production") // TODO: Add way to change environment
+        
         let taskExecutor = TaskExecutor(clusters: clusters)
         let commands = buildCommandsWithTaskExecutor(taskExecutor)
         
@@ -34,6 +41,11 @@ public class Flock {
     }
     
     // MARK: - Internal
+    
+    static func configureForEnvironment(environment: String) {
+        configurations[.Always]?.configure()
+        configurations[.Environment(environment)]?.configure()
+    }
     
     static func buildCommandsWithTaskExecutor(taskExecutor: TaskExecutor) -> [CommandType] {
         return clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) }

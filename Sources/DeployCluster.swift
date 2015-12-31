@@ -10,9 +10,9 @@ extension Flock {
     static let Deploy = DeployCluster()
 }
 
-class DeployCluster: Cluster {
-    let name = "deploy"
-    let tasks: [Task] = [SSHTask()]
+public class DeployCluster: Cluster {
+    public let name = "deploy"
+    public let tasks: [Task] = [SSHTask()]
     
     // Config
     public var quickly = false
