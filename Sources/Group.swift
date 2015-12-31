@@ -1,5 +1,5 @@
 //
-//  Group.swift
+//  Cluster.swift
 //  Flock
 //
 //  Created by Jake Heiser on 12/28/15.
@@ -8,7 +8,7 @@
 
 import SwiftCLI
 
-public protocol Group {
+public protocol Cluster {
     
     var name: String { get }
     var tasks: [Task] { get }
@@ -17,7 +17,7 @@ public protocol Group {
     
 }
 
-extension Group {
+extension Cluster {
     func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
     }

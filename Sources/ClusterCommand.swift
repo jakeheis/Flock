@@ -1,18 +1,18 @@
 import SwiftCLI
 
-final class GroupCommand: OptionCommandType {
+final class ClusterCommand: OptionCommandType {
   
     let commandName: String
     let commandSignature = "[<task>]"
     let commandShortDescription = ""
     
-    private let group: Group
+    private let cluster: Cluster
     private var printPath = false
   
-    init(group: Group) {
-      self.commandName = group.name
+    init(cluster: Cluster) {
+      self.commandName = cluster.name
       
-      self.group = group
+      self.cluster = cluster
     }
     
     func setupOptions(options: Options) {
@@ -23,19 +23,19 @@ final class GroupCommand: OptionCommandType {
     
     func execute(arguments: CommandArguments) throws {
         if let taskName = arguments.optionalArgument("task") {
-            guard let task = group.tasks.filter({ $0.name == taskName }).first else {
-                throw CLIError.Error("Task \(group.name):\(taskName) not found")
+            guard let task = cluster.tasks.filter({ $0.name == taskName }).first else {
+                throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
             runTask(task)
         } else {
-            for task in group.tasks {
+            for task in cluster.tasks {
               runTask(task)
             }
         }
     }
     
     private func runTask(task: Task) {
-      let taskString = group.taskToString(task)
+      let taskString = cluster.taskToString(task)
 
       runHooksAtTime(.Before(taskString))
       if printPath {

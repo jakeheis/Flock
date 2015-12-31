@@ -10,25 +10,25 @@ import SwiftCLI
 
 public class Flock {
   
-    static var groups: [Group] = []
+    static var clusters: [Cluster] = []
     static var hookables: [Hookable] = []
   
     // MARK: - Public
     
-    public static let Default: [Group] = [Flock.Deploy]
+    public static let Default: [Cluster] = [Flock.Deploy]
     
-    public static func use(group: Group) {
-        groups.append(group)
+    public static func use(cluster: Cluster) {
+        clusters.append(cluster)
         
-        for task in group.tasks {
+        for task in cluster.tasks {
           if let hookableTask = task as? Hookable {
             hookables.append(hookableTask)
           }
         }
     }
     
-    public static func use(groups: [Group]) {
-        groups.forEach { use($0) }
+    public static func use(clusters: [Cluster]) {
+        clusters.forEach { use($0) }
     }
     
     public static func run() {
@@ -40,7 +40,7 @@ public class Flock {
     // MARK: - Internal
     
     static func buildCommands() -> [CommandType] {
-      return groups.map { GroupCommand(group: $0) }
+      return clusters.map { ClusterCommand(cluster: $0) }
     }
     
 }

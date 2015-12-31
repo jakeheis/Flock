@@ -1,5 +1,5 @@
 //
-//  DeployGroup.swift
+//  DeployCluster.swift
 //  Flock
 //
 //  Created by Jake Heiser on 12/28/15.
@@ -7,10 +7,10 @@
 //
 
 extension Flock {
-  static let Deploy = DeployGroup()
+  static let Deploy = DeployCluster()
 }
 
-class DeployGroup: Group {
+class DeployCluster: Cluster {
     let name = "deploy"
     let tasks: [Task] = [SSHTask()]
     required init() {}
