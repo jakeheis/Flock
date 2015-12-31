@@ -6,7 +6,7 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-import SwiftCLI
+// MARK: - Cluster
 
 public protocol Cluster {
     var name: String { get }
@@ -17,14 +17,12 @@ extension Cluster {
     public func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
     }
-    
-    public func keyTask(task: Task) -> KeyedTask {
-        return KeyedTask(key: taskToString(task), task: task)
-    }
 }
+
+// MARK: - KeyedTask extension
 
 extension Cluster {
     func keyedTasks() -> [KeyedTask] {
-        return tasks.map { keyTask($0) }
+        return tasks.map { KeyedTask(key: taskToString($0), task: $0) }
     }
 }

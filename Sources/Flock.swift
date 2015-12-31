@@ -26,17 +26,14 @@ public class Flock {
     }
     
     public static func run() {
-        resolveSchedules()
+        scheduler.schedule(clusters)
+        
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         CLI.registerCommands(buildCommands())
         CLI.go()
     }
     
     // MARK: - Internal
-    
-    static func resolveSchedules() {
-        scheduler.schedule(clusters)
-    }
     
     static func buildCommands() -> [CommandType] {
         return clusters.map { ClusterCommand(cluster: $0) }

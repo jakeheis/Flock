@@ -6,16 +6,22 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+// MARK: - Task
+
 public protocol Task {
     var name: String { get }
     
     func run()
 }
 
-public struct KeyedTask {
+// MARK: - KeyedTask
+
+struct KeyedTask {
     let key: String
     let task: Task
 }
+
+// MARK: - ScheduledTask
 
 public protocol ScheduledTask: Task {
     var scheduledTimes: [ScheduleTime] { get }
