@@ -20,7 +20,7 @@ extension ConfigurationTime: Equatable {}
 
 public func == (lhs: ConfigurationTime, rhs: ConfigurationTime) -> Bool { 
   switch (lhs, rhs) {
-    case let (.Always, .Always): return true
+    case (.Always, .Always): return true
     case let (.Environment(e1), .Environment(e2)) where e1 == e2: return true
     default: return false
   }
