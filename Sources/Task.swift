@@ -16,8 +16,6 @@ public protocol Hookable {
     var hookTimes: [HookTime] { get }
 }
 
-typealias HookableTask = protocol<Task, Hookable>
-
 public enum HookTime {
     case Before(String)
     case After(String)

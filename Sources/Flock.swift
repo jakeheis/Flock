@@ -11,7 +11,7 @@ import SwiftCLI
 public class Flock {
   
     static var groups: [Group] = []
-    static var hookableTasks: [HookableTask] = []
+    static var hookables: [Hookable] = []
   
     // MARK: - Public
     
@@ -21,8 +21,8 @@ public class Flock {
         groups.append(group)
         
         for task in group.tasks {
-          if let hookableTask = task as? HookableTask {
-            hookableTasks.append(hookableTask)
+          if let hookableTask = task as? Hookable {
+            hookables.append(hookableTask)
           }
         }
     }
