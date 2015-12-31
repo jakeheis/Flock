@@ -10,7 +10,7 @@
 
 public protocol Cluster {
     var name: String { get }
-    var tasks: [Task] { get }    
+    var tasks: [Task] { get }
 }
 
 extension Cluster {

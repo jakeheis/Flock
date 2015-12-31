@@ -7,18 +7,21 @@
 //
 
 extension Flock {
-  static let Deploy = DeployCluster()
+    static let Deploy = DeployCluster()
 }
 
 class DeployCluster: Cluster {
     let name = "deploy"
     let tasks: [Task] = [SSHTask()]
+    
+    // Config
+    var quickly = false
 }
 
 class SSHTask: Task {
     let name = "ssh"
     
     func run() { 
-      print("SSHing in") 
+      print("SSHing in ", Flock.Deploy.quickly ? "quickly" : "slowly") 
     }
 }
