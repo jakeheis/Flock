@@ -11,6 +11,7 @@ import SwiftCLI
 public class Flock {
   
     static var groups: [Group] = []
+    static var hookableTasks: [HookableTask] = []
   
     // MARK: - Public
     
@@ -18,10 +19,16 @@ public class Flock {
     
     public static func use(group: Group) {
         groups.append(group)
+        
+        for task in group.tasks {
+          if let hookableTask = task as? HookableTask {
+            hookableTasks.append(hookableTask)
+          }
+        }
     }
     
     public static func use(groups: [Group]) {
-        self.groups += groups
+        groups.forEach { use($0) }
     }
     
     public static func run() {
