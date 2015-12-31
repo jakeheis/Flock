@@ -7,7 +7,7 @@
 //
 
 extension Flock {
-    static let Deploy = DeployCluster()
+    public static let Deploy = DeployCluster()
 }
 
 public class DeployCluster: Cluster {
