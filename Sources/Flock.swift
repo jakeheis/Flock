@@ -11,10 +11,10 @@ import SwiftCLI
 public class Flock {
   
     static var groups: [Group] = []
-    
-    static let Default: [Group] = [Flock.Deploy]
   
     // MARK: - Public
+    
+    public static let Default: [Group] = [Flock.Deploy]
     
     public static func use(group: Group) {
         groups.append(group)
