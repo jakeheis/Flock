@@ -9,12 +9,8 @@
 import SwiftCLI
 
 public protocol Cluster {
-    
     var name: String { get }
-    var tasks: [Task] { get }
-    
-    init()
-    
+    var tasks: [Task] { get }    
 }
 
 extension Cluster {

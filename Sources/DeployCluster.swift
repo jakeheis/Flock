@@ -13,7 +13,6 @@ extension Flock {
 class DeployCluster: Cluster {
     let name = "deploy"
     let tasks: [Task] = [SSHTask()]
-    required init() {}
 }
 
 class SSHTask: Task {
