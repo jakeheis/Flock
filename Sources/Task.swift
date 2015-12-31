@@ -8,16 +8,16 @@
 
 public protocol Task {
     var name: String { get }
+    var taskTimes: [TaskTime] { get }
     
     func run()
 }
 
+public enum TaskTime {
+    case Before(String)
+    case After(String)
+}
+
 extension Task {
-    func runBefore(task: Task) {
-        
-    }
-    
-    func runAfter(task: Task) {
-        
-    }
+    var taskTimes = []
 }

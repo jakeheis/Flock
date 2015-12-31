@@ -17,7 +17,9 @@ class DeployGroup: Group {
 }
 
 class SSHTask: Task {
-  let name = "ssh"
-  
-  func run() { print("SSHing in") }
+    let name = "ssh"
+    
+    func run() { 
+      print("SSHing in") 
+    }
 }
