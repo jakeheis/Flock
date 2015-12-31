@@ -15,7 +15,7 @@ class DeployCluster: Cluster {
     let tasks: [Task] = [SSHTask()]
     
     // Config
-    var quickly = false
+    public var quickly = false
 }
 
 class SSHTask: Task {
