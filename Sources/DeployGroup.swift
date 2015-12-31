@@ -6,8 +6,6 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-import Foundation
-
 extension Flock {
   static let Deploy = DeployGroup()
 }

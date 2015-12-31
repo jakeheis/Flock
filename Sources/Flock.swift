@@ -6,7 +6,6 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-import Foundation
 import SwiftCLI
 
 public class Flock {

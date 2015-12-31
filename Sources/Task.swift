@@ -6,8 +6,6 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-import Foundation
-
 public protocol Task {
     var name: String { get }
     
