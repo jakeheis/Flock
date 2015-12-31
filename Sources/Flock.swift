@@ -11,6 +11,8 @@ import SwiftCLI
 public class Flock {
   
     static var groups: [Group] = []
+    
+    static let Default: [Group] = [Flock.Deploy]
   
     // MARK: - Public
     
@@ -18,19 +20,17 @@ public class Flock {
         groups.append(group)
     }
     
+    public static func use(groups: [Group]) {
+        self.groups += groups
+    }
+    
     public static func run() {
-      setupDefaults()
-      
       CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
       CLI.registerCommands(buildCommands())
       CLI.go()
     }
     
     // MARK: - Internal
-    
-    static func setupDefaults() {
-        use(Flock.Deploy)
-    }
     
     static func buildCommands() -> [CommandType] {
       return groups.map { $0.toCommand() }
