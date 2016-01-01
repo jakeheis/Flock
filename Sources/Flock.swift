@@ -30,8 +30,6 @@ public class Flock {
     }
     
     public static func run() {
-        configureForEnvironment("production") // TODO: Add way to change environment
-        
         let taskExecutor = TaskExecutor(clusters: clusters)
         let commands = buildCommandsWithTaskExecutor(taskExecutor)
         
