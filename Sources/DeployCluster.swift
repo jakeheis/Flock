@@ -12,16 +12,17 @@ extension Flock {
 
 public class DeployCluster: Cluster {
     public let name = "deploy"
-    public let tasks: [Task] = [SSHTask()]
+    public let tasks: [Task] = [GitTask()]
     
     // Config
-    public var quickly = false
+    public var deployTo = "/var/www"
+    public var repoURL = ""
 }
 
-class SSHTask: Task {
-    let name = "ssh"
+class GitTask: Task {
+    let name = "git"
     
     func run() { 
-      print("SSHing in ", Flock.Deploy.quickly ? "quickly" : "slowly") 
+      print("Deploying \(Flock.Deploy.repoURL) to \(Flock.Deploy.deployTo)")
     }
 }
