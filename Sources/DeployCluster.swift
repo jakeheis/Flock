@@ -10,19 +10,20 @@ extension Flock {
     public static let Deploy = DeployCluster()
 }
 
+extension Config {
+    public static var deployTo = "/var/www"
+    public static var repoURL = ""
+}
+
 public class DeployCluster: Cluster {
     public let name = "deploy"
     public let tasks: [Task] = [GitTask()]
-    
-    // Config
-    public var deployTo = "/var/www"
-    public var repoURL = ""
 }
 
 class GitTask: Task {
     let name = "git"
     
     func run() { 
-      print("Deploying \(Flock.Deploy.repoURL) to \(Flock.Deploy.deployTo)")
+        print("Deploying \(Config.repoURL) to \(Config.deployTo)")
     }
 }

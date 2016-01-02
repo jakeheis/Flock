@@ -13,6 +13,8 @@ public protocol Cluster {
     var tasks: [Task] { get }
 }
 
+public struct Config {}
+
 extension Cluster {
     public func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
