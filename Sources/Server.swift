@@ -9,7 +9,7 @@ public class Servers {
     }
 }
 
-public struct Server {
+public class Server {
     public enum Role {
         case App
         case DB
@@ -20,16 +20,31 @@ public struct Server {
     public let user: String
     public let roles: [Role]
     
+    private var commandStack: [String] = []
+    
     public init(IP: String, user: String, roles: [Role]) {
         self.IP = IP
         self.user = user
         self.roles = roles
     }
     
-    func execute(command: String) {
+    public func within(directory: String, block: () -> ()) {
+        commandStack.append("cd \(directory)")
+        block()
+        commandStack.removeLast()
+    }
+    
+    public func execute(command: String) {
+        execute([command])
+    }
+    
+    public func execute(commands: [String]) {
+        let finalCommands = commandStack + commands
+        let finalCommand = finalCommands.joinWithSeparator("; ")
+        
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["WhiteKnight", "bash -c '\(command)'"]
+        task.arguments = ["WhiteKnight", "bash -c '\(finalCommand)'"]
         task.launch()
         task.waitUntilExit()
     }

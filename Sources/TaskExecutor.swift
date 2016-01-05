@@ -23,7 +23,7 @@ class TaskExecutor {
         switch mode {
         case .Execute: 
             for server in Servers.servers {
-                keyedTask.task.run(Context(server: server))
+                keyedTask.task.run(server)
             }
         case .Print:
             print(keyedTask.key)

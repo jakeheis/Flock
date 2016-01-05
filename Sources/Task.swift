@@ -11,7 +11,7 @@
 public protocol Task {
     var name: String { get }
     
-    func run(context: Context)
+    func run(server: Server)
 }
 
 // MARK: - KeyedTask
