@@ -1,3 +1,9 @@
+public class Servers {
+    public static func add(IP IP: String, user: String, roles: [Server.Role]) {
+        Config.servers.append(Server(IP: IP, user: user, roles: roles))
+    }
+}
+
 public struct Server {
     public enum Role {
         case App
@@ -17,5 +23,5 @@ public struct Server {
 }
 
 extension Config {
-    public static var servers: [Server] = []
+    static var servers: [Server] = []
 }
