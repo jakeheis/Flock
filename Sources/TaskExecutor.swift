@@ -21,8 +21,12 @@ class TaskExecutor {
     
     func runTask(keyedTask: KeyedTask, mode: Mode) {
         switch mode {
-        case .Execute: keyedTask.task.run()
-        case .Print: print(keyedTask.key)
+        case .Execute: 
+            for server in Servers.servers {
+                keyedTask.task.run(Context(server: server))
+            }
+        case .Print:
+            print(keyedTask.key)
         }
     }
     

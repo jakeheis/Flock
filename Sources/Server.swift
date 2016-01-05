@@ -1,3 +1,5 @@
+import Foundation
+
 public class Servers {
     
     static var servers: [Server] = []
@@ -23,4 +25,13 @@ public struct Server {
         self.user = user
         self.roles = roles
     }
+    
+    func execute(command: String) {
+        let task = NSTask()
+        task.launchPath = "/usr/bin/ssh"
+        task.arguments = ["WhiteKnight", "'\(command)'"]
+        task.launch()
+        task.waitUntilExit()
+    }
+    
 }
