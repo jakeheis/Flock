@@ -1,6 +1,9 @@
 public class Servers {
+    
+    static var servers: [Server] = []
+    
     public static func add(IP IP: String, user: String, roles: [Server.Role]) {
-        Config.servers.append(Server(IP: IP, user: user, roles: roles))
+        servers.append(Server(IP: IP, user: user, roles: roles))
     }
 }
 
@@ -20,8 +23,4 @@ public struct Server {
         self.user = user
         self.roles = roles
     }
-}
-
-extension Config {
-    static var servers: [Server] = []
 }

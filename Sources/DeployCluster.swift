@@ -24,6 +24,6 @@ class GitTask: Task {
     let name = "git"
     
     func run() { 
-        print("On \(Config.servers.first?.IP): deploying \(Config.repoURL) to \(Config.deployTo)")
+        print("On \(Servers.servers.first?.IP): deploying \(Config.repoURL) to \(Config.deployTo)")
     }
 }
