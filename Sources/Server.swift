@@ -29,7 +29,7 @@ public struct Server {
     func execute(command: String) {
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["WhiteKnight", "'\(command)'"]
+        task.arguments = ["WhiteKnight", "bash -c '\(command)'"]
         task.launch()
         task.waitUntilExit()
     }

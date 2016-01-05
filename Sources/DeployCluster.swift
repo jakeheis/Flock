@@ -26,6 +26,6 @@ class GitTask: Task {
     func run(context: Context) { 
         print("On \(context.server.IP): deploying \(Config.repoURL) to \(Config.deployTo)")
         
-        context.server.execute("mkdir blahblah")
+        context.server.execute("mkdir HIHello")
     }
 }
