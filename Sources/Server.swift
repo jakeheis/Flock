@@ -45,6 +45,9 @@ public class Server {
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
         task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "bash -c '\(finalCommand)'"]
+        
+        print("On \(IP): \(task.commandCall)")
+        
         task.launch()
         task.waitUntilExit()
     }
@@ -53,4 +56,11 @@ public class Server {
 
 extension Config {
     public static var SSHKey: String = ""
+}
+
+extension NSTask {
+    var commandCall: String {
+        let args = arguments?.joinWithSeparator(" ") ?? ""
+        return "\(launchPath) \(args)"
+    }
 }
