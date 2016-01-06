@@ -60,7 +60,8 @@ extension Config {
 
 extension NSTask {
     var commandCall: String {
+        let launch = launchPath ?? ""
         let args = arguments?.joinWithSeparator(" ") ?? ""
-        return "\(launchPath) \(args)"
+        return "\(launch) \(args)"
     }
 }
