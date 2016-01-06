@@ -44,7 +44,7 @@ public class Server {
         
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "bash -c '\(finalCommand)'"]
+        task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'bash -c \"\(finalCommand)\"'"]
         
         print("On \(IP): \(task.commandCall)")
         
