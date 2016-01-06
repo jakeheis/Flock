@@ -44,9 +44,13 @@ public class Server {
         
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["WhiteKnight", "bash -c '\(finalCommand)'"]
+        task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "bash -c '\(finalCommand)'"]
         task.launch()
         task.waitUntilExit()
     }
     
+}
+
+extension Config {
+    public static var SSHKey: String = ""
 }
