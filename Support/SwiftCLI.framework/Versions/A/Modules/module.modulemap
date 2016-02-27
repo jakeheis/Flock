@@ -1,0 +1,10 @@
+framework module SwiftCLI {
+  umbrella header "SwiftCLI.h"
+
+  export *
+  module * { export * }
+}
+
+module SwiftCLI.Swift {
+    header "SwiftCLI-Swift.h"
+}

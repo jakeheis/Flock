@@ -1,4 +1,5 @@
 import Foundation
+import NMSSH
 
 public class Servers {
     
@@ -39,17 +40,26 @@ public class Server {
     }
     
     public func execute(commands: [String]) {
+        let config = NMSSHHostConfig()
+        config.hostname = IP
+        config.user = user
+        config.port = 22
+        config.identityFiles = [Config.SSHKey]
+
+        let session = NMSSHSession(host: IP, configs: [config], withDefaultPort: 8080, defaultUsername: user)
+        session.connect()
+        defer { session.disconnect() }
+        
         let finalCommands = commandStack + commands
         let finalCommand = finalCommands.joinWithSeparator("; ")
+        let call = "bash -c \"\(finalCommand)\""
         
-        let task = NSTask()
-        task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'bash -c \"\(finalCommand)\"'"]
-        
-        print("On \(IP): \(task.commandCall)")
-        
-        task.launch()
-        task.waitUntilExit()
+        print("On \(IP): \(call)")
+        do {
+            try session.channel.execute(call)
+        } catch let error as NSError {
+            print(error)
+        }
     }
     
 }
