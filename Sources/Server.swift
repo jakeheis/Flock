@@ -1,5 +1,5 @@
 import Foundation
-import NMSSH
+import CNMSSH
 
 public class Servers {
     
