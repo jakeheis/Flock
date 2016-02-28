@@ -53,12 +53,12 @@ public class Server {
         
         let finalCommands = commandStack + commands
         let finalCommand = finalCommands.joinWithSeparator("; ")
-        let call = "bash -c \"\(finalCommand)\""
+        let call = "\(finalCommand)"
         
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
         // task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'\(call)"]
-        task.arguments = ["\(SSHHost)", "'\(call)"]
+        task.arguments = ["\(SSHHost)", "\(call)"]
         
         print("On \(IP): \(call)")
         
