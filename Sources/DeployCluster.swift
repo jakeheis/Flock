@@ -11,7 +11,8 @@ extension Flock {
 }
 
 extension Config {
-    public static var deployTo = "/var/www"
+    public static var deployDirectory = "/var/www"
+    
     public static var repoURL = ""
 }
 
@@ -24,8 +25,8 @@ class GitTask: Task {
     let name = "git"
     
     func run(server: ServerType) { 
-        server.within(Config.deployTo) {
-            server.execute("mkdir Hello")
+        server.within(Config.deployDirectory) {
+            server.execute("git clone \(Config.repoURL)")
         }
     }
 }
