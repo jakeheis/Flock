@@ -4,8 +4,8 @@ public class Servers {
     
     static var servers: [Server] = []
     
-    public static func add(IP IP: String, user: String, roles: [Server.Role]) {
-        servers.append(Server(IP: IP, user: user, roles: roles))
+    public static func add(IP IP: String, user: String, roles: [Server.Role], SSHHost: String) {
+        servers.append(Server(IP: IP, user: user, roles: roles, SSHHost: SSHHost))
     }
 }
 
@@ -19,13 +19,15 @@ public class Server {
     public let IP: String
     public let user: String
     public let roles: [Role]
+    public let SSHHost: String
     
     private var commandStack: [String] = []
     
-    public init(IP: String, user: String, roles: [Role]) {
+    public init(IP: String, user: String, roles: [Role], SSHHost: String) {
         self.IP = IP
         self.user = user
         self.roles = roles
+        self.SSHHost = SSHHost
     }
     
     public func within(directory: String, block: () -> ()) {
@@ -55,7 +57,8 @@ public class Server {
         
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'\(call)"]
+        // task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'\(call)"]
+        task.arguments = ["\(SSHHost)", "'\(call)"]
         
         print("On \(IP): \(call)")
         
