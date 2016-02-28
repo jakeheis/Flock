@@ -2,33 +2,33 @@ import Foundation
 
 public class Servers {
     
-    static var servers: [Server] = []
+    static var servers: [ServerType] = []
     
-    public static func add(IP IP: String, user: String, roles: [Server.Role], SSHHost: String) {
-        servers.append(Server(IP: IP, user: user, roles: roles, SSHHost: SSHHost))
+    public static func add(SSHHost SSHHost: String, roles: [ServerRole]) {
+        servers.append(SSHHostServer(SSHHost: SSHHost, roles: roles))
+    }
+    
+    public static func add(IP IP: String, user: String, roles: [ServerRole]) {
+        servers.append(UserServer(IP: IP, user: user, roles: roles))
     }
 }
 
-public class Server {
-    public enum Role {
-        case App
-        case DB
-        case Web
-    }
+public enum ServerRole {
+    case App
+    case DB
+    case Web
+}
+
+public protocol ServerType: class {
   
-    public let IP: String
-    public let user: String
-    public let roles: [Role]
-    public let SSHHost: String
+    var roles: [ServerRole] { get }
+    var commandStack: [String] { get set }
     
-    private var commandStack: [String] = []
+    func execute(commands: [String])
     
-    public init(IP: String, user: String, roles: [Role], SSHHost: String) {
-        self.IP = IP
-        self.user = user
-        self.roles = roles
-        self.SSHHost = SSHHost
-    }
+}
+
+extension ServerType {
     
     public func within(directory: String, block: () -> ()) {
         commandStack.append("cd \(directory)")
@@ -38,6 +38,51 @@ public class Server {
     
     public func execute(command: String) {
         execute([command])
+    }
+    
+}
+
+public class SSHHostServer: ServerType {
+  
+    public let SSHHost: String
+    public let roles: [ServerRole]
+    
+    public var commandStack: [String] = []
+    
+    public init(SSHHost: String, roles: [ServerRole]) {
+        self.SSHHost = SSHHost
+        self.roles = roles
+    }
+    
+    public func execute(commands: [String]) {
+        let finalCommands = commandStack + commands
+        let finalCommand = finalCommands.joinWithSeparator("; ")
+        let call = "\(finalCommand)"
+        
+        let task = NSTask()
+        task.launchPath = "/usr/bin/ssh"
+        task.arguments = ["\(SSHHost)", "\(call)"]
+        
+        print("On \(SSHHost): \(call)")
+        
+        task.launch()
+        task.waitUntilExit()
+    }
+  
+}
+
+public class UserServer: ServerType {
+    
+    public let IP: String
+    public let user: String
+    public let roles: [ServerRole]
+        
+    public var commandStack: [String] = []
+    
+    public init(IP: String, user: String, roles: [ServerRole]) {
+        self.IP = IP
+        self.user = user
+        self.roles = roles
     }
     
     public func execute(commands: [String]) {
@@ -51,19 +96,9 @@ public class Server {
         // session.connect()
         // defer { session.disconnect() }
         
-        let finalCommands = commandStack + commands
-        let finalCommand = finalCommands.joinWithSeparator("; ")
-        let call = "\(finalCommand)"
-        
-        let task = NSTask()
-        task.launchPath = "/usr/bin/ssh"
-        // task.arguments = ["-i \(Config.SSHKey)", "\(user)@\(IP)", "'\(call)"]
-        task.arguments = ["\(SSHHost)", "\(call)"]
-        
-        print("On \(IP): \(call)")
-        
-        task.launch()
-        task.waitUntilExit()
+        // let finalCommands = commandStack + commands
+        // let finalCommand = finalCommands.joinWithSeparator("; ")
+        // let call = "\(finalCommand)"
         
         // print("On \(IP): \(call)")
         // do {

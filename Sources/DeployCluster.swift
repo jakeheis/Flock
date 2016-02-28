@@ -23,9 +23,7 @@ public class DeployCluster: Cluster {
 class GitTask: Task {
     let name = "git"
     
-    func run(server: Server) { 
-        print("On \(server.IP): deploying \(Config.repoURL) to \(Config.deployTo)")
-        
+    func run(server: ServerType) { 
         server.within(Config.deployTo) {
             server.execute("mkdir Hello")
         }
