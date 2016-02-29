@@ -63,7 +63,7 @@ public class SSHHostServer: ServerType {
         task.launchPath = "/usr/bin/ssh"
         task.arguments = ["\(SSHHost)", "\(call)"]
         
-        print("On \(SSHHost): \(call)")
+        print("\tOn \(SSHHost): \(call)")
         
         task.launch()
         task.waitUntilExit()

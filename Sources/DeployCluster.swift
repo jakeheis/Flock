@@ -27,6 +27,7 @@ class GitTask: Task {
     let name = "git"
     
     func run(server: ServerType) {
+        print("Cloning project in \(Config.deployDirectory)")
         server.execute("mkdir -p \(Config.deployDirectory)")
         server.within(Config.deployDirectory) {
             server.execute("git clone \(Config.repoURL)")
@@ -38,7 +39,9 @@ class BuildTask: Task {
     let name = "build"
     
     func run(server: ServerType) { 
-        server.within("\(Config.deployDirectory)/FlockTester") {
+        let within = "\(Config.deployDirectory)/FlockTester"
+        print("Building swift project in \(within)")
+        server.within(within) {
             server.execute("swift build")
         }
     }
