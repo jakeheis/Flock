@@ -10,6 +10,10 @@ extension Flock {
     public static let Tools = ToolsCluster()
 }
 
+extension Config {
+    public static var swiftVersion: String? = nil
+}
+
 public class ToolsCluster: Cluster {
     public let name = "tools"
     public let tasks: [Task] = [
@@ -46,5 +50,12 @@ class SwiftInstallationTask: Task {
         server.execute("echo >> \(tmpFile)")
         server.execute("cat \(bashrc) >> \(tmpFile)")
         server.execute("cat \(tmpFile) > \(bashrc)")
+        
+        print("Installing Swift")
+        guard let swiftVersion = Config.swiftVersion else {
+            print("ERROR: You must specify in your configuration file which Swift version to install.")
+            return
+        }
+        server.execute("swiftenv install \(swiftVersion)")
     }
 }
