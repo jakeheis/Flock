@@ -26,7 +26,7 @@ public class DeployCluster: Cluster {
 class GitTask: Task {
     let name = "git"
     
-    func run(server: ServerType) { 
+    func run(server: ServerType) {
         server.execute("mkdir -p \(Config.deployDirectory)")
         server.within(Config.deployDirectory) {
             server.execute("git clone \(Config.repoURL)")
@@ -38,7 +38,7 @@ class BuildTask: Task {
     let name = "build"
     
     func run(server: ServerType) { 
-        server.within(Config.deployDirectory) {
+        server.within("\(Config.deployDirectory)/FlockTester") {
             server.execute("swift build")
         }
     }
