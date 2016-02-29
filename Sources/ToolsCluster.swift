@@ -38,7 +38,7 @@ class SwiftInstallationTask: Task {
             "export SWIFTENV_ROOT='HOME/.swiftenv'",
             "export PATH='$SWIFTENV_ROOT/bin:$PATH'",
             "eval '$(swiftenv init -)'"
-        ].joinWithSeparator("\n")
+        ].joinWithSeparator(";")
         server.execute("echo -e \"\(bashRC)\n$(cat ~/.bashrc)\" > ~/.bashrc")
     }
 }
