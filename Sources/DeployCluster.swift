@@ -27,6 +27,7 @@ class GitTask: Task {
     let name = "git"
     
     func run(server: ServerType) { 
+        server.execute("mkdir -p \(Config.deployDirectory)")
         server.within(Config.deployDirectory) {
             server.execute("git clone \(Config.repoURL)")
         }
