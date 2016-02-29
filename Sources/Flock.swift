@@ -14,9 +14,7 @@ public class Flock {
     static var configurations: [ConfigurationTime: Configuration] = [:]
   
     // MARK: - Public
-    
-    public static let Default: [Cluster] = [Flock.Deploy]
-    
+        
     public static func use(cluster: Cluster) {
         clusters.append(cluster)
     }
