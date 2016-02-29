@@ -35,10 +35,11 @@ class SwiftInstallationTask: Task {
         server.execute("git clone https://github.com/kylef/swiftenv.git ~/.swiftenv")
         
         let bashRC = [
-            "export SWIFTENV_ROOT=\"\\$HOME/.swiftenv\"",
-            "export PATH=\"\\$SWIFTENV_ROOT/bin:\\$PATH\"",
-            "eval \"\\$(swiftenv init -)\""
+            "export SWIFTENV_ROOT=\"$HOME/.swiftenv\"",
+            "export PATH=\"$SWIFTENV_ROOT/bin:$PATH\"",
+            "eval \"$(swiftenv init -)\""
         ].joinWithSeparator("; ")
-        server.execute("echo -e \"\(bashRC)\n$(cat ~/.bashrc)\" > ~/.bashrc")
+        server.execute("echo -e '\(bashRC)' > /tmp/bashrc")
+        // server.execute("echo -e \"\(bashRC)\n$(cat ~/.bashrc)\" > ~/.bashrc")
     }
 }
