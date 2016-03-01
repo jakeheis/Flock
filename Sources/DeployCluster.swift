@@ -12,7 +12,12 @@ extension Flock {
 
 extension Config {
     public static var deployDirectory = "/var/www"
-    public static var repoURL = ""
+    public static var repoURL: String? = nil
+    public static var projectName: String? = nil
+    
+    public static var projectDirectory: String {
+        return "\(deployDirectory)/\(projectName)"
+    }
 }
 
 public class DeployCluster: Cluster {
@@ -28,9 +33,14 @@ class GitTask: Task {
     
     func run(server: ServerType) {
         print("Cloning project in \(Config.deployDirectory)")
+        
+        guard let repoURL = Config.repoURL, let projectName = Config.projectName else {
+              return
+        }
+        
         server.execute("mkdir -p \(Config.deployDirectory)")
         server.within(Config.deployDirectory) {
-            server.execute("git clone \(Config.repoURL)")
+            server.execute("git clone \(repoURL) \(projectName)")
         }
     }
 }
@@ -39,9 +49,8 @@ class BuildTask: Task {
     let name = "build"
     
     func run(server: ServerType) { 
-        let within = "\(Config.deployDirectory)/FlockTester"
-        print("Building swift project in \(within)")
-        server.within(within) {
+        print("Building swift project")
+        server.within(Config.projectDirectory) {
             server.execute("swift build")
         }
     }
