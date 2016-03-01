@@ -1,4 +1,5 @@
 import Foundation
+import Rainbow
 
 public class Servers {
     
@@ -59,12 +60,11 @@ public class SSHHostServer: ServerType {
         let finalCommand = finalCommands.joinWithSeparator("; ")
         let call = "\(finalCommand)"
         
+        print("On \(SSHHost): \(call)".green)
+        
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
         task.arguments = ["\(SSHHost)", "\(call)"]
-        
-        print("\tOn \(SSHHost): \(call)")
-        
         task.launch()
         task.waitUntilExit()
     }
