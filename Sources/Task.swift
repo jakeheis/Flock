@@ -14,6 +14,15 @@ public protocol Task {
     func run(server: ServerType)
 }
 
+extension Task {
+  
+    func internalRun(server: ServerType, key: String) {
+        print("Task \(key) begun:".blue.bold)
+        run(server)
+    }
+  
+}
+
 // MARK: - KeyedTask
 
 struct KeyedTask {
