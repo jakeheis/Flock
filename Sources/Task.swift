@@ -23,6 +23,11 @@ extension Task {
   
 }
 
+enum TaskError: ErrorType {
+    case CommandFailed
+    case Error(String)
+}
+
 // MARK: - KeyedTask
 
 struct KeyedTask {

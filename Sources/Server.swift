@@ -40,7 +40,16 @@ extension ServerType {
     
     public func fileExists(file: String) -> Bool {
         let call = "test -f \(file)"
-        
+        do {
+            try execute(call)
+        } catch {
+            return false
+        }
+        return true
+    }
+    
+    public func directoryExists(directory: String) -> Bool {
+        let call = "test -d \(directory)"
         do {
             try execute(call)
         } catch {
@@ -90,7 +99,7 @@ public class SSHHostServer: ServerType {
         task.waitUntilExit()
         
         guard task.terminationStatus == 0 else {
-            throw CLIError.Error("A task failed, so the process was stopped.")
+            throw TaskError.CommandFailed
         }
         
         if let pipe = task.standardOutput as? NSPipe {

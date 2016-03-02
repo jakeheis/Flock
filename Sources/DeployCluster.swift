@@ -38,9 +38,9 @@ class GitTask: Task {
               return
         }
         
-        server.execute("mkdir -p \(Config.deployDirectory)")
-        server.within(Config.deployDirectory) {
-            server.execute("git clone \(repoURL) \(projectName)")
+        try server.execute("mkdir -p \(Config.deployDirectory)")
+        try server.within(Config.deployDirectory) {
+            try server.execute("git clone \(repoURL) \(projectName)")
         }
     }
 }

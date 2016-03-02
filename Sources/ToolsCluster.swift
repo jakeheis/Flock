@@ -34,9 +34,25 @@ class DependencyInstallationTask: Task {
 class SwiftInstallationTask: Task {
     let name = "swift"
     
+    private let swiftEnv = "~/.swiftenv"
+    
     func run(server: ServerType) throws {
+        if server.directoryExists(swiftEnv) {
+            print("swiftenv alrady installed")
+        } else {
+            try installSwiftenv(server)
+        }
+        
+        print("Installing Swift")
+        guard let swiftVersion = Config.swiftVersion else {
+            throw TaskError.Error("You must specify in your configuration file which Swift version to install.")
+        }
+        try server.execute("swiftenv install \(swiftVersion)")
+    }
+    
+    func installSwiftenv(server: ServerType) throws {
         print("Installing swiftenv")
-        try server.execute("git clone https://github.com/kylef/swiftenv.git ~/.swiftenv")
+        try server.execute("git clone https://github.com/kylef/swiftenv.git \(swiftEnv)")
         
         let tmpFile = "/tmp/bashrc"
         let bashrc = "~/.bashrc"
@@ -50,12 +66,5 @@ class SwiftInstallationTask: Task {
         try server.execute("echo >> \(tmpFile)")
         try server.execute("cat \(bashrc) >> \(tmpFile)")
         try server.execute("cat \(tmpFile) > \(bashrc)")
-        
-        print("Installing Swift")
-        guard let swiftVersion = Config.swiftVersion else {
-            print("ERROR: You must specify in your configuration file which Swift version to install.")
-            return
-        }
-        try server.execute("swiftenv install \(swiftVersion)")
     }
 }
