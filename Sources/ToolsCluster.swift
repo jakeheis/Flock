@@ -27,7 +27,7 @@ class DependencyInstallationTask: Task {
     
     func run(server: ServerType) throws {
         print("Installing Swift dependencies")
-        try server.execute("sudo apt-get -y install clang libicu-dev git")
+        try server.execute("sudo apt-get -yq install clang libicu-dev git")
     }
 }
 
@@ -43,11 +43,16 @@ class SwiftInstallationTask: Task {
             try installSwiftenv(server)
         }
         
-        print("Installing Swift")
         guard let swiftVersion = Config.swiftVersion else {
             throw TaskError.Error("You must specify in your configuration file which Swift version to install.")
         }
-        try server.execute("swiftenv install \(swiftVersion)")
+        
+        if let existingSwifts = try server.capture("swiftenv versions") where existingSwifts.containsString(swiftVersion) {
+            try server.execute("swiftenv global \(swiftVersion)")
+        } else {
+            print("Installing Swift")
+            try server.execute("swiftenv install \(swiftVersion)")
+        }
     }
     
     func installSwiftenv(server: ServerType) throws {
