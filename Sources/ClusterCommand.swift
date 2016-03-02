@@ -31,21 +31,26 @@ final class ClusterCommand: OptionCommandType {
     func execute(arguments: CommandArguments) throws {
         Flock.configureForEnvironment(environment)
       
+        let call: () throws -> ()
+      
         if let taskName = arguments.optionalArgument("task") {
             guard let task = cluster.keyedTasks().filter({ $0.task.name == taskName }).first else {
                 throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
-            do {
-                try taskExecutor.runTask(task, mode: currentMode())
-            } catch TaskError.CommandFailed {
-                throw CLIError.Error("A command failed.") 
-            } catch TaskError.Error(let string) {
-                throw CLIError.Error(string)
-            } catch let error {
-                throw error
-            }
+            call = { try self.taskExecutor.runTask(task, mode: self.currentMode()) }
+            
         } else {
-            try taskExecutor.runCluster(cluster, mode: currentMode())
+            call = { try self.taskExecutor.runCluster(self.cluster, mode: self.currentMode()) }
+        }
+        
+        do {
+            try call()
+        } catch TaskError.CommandFailed {
+            throw CLIError.Error("A command failed.".red) 
+        } catch TaskError.Error(let string) {
+            throw CLIError.Error(string.red)
+        } catch let error {
+            throw error
         }
     }
     
