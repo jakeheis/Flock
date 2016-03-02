@@ -25,18 +25,18 @@ public class ToolsCluster: Cluster {
 class DependencyInstallationTask: Task {
     let name = "dependencies"
     
-    func run(server: ServerType) {
+    func run(server: ServerType) throws {
         print("Installing Swift dependencies")
-        server.execute("sudo apt-get -y install clang libicu-dev git")
+        try server.execute("sudo apt-get -y install clang libicu-dev git")
     }
 }
 
 class SwiftInstallationTask: Task {
     let name = "swift"
     
-    func run(server: ServerType) {
+    func run(server: ServerType) throws {
         print("Installing swiftenv")
-        server.execute("git clone https://github.com/kylef/swiftenv.git ~/.swiftenv")
+        try server.execute("git clone https://github.com/kylef/swiftenv.git ~/.swiftenv")
         
         let tmpFile = "/tmp/bashrc"
         let bashrc = "~/.bashrc"
@@ -46,16 +46,16 @@ class SwiftInstallationTask: Task {
             "export PATH=\"$SWIFTENV_ROOT/bin:$PATH\"",
             "eval \"$(swiftenv init -)\""
         ].joinWithSeparator("; ")
-        server.execute("echo -e '\(bashRC)' > \(tmpFile)")
-        server.execute("echo >> \(tmpFile)")
-        server.execute("cat \(bashrc) >> \(tmpFile)")
-        server.execute("cat \(tmpFile) > \(bashrc)")
+        try server.execute("echo -e '\(bashRC)' > \(tmpFile)")
+        try server.execute("echo >> \(tmpFile)")
+        try server.execute("cat \(bashrc) >> \(tmpFile)")
+        try server.execute("cat \(tmpFile) > \(bashrc)")
         
         print("Installing Swift")
         guard let swiftVersion = Config.swiftVersion else {
             print("ERROR: You must specify in your configuration file which Swift version to install.")
             return
         }
-        server.execute("swiftenv install \(swiftVersion)")
+        try server.execute("swiftenv install \(swiftVersion)")
     }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import Rainbow
+import SwiftCLI
 
 public class Servers {
     
@@ -9,9 +10,9 @@ public class Servers {
         servers.append(SSHHostServer(SSHHost: SSHHost, roles: roles))
     }
     
-    public static func add(IP IP: String, user: String, roles: [ServerRole]) {
-        servers.append(UserServer(IP: IP, user: user, roles: roles))
-    }
+    // public static func add(IP IP: String, user: String, roles: [ServerRole]) {
+    //     servers.append(UserServer(IP: IP, user: user, roles: roles))
+    // }
 }
 
 public enum ServerRole {
@@ -25,20 +26,35 @@ public protocol ServerType: class {
     var roles: [ServerRole] { get }
     var commandStack: [String] { get set }
     
-    func execute(commands: [String])
+    func execute(commands: [String], capture: Bool) throws -> String?
     
 }
 
 extension ServerType {
     
-    public func within(directory: String, block: () -> ()) {
+    public func within(directory: String, block: () throws -> ()) rethrows {
         commandStack.append("cd \(directory)")
-        block()
+        try block()
         commandStack.removeLast()
     }
     
-    public func execute(command: String) {
-        execute([command])
+    public func fileExists(file: String) -> Bool {
+        let call = "test -f \(file)"
+        
+        do {
+            try execute(call)
+        } catch {
+            return false
+        }
+        return true
+    }
+    
+    public func execute(command: String) throws {
+        try execute([command], capture: false)
+    }
+    
+    public func capture(command: String) throws -> String? {
+        return try execute([command], capture: true)
     }
     
 }
@@ -55,7 +71,7 @@ public class SSHHostServer: ServerType {
         self.roles = roles
     }
     
-    public func execute(commands: [String]) {
+    public func execute(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
         let finalCommand = finalCommands.joinWithSeparator("; ")
         let call = "\(finalCommand)"
@@ -65,13 +81,29 @@ public class SSHHostServer: ServerType {
         let task = NSTask()
         task.launchPath = "/usr/bin/ssh"
         task.arguments = ["\(SSHHost)", "\(call)"]
+        
+        if capture {
+            task.standardOutput = NSPipe()
+        }
+        
         task.launch()
         task.waitUntilExit()
+        
+        guard task.terminationStatus == 0 else {
+            throw CLIError.Error("A task failed, so the process was stopped.")
+        }
+        
+        if let pipe = task.standardOutput as? NSPipe {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let string = String(data: data, encoding: NSUTF8StringEncoding)
+            return string
+        }
+        return nil
     }
   
 }
 
-public class UserServer: ServerType {
+/*public class UserServer: ServerType {
     
     public let IP: String
     public let user: String
@@ -85,7 +117,7 @@ public class UserServer: ServerType {
         self.roles = roles
     }
     
-    public func execute(commands: [String]) {
+    public func execute(commands: [String], capture: Bool) -> String? {
         // let config = NMSSHHostConfig()
         // config.hostname = IP
         // config.user = user
@@ -106,9 +138,10 @@ public class UserServer: ServerType {
         // } catch let error as NSError {
         //     print(error)
         // }
+        return nil
     }
     
-}
+}*/
 
 extension Config {
     public static var SSHKey: String = ""

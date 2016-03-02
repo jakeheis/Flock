@@ -11,14 +11,14 @@
 public protocol Task {
     var name: String { get }
     
-    func run(server: ServerType)
+    func run(server: ServerType) throws
 }
 
 extension Task {
   
-    func internalRun(server: ServerType, key: String) {
+    func internalRun(server: ServerType, key: String) throws {
         print("Task \(key) begun:".blue.bold)
-        run(server)
+        try run(server)
     }
   
 }

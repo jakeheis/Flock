@@ -11,19 +11,19 @@ class TaskExecutor {
         self.scheduler = TaskScheduler(clusters: clusters)
     }
     
-    func runCluster(cluster: Cluster, mode: Mode) {
+    func runCluster(cluster: Cluster, mode: Mode) throws {
         for keyedTask in cluster.keyedTasks() {
-            runTasksScheduledAtTime(.Before(keyedTask.key), mode: mode)
-            runTask(keyedTask, mode: mode)
-            runTasksScheduledAtTime(.After(keyedTask.key), mode: mode)
+            try runTasksScheduledAtTime(.Before(keyedTask.key), mode: mode)
+            try runTask(keyedTask, mode: mode)
+            try runTasksScheduledAtTime(.After(keyedTask.key), mode: mode)
         }
     }
     
-    func runTask(keyedTask: KeyedTask, mode: Mode) {
+    func runTask(keyedTask: KeyedTask, mode: Mode) throws {
         switch mode {
         case .Execute: 
             for server in Servers.servers {
-                keyedTask.task.internalRun(server, key: keyedTask.key)
+                try keyedTask.task.internalRun(server, key: keyedTask.key)
             }
         case .Print:
             print(keyedTask.key)
@@ -32,10 +32,10 @@ class TaskExecutor {
     
     // MARK: - Private
     
-    private func runTasksScheduledAtTime(scheduleTime: ScheduleTime, mode: Mode) {
+    private func runTasksScheduledAtTime(scheduleTime: ScheduleTime, mode: Mode) throws {
         let tasks = scheduler.scheduledTasksAtTime(scheduleTime)
         for task in tasks {
-            runTask(task, mode: mode)
+            try runTask(task, mode: mode)
         }
     }
     

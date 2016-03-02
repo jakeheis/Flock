@@ -35,9 +35,9 @@ final class ClusterCommand: OptionCommandType {
             guard let task = cluster.keyedTasks().filter({ $0.task.name == taskName }).first else {
                 throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
-            taskExecutor.runTask(task, mode: currentMode())
+            try taskExecutor.runTask(task, mode: currentMode())
         } else {
-            taskExecutor.runCluster(cluster, mode: currentMode())
+            try taskExecutor.runCluster(cluster, mode: currentMode())
         }
     }
     

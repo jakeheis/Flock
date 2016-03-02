@@ -31,7 +31,7 @@ public class DeployCluster: Cluster {
 class GitTask: Task {
     let name = "git"
     
-    func run(server: ServerType) {
+    func run(server: ServerType) throws {
         print("Cloning project in \(Config.deployDirectory)")
         
         guard let repoURL = Config.repoURL, let projectName = Config.projectName else {
@@ -48,10 +48,10 @@ class GitTask: Task {
 class BuildTask: Task {
     let name = "build"
     
-    func run(server: ServerType) { 
+    func run(server: ServerType) throws { 
         print("Building swift project")
-        server.within(Config.projectDirectory) {
-            server.execute("swift build")
+        try server.within(Config.projectDirectory) {
+            try server.execute("swift build")
         }
     }
 }
