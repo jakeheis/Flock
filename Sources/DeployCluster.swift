@@ -16,7 +16,8 @@ extension Config {
     public static var projectName: String? = nil
     
     public static var projectDirectory: String {
-        return "\(deployDirectory)/\(projectName)"
+        let project = projectName ?? "Project"
+        return "\(deployDirectory)/\(project)"
     }
 }
 
