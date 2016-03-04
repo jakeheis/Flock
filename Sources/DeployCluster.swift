@@ -35,7 +35,7 @@ class GitTask: Task {
         print("Cloning project in \(Config.deployDirectory)")
         
         guard let repoURL = Config.repoURL, let projectName = Config.projectName else {
-              return
+            throw TaskError.Error("You must supply a repoURL and a projectName in your configuration")
         }
         
         try server.execute("mkdir -p \(Config.deployDirectory)")

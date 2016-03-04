@@ -10,6 +10,10 @@ public class Servers {
         servers.append(SSHHostServer(SSHHost: SSHHost, roles: roles))
     }
     
+    public static func add(dockerContainer container: String, roles: [ServerRole]) {
+        servers.append(DockerServer(container: container, roles: roles))
+    }
+    
     // public static func add(IP IP: String, user: String, roles: [ServerRole]) {
     //     servers.append(UserServer(IP: IP, user: user, roles: roles))
     // }
@@ -110,6 +114,59 @@ public class SSHHostServer: ServerType {
         return nil
     }
   
+}
+
+public class DockerServer: ServerType {
+
+    public let container: String
+    public let roles: [ServerRole]
+    
+    public var commandStack: [String] = []
+    
+    public init(container: String, roles: [ServerRole]) {
+        self.container = container
+        self.roles = roles
+    }
+    
+    public func execute(commands: [String], capture: Bool) throws -> String? {
+        let finalCommands = commandStack + commands
+        let finalCommand = finalCommands.joinWithSeparator("; ")
+        let call = "\(finalCommand)"
+        
+        let tmpFile = "/tmp/docker_call"
+        try call.writeToFile(tmpFile, atomically: true, encoding: NSUTF8StringEncoding)
+        
+        let copyTask = NSTask()
+        copyTask.launchPath = "/usr/bin/env"
+        copyTask.arguments = ["docker", "cp", tmpFile, "\(container):\(tmpFile)"]
+        copyTask.launch()
+        copyTask.waitUntilExit()
+        
+        print("On \(container): \(call)".green)
+        
+        let task = NSTask()
+        task.launchPath = "/usr/bin/env"
+        task.arguments = ["docker", "exec", container, "bash", tmpFile]
+        
+        if capture {
+            task.standardOutput = NSPipe()
+        }
+        
+        task.launch()
+        task.waitUntilExit()
+        
+        guard task.terminationStatus == 0 else {
+            throw TaskError.CommandFailed
+        }
+        
+        if let pipe = task.standardOutput as? NSPipe {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            let string = String(data: data, encoding: NSUTF8StringEncoding)
+            return string
+        }
+        return nil
+    }
+    
 }
 
 /*public class UserServer: ServerType {
