@@ -11,13 +11,22 @@ extension Flock {
 }
 
 extension Config {
+    public static var projectName: String? = nil // Must be supplied
     public static var deployDirectory = "/var/www"
-    public static var repoURL: String? = nil
-    public static var projectName: String? = nil
+    
+    public static var repoURL: String? = nil // Must be supplied
     
     public static var projectDirectory: String {
         let project = projectName ?? "Project"
         return "\(deployDirectory)/\(project)"
+    }
+    
+    public static var currentDirectory: String {
+        return "\(projectDirectory)/current"
+    }
+    
+    public static var releasesDirectory: String {
+        return "\(projectDirectory)/releases"
     }
 }
 
@@ -39,10 +48,12 @@ class GitTask: Task {
             throw TaskError.Error("You must supply a repoURL and a projectName in your configuration")
         }
         
-        try server.execute("mkdir -p \(Config.deployDirectory)")
-        try server.within(Config.deployDirectory) {
-            try server.execute("git clone \(repoURL) \(projectName)")
-        }
+        let currentTime = NSDate()
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "YYYYMMddHHMMSS"
+        let timestamp = formatter.stringFromDate(currentTime)
+        
+        try server.execute("git clone \(repoURL) \(Config.releasesDirectory)/\(timestamp)")
     }
 }
 
@@ -51,7 +62,7 @@ class BuildTask: Task {
     
     func run(server: ServerType) throws { 
         print("Building swift project")
-        try server.within(Config.projectDirectory) {
+        try server.within(Config.currentDirectory) {
             try server.execute("swift build")
         }
     }
