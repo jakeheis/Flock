@@ -17,7 +17,7 @@ public protocol Task {
 
 extension Task {
     
-    var serverRoles: [ServerRole] { return [.App, .DB, .Web]}
+    public var serverRoles: [ServerRole] { return [.App, .DB, .Web]}
   
     func internalRun(server: ServerType, key: String) throws {
         print("Task \(key) begun:".blue.bold)
