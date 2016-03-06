@@ -220,3 +220,23 @@ extension NSTask {
         return "\(launch) \(args)"
     }
 }
+
+class ErrorPipe: NSPipe {
+    
+    override init() {
+        super.init()
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("dataAvailable:"), name: NSFileHandleDataAvailableNotification, object: nil)
+        
+        fileHandleForReading.waitForDataInBackgroundAndNotify()
+    }
+    
+    func dataAvailable(note: NSNotification) {
+        var data = fileHandleForReading.availableData
+        while data.length > 0 {
+            print("Got: ", String(data: data, encoding: NSUTF8StringEncoding))
+            data = fileHandleForReading.availableData
+        }
+    }
+    
+}
