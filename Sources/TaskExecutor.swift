@@ -23,6 +23,9 @@ class TaskExecutor {
         switch mode {
         case .Execute: 
             for server in Servers.servers {
+                if Set(server.roles).intersect(Set(keyedTask.task.serverRoles)).isEmpty {
+                    continue
+                }
                 try keyedTask.task.internalRun(server, key: keyedTask.key)
             }
         case .Print:

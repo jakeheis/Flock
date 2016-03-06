@@ -6,6 +6,8 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+import Foundation
+
 extension Flock {
     public static let Deploy = DeployCluster()
 }
@@ -53,7 +55,9 @@ class GitTask: Task {
         formatter.dateFormat = "YYYYMMddHHMMSS"
         let timestamp = formatter.stringFromDate(currentTime)
         
-        try server.execute("git clone \(repoURL) \(Config.releasesDirectory)/\(timestamp)")
+        let cloneDirectory = "\(Config.releasesDirectory)/\(timestamp)"
+        try server.execute("git clone \(repoURL) \(cloneDirectory)")
+        try server.execute("ln -s \(cloneDirectory) \(Config.currentDirectory)")
     }
 }
 

@@ -10,11 +10,14 @@
 
 public protocol Task {
     var name: String { get }
+    var serverRoles: [ServerRole] { get }
     
     func run(server: ServerType) throws
 }
 
 extension Task {
+    
+    var serverRoles: [ServerRole] { return [.App, .DB, .Web]}
   
     func internalRun(server: ServerType, key: String) throws {
         print("Task \(key) begun:".blue.bold)
