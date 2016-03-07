@@ -29,7 +29,7 @@ public class Flock {
     
     public static func run() {
         let taskExecutor = TaskExecutor(clusters: clusters)
-        let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) }
+        let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) as CommandType }
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         CLI.router = FlockRouter()
