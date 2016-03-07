@@ -29,9 +29,10 @@ public class Flock {
     
     public static func run() {
         let taskExecutor = TaskExecutor(clusters: clusters)
-        let commands = buildCommandsWithTaskExecutor(taskExecutor)
+        let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) }
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
+        CLI.router = FlockRouter()
         CLI.registerCommands(commands)
         CLI.go()
     }
@@ -43,8 +44,34 @@ public class Flock {
         configurations[.Environment(environment)]?.configure()
     }
     
-    static func buildCommandsWithTaskExecutor(taskExecutor: TaskExecutor) -> [CommandType] {
-        return clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) }
+}
+
+class FlockRouter: RouterType {
+    
+    func route(commands: [CommandType], arguments: RawArguments) throws -> CommandType {
+        let clusterCommands = commands.flatMap { $0 as? ClusterCommand }
+        
+        guard let commandName = arguments.firstArgumentOfType(.Unclassified) else {
+            throw CLIError.Error("Cluster router failed")
+        }
+        
+        let clusterName: String
+        let taskName: String?
+        if let colonIndex = commandName.characters.indexOf(":") {
+            clusterName = commandName.substringToIndex(colonIndex)
+            taskName = commandName.substringFromIndex(colonIndex.successor())
+        } else {
+            clusterName = commandName
+            taskName = nil
+        }
+        
+        guard let command = clusterCommands.filter({ $0.cluster.name == clusterName }).first else {
+            throw CLIError.Error("Cluster not found")
+        }
+        
+        command.taskName = taskName
+        
+        return command
     }
     
 }

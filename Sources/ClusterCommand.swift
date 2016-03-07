@@ -6,7 +6,9 @@ final class ClusterCommand: OptionCommandType {
     let commandSignature = "[<task>]"
     let commandShortDescription = ""
     
-    private let cluster: Cluster
+    let cluster: Cluster
+    var taskName: String?
+    
     private let taskExecutor: TaskExecutor
     
     private var printPath = false
@@ -33,12 +35,11 @@ final class ClusterCommand: OptionCommandType {
       
         let call: () throws -> ()
       
-        if let taskName = arguments.optionalArgument("task") {
-            guard let task = cluster.keyedTasks().filter({ $0.task.name == taskName }).first else {
+        if let taskName = taskName {
+            guard let task = cluster.taskNamed(taskName) else {
                 throw CLIError.Error("Task \(cluster.name):\(taskName) not found")
             }
             call = { try self.taskExecutor.runTask(task, mode: self.currentMode()) }
-            
         } else {
             call = { try self.taskExecutor.runCluster(self.cluster, mode: self.currentMode()) }
         }

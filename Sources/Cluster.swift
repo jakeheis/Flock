@@ -16,9 +16,15 @@ public protocol Cluster {
 public struct Config {}
 
 extension Cluster {
-    public func taskToString(task: Task) -> String {
+    
+    func taskToString(task: Task) -> String {
         return "\(name):\(task.name)"
     }
+    
+    func taskNamed(taskName: String) -> KeyedTask? {
+        return keyedTasks().filter({ $0.task.name == taskName }).first
+    }
+    
 }
 
 // MARK: - KeyedTask extension
