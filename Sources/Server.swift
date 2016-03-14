@@ -30,7 +30,7 @@ public protocol ServerType: class {
     var roles: [ServerRole] { get }
     var commandStack: [String] { get set }
     
-    func execute(commands: [String], capture: Bool) throws -> String?
+    func runCommands(commands: [String], capture: Bool) throws -> String?
     
 }
 
@@ -63,11 +63,11 @@ extension ServerType {
     }
     
     public func execute(command: String) throws {
-        try execute([command], capture: false)
+        try runCommands([command], capture: false)
     }
     
     public func capture(command: String) throws -> String? {
-        return try execute([command], capture: true)
+        return try runCommands([command], capture: true)
     }
     
 }
@@ -84,7 +84,7 @@ public class SSHHostServer: ServerType {
         self.roles = roles
     }
     
-    public func execute(commands: [String], capture: Bool) throws -> String? {
+    public func runCommands(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
         let finalCommand = finalCommands.joinWithSeparator("; ")
         let call = "\(finalCommand)"
@@ -128,7 +128,7 @@ public class DockerServer: ServerType {
         self.roles = roles
     }
     
-    public func execute(commands: [String], capture: Bool) throws -> String? {
+    public func runCommands(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
         let finalCommand = finalCommands.joinWithSeparator("; ")
         let call = "\(finalCommand)"

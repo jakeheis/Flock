@@ -30,6 +30,11 @@ extension Config {
     public static var releasesDirectory: String {
         return "\(projectDirectory)/releases"
     }
+    
+    public static var executable: String {
+        let project = projectName ?? "Project"
+        return "\(currentDirectory)/.build/debug/\(project)"
+    }
 }
 
 public class DeployCluster: Cluster {
