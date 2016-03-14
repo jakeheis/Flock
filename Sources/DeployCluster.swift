@@ -57,7 +57,7 @@ class GitTask: Task {
         
         let cloneDirectory = "\(Config.releasesDirectory)/\(timestamp)"
         try server.execute("git clone \(repoURL) \(cloneDirectory)")
-        try server.execute("ln -s \(cloneDirectory) \(Config.currentDirectory)")
+        try server.execute("ln -sfn \(cloneDirectory) \(Config.currentDirectory)")
     }
 }
 
