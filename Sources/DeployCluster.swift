@@ -13,28 +13,9 @@ extension Flock {
 }
 
 extension Config {
-    public static var projectName: String? = nil // Must be supplied
+    public static var projectName = "Project" // Must be supplied
     public static var deployDirectory = "/var/www"
-    
     public static var repoURL: String? = nil // Must be supplied
-    
-    public static var projectDirectory: String {
-        let project = projectName ?? "Project"
-        return "\(deployDirectory)/\(project)"
-    }
-    
-    public static var currentDirectory: String {
-        return "\(projectDirectory)/current"
-    }
-    
-    public static var releasesDirectory: String {
-        return "\(projectDirectory)/releases"
-    }
-    
-    public static var executable: String {
-        let project = projectName ?? "Project"
-        return "\(currentDirectory)/.build/debug/\(project)"
-    }
 }
 
 public class DeployCluster: Cluster {
@@ -49,10 +30,8 @@ class GitTask: Task {
     let name = "git"
     
     func run(server: ServerType) throws {
-        print("Cloning project in \(Config.deployDirectory)")
-        
-        guard let repoURL = Config.repoURL, let projectName = Config.projectName else {
-            throw TaskError.Error("You must supply a repoURL and a projectName in your configuration")
+        guard let repoURL = Config.repoURL else {
+            throw TaskError.Error("You must supply a repoURL in your configuration")
         }
         
         let currentTime = NSDate()
@@ -60,9 +39,9 @@ class GitTask: Task {
         formatter.dateFormat = "YYYYMMddHHMMSS"
         let timestamp = formatter.stringFromDate(currentTime)
         
-        let cloneDirectory = "\(Config.releasesDirectory)/\(timestamp)"
+        let cloneDirectory = "\(Paths.releasesDirectory)/\(timestamp)"
         try server.execute("git clone \(repoURL) \(cloneDirectory)")
-        try server.execute("ln -sfn \(cloneDirectory) \(Config.currentDirectory)")
+        try server.execute("ln -sfn \(cloneDirectory) \(Paths.currentDirectory)")
     }
 }
 
@@ -71,7 +50,7 @@ class BuildTask: Task {
     
     func run(server: ServerType) throws { 
         print("Building swift project")
-        try server.within(Config.currentDirectory) {
+        try server.within(Paths.currentDirectory) {
             try server.execute("swift build")
         }
     }
