@@ -12,23 +12,23 @@ public protocol Task {
     var name: String { get }
     var serverRoles: [ServerRole] { get }
     
-    func run(server: ServerType) throws
+    func run(on server: Server) throws
 }
 
 extension Task {
     
-    public var serverRoles: [ServerRole] { return [.App, .DB, .Web]}
+    public var serverRoles: [ServerRole] { return [.app, .db, .web]}
   
-    func internalRun(server: ServerType, key: String) throws {
+    func internalRun(on server: Server, key: String) throws {
         print("Task \(key) begun:".blue.bold)
-        try run(server)
+        try run(on: server)
     }
   
 }
 
-enum TaskError: ErrorType {
-    case CommandFailed
-    case Error(String)
+enum TaskError: Error {
+    case commandFailed
+    case error(String)
 }
 
 // MARK: - KeyedTask
@@ -45,24 +45,24 @@ public protocol ScheduledTask: Task {
 }
 
 public enum ScheduleTime {
-    case Before(String)
-    case After(String)
+    case before(String)
+    case after(String)
 }
 
 extension ScheduleTime: Equatable {}
 extension ScheduleTime: Hashable {
     public var hashValue: Int {
         switch self {
-        case .Before(let task): return "before:\(task)".hashValue
-        case .After(let task): return "after:\(task)".hashValue
+        case .before(let task): return "before:\(task)".hashValue
+        case .after(let task): return "after:\(task)".hashValue
         }
     }
 }
 
 public func == (lhs: ScheduleTime, rhs: ScheduleTime) -> Bool { 
   switch (lhs, rhs) {
-    case let (.Before(t1), .Before(t2)) where t1 == t2: return true
-    case let (.After(t1), .After(t2)) where t1 == t2: return true
+    case let (.before(t1), .before(t2)) where t1 == t2: return true
+    case let (.after(t1), .after(t2)) where t1 == t2: return true
     default: return false
   }
 }

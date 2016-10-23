@@ -4,13 +4,13 @@ import SwiftCLI
 
 public class Servers {
     
-    static var servers: [ServerType] = []
+    static var servers: [Server] = []
     
-    public static func add(SSHHost SSHHost: String, roles: [ServerRole]) {
+    public static func add(SSHHost: String, roles: [ServerRole]) {
         servers.append(SSHHostServer(SSHHost: SSHHost, roles: roles))
     }
     
-    public static func add(dockerContainer container: String, roles: [ServerRole]) {
+    public static func add(docker container: String, roles: [ServerRole]) {
         servers.append(DockerServer(container: container, roles: roles))
     }
     
@@ -20,29 +20,29 @@ public class Servers {
 }
 
 public enum ServerRole {
-    case App
-    case DB
-    case Web
+    case app
+    case db
+    case web
 }
 
-public protocol ServerType: class {
+public protocol Server: class {
   
     var roles: [ServerRole] { get }
     var commandStack: [String] { get set }
     
-    func runCommands(commands: [String], capture: Bool) throws -> String?
+    func run(commands: [String], capture: Bool) throws -> String?
     
 }
 
-extension ServerType {
+extension Server {
     
-    public func within(directory: String, block: () throws -> ()) rethrows {
+    public func within(_ directory: String, block: () throws -> ()) rethrows {
         commandStack.append("cd \(directory)")
         try block()
         commandStack.removeLast()
     }
     
-    public func fileExists(file: String) -> Bool {
+    public func fileExists(_ file: String) -> Bool {
         let call = "test -f \(file)"
         do {
             try execute(call)
@@ -52,7 +52,7 @@ extension ServerType {
         return true
     }
     
-    public func directoryExists(directory: String) -> Bool {
+    public func directoryExists(_ directory: String) -> Bool {
         let call = "test -d \(directory)"
         do {
             try execute(call)
@@ -62,17 +62,17 @@ extension ServerType {
         return true
     }
     
-    public func execute(command: String) throws {
-        try runCommands([command], capture: false)
+    public func execute(_ command: String) throws {
+        _ = try run(commands: [command], capture: false)
     }
     
-    public func capture(command: String) throws -> String? {
-        return try runCommands([command], capture: true)
+    public func capture(_ command: String) throws -> String? {
+        return try run(commands: [command], capture: true)
     }
     
 }
 
-public class SSHHostServer: ServerType {
+public class SSHHostServer: Server {
   
     public let SSHHost: String
     public let roles: [ServerRole]
@@ -84,31 +84,31 @@ public class SSHHostServer: ServerType {
         self.roles = roles
     }
     
-    public func runCommands(commands: [String], capture: Bool) throws -> String? {
+    public func run(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
-        let finalCommand = finalCommands.joinWithSeparator("; ")
+        let finalCommand = finalCommands.joined(separator: "; ")
         let call = "\(finalCommand)"
         
         print("On \(SSHHost): \(call)".green)
         
-        let task = NSTask()
+        let task = Process()
         task.launchPath = "/usr/bin/ssh"
         task.arguments = ["\(SSHHost)", "\(call)"]
         
         if capture {
-            task.standardOutput = NSPipe()
+            task.standardOutput = Pipe()
         }
         
         task.launch()
         task.waitUntilExit()
         
         guard task.terminationStatus == 0 else {
-            throw TaskError.CommandFailed
+            throw TaskError.commandFailed
         }
         
-        if let pipe = task.standardOutput as? NSPipe {
+        if let pipe = task.standardOutput as? Pipe {
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let string = String(data: data, encoding: NSUTF8StringEncoding)
+            let string = String(data: data, encoding: .utf8)
             return string
         }
         return nil
@@ -116,7 +116,7 @@ public class SSHHostServer: ServerType {
   
 }
 
-public class DockerServer: ServerType {
+public class DockerServer: Server {
 
     public let container: String
     public let roles: [ServerRole]
@@ -128,15 +128,15 @@ public class DockerServer: ServerType {
         self.roles = roles
     }
     
-    public func runCommands(commands: [String], capture: Bool) throws -> String? {
+    public func run(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
-        let finalCommand = finalCommands.joinWithSeparator("; ")
+        let finalCommand = finalCommands.joined(separator: "; ")
         let call = "\(finalCommand)"
         
         let tmpFile = "/tmp/docker_call"
-        try call.writeToFile(tmpFile, atomically: true, encoding: NSUTF8StringEncoding)
+        try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
         
-        let copyTask = NSTask()
+        let copyTask = Process()
         copyTask.launchPath = "/usr/bin/env"
         copyTask.arguments = ["docker", "cp", tmpFile, "\(container):\(tmpFile)"]
         copyTask.launch()
@@ -144,24 +144,24 @@ public class DockerServer: ServerType {
         
         print("On \(container): \(call)".green)
         
-        let task = NSTask()
+        let task = Process()
         task.launchPath = "/usr/bin/env"
         task.arguments = ["docker", "exec", container, "bash", tmpFile]
         
         if capture {
-            task.standardOutput = NSPipe()
+            task.standardOutput = Pipe()
         }
         
         task.launch()
         task.waitUntilExit()
         
         guard task.terminationStatus == 0 else {
-            throw TaskError.CommandFailed
+            throw TaskError.commandFailed
         }
         
-        if let pipe = task.standardOutput as? NSPipe {
+        if let pipe = task.standardOutput as? Pipe {
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let string = String(data: data, encoding: NSUTF8StringEncoding)
+            let string = String(data: data, encoding: .utf8)
             return string
         }
         return nil
@@ -213,30 +213,30 @@ extension Config {
     public static var SSHKey: String = ""
 }
 
-extension NSTask {
-    var commandCall: String {
-        let launch = launchPath ?? ""
-        let args = arguments?.joinWithSeparator(" ") ?? ""
-        return "\(launch) \(args)"
-    }
-}
+//extension Process {
+//    var commandCall: String {
+//        let launch = launchPath ?? ""
+//        let args = arguments?.joined(separator: " ") ?? ""
+//        return "\(launch) \(args)"
+//    }
+//}
 
-class ErrorPipe: NSPipe {
-    
-    override init() {
-        super.init()
-        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("dataAvailable:"), name: NSFileHandleDataAvailableNotification, object: nil)
-        
-        fileHandleForReading.waitForDataInBackgroundAndNotify()
-    }
-    
-    func dataAvailable(note: NSNotification) {
-        var data = fileHandleForReading.availableData
-        while data.length > 0 {
-            print("Got: ", String(data: data, encoding: NSUTF8StringEncoding))
-            data = fileHandleForReading.availableData
-        }
-    }
-    
-}
+//class ErrorPipe: Pipe {
+//    
+//    override init() {
+//        super.init()
+//        
+//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("dataAvailable:"), name: NSFileHandleDataAvailableNotification, object: nil)
+//        
+//        fileHandleForReading.waitForDataInBackgroundAndNotify()
+//    }
+//    
+//    func dataAvailable(note: NSNotification) {
+//        var data = fileHandleForReading.availableData
+//        while data.length > 0 {
+//            print("Got: ", String(data: data, encoding: NSUTF8StringEncoding))
+//            data = fileHandleForReading.availableData
+//        }
+//    }
+//    
+//}

@@ -1,26 +1,28 @@
 import SwiftCLI
 
-class FlockRouter: RouterType {
+class FlockRouter: Router {
     
-    func route(commands: [CommandType], arguments: RawArguments) throws -> CommandType {
+    func route(commands: [Command], aliases: [String: String], arguments: RawArguments) -> Command? {
         let clusterCommands = commands.flatMap { $0 as? ClusterCommand }
         
-        guard let commandName = arguments.firstArgumentOfType(.Unclassified) else {
-            throw CLIError.Error("Cluster router failed")
+        guard let commandName = arguments.unclassifiedArguments.first else {
+            return nil
         }
         
         let clusterName: String
         let taskName: String?
-        if let colonIndex = commandName.characters.indexOf(":") {
-            clusterName = commandName.substringToIndex(colonIndex)
-            taskName = commandName.substringFromIndex(colonIndex.successor())
+        if let colonIndex = commandName.value.characters.index(of: ":") {
+            clusterName = commandName.value.substring(to: colonIndex)
+            taskName = commandName.value.substring(from: commandName.value.index(after: colonIndex))
         } else {
-            clusterName = commandName
+            clusterName = commandName.value
             taskName = nil
         }
         
-        guard let command = clusterCommands.filter({ $0.cluster.name == clusterName }).first else {
-            throw CLIError.Error("Task cluster not found")
+        commandName.classification = .commandName
+        
+        guard let command = clusterCommands.first(where: { $0.cluster.name == clusterName }) else {
+            return nil
         }
         
         command.taskName = taskName

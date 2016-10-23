@@ -3,15 +3,15 @@ public protocol Configuration {
 }
 
 public enum ConfigurationTime {
-    case Always
-    case Environment(String)
+    case always
+    case environment(String)
 }
 
 extension ConfigurationTime: Hashable {
   public var hashValue: Int {
       switch self {
-      case .Always: return "always".hashValue
-      case .Environment(let env): return "environment:\(env)".hashValue
+      case .always: return "always".hashValue
+      case .environment(let env): return "environment:\(env)".hashValue
       }
   }
 }
@@ -20,8 +20,8 @@ extension ConfigurationTime: Equatable {}
 
 public func == (lhs: ConfigurationTime, rhs: ConfigurationTime) -> Bool { 
   switch (lhs, rhs) {
-    case (.Always, .Always): return true
-    case let (.Environment(e1), .Environment(e2)) where e1 == e2: return true
+    case (.always, .always): return true
+    case let (.environment(e1), .environment(e2)) where e1 == e2: return true
     default: return false
   }
 }

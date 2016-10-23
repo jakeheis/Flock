@@ -17,12 +17,12 @@ public struct Config {}
 
 extension Cluster {
     
-    func taskToString(task: Task) -> String {
+    func taskToString(_ task: Task) -> String {
         return "\(name):\(task.name)"
     }
     
-    func taskNamed(taskName: String) -> KeyedTask? {
-        return keyedTasks().filter({ $0.task.name == taskName }).first
+    func task(named taskName: String) -> KeyedTask? {
+        return keyedTasks().first(where: { $0.task.name == taskName })
     }
     
 }

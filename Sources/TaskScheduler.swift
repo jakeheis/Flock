@@ -6,7 +6,7 @@ class TaskScheduler {
         self.schedule(clusters)
     }
     
-    func schedule(clusters: [Cluster]) {
+    func schedule(_ clusters: [Cluster]) {
         let allTasks = clusters.flatMap { $0.keyedTasks() }
         
         allTasks.forEach {(keyedTask) in
@@ -22,7 +22,7 @@ class TaskScheduler {
         }
     }
   
-    func scheduledTasksAtTime(time: ScheduleTime) -> [KeyedTask] {
+    func scheduledTasks(at time: ScheduleTime) -> [KeyedTask] {
         return schedule[time] ?? []
     }
   

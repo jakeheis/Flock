@@ -29,15 +29,15 @@ public class DeployCluster: Cluster {
 class GitTask: Task {
     let name = "git"
     
-    func run(server: ServerType) throws {
+    func run(on server: Server) throws {
         guard let repoURL = Config.repoURL else {
-            throw TaskError.Error("You must supply a repoURL in your configuration")
+            throw TaskError.error("You must supply a repoURL in your configuration")
         }
         
-        let currentTime = NSDate()
-        let formatter = NSDateFormatter()
+        let currentTime = Date()
+        let formatter = DateFormatter()
         formatter.dateFormat = "YYYYMMddHHMMSS"
-        let timestamp = formatter.stringFromDate(currentTime)
+        let timestamp = formatter.string(from: currentTime)
         
         let cloneDirectory = "\(Paths.releasesDirectory)/\(timestamp)"
         try server.execute("git clone \(repoURL) \(cloneDirectory)")
@@ -48,7 +48,7 @@ class GitTask: Task {
 class BuildTask: Task {
     let name = "build"
     
-    func run(server: ServerType) throws { 
+    func run(on server: Server) throws {
         print("Building swift project")
         try server.within(Paths.currentDirectory) {
             try server.execute("swift build")

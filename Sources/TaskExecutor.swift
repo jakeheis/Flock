@@ -1,8 +1,8 @@
 class TaskExecutor {
   
     enum Mode {
-        case Execute
-        case Print
+        case execute
+        case print
     }
     
     private let scheduler: TaskScheduler
@@ -11,34 +11,34 @@ class TaskExecutor {
         self.scheduler = TaskScheduler(clusters: clusters)
     }
     
-    func runCluster(cluster: Cluster, mode: Mode) throws {
+    func run(cluster: Cluster, mode: Mode) throws {
         for keyedTask in cluster.keyedTasks() {
-            try runTasksScheduledAtTime(.Before(keyedTask.key), mode: mode)
-            try runTask(keyedTask, mode: mode)
-            try runTasksScheduledAtTime(.After(keyedTask.key), mode: mode)
+            try runTasks(scheduled: .before(keyedTask.key), mode: mode)
+            try run(task: keyedTask, mode: mode)
+            try runTasks(scheduled: .after(keyedTask.key), mode: mode)
         }
     }
     
-    func runTask(keyedTask: KeyedTask, mode: Mode) throws {
+    func run(task keyedTask: KeyedTask, mode: Mode) throws {
         switch mode {
-        case .Execute: 
+        case .execute:
             for server in Servers.servers {
-                if Set(server.roles).intersect(Set(keyedTask.task.serverRoles)).isEmpty {
+                if Set(server.roles).intersection(Set(keyedTask.task.serverRoles)).isEmpty {
                     continue
                 }
-                try keyedTask.task.internalRun(server, key: keyedTask.key)
+                try keyedTask.task.internalRun(on: server, key: keyedTask.key)
             }
-        case .Print:
+        case .print:
             print(keyedTask.key)
         }
     }
     
     // MARK: - Private
     
-    private func runTasksScheduledAtTime(scheduleTime: ScheduleTime, mode: Mode) throws {
-        let tasks = scheduler.scheduledTasksAtTime(scheduleTime)
+    private func runTasks(scheduled scheduleTime: ScheduleTime, mode: Mode) throws {
+        let tasks = scheduler.scheduledTasks(at: scheduleTime)
         for task in tasks {
-            try runTask(task, mode: mode)
+            try run(task: task, mode: mode)
         }
     }
     

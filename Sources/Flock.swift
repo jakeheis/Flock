@@ -20,7 +20,7 @@ public class Flock {
     }
     
     public static func use(clusters: [Cluster]) {
-        clusters.forEach { use($0) }
+        clusters.forEach { use(cluster: $0) }
     }
     
     public static func configure(time: ConfigurationTime, _ configuration: Configuration) {
@@ -29,19 +29,19 @@ public class Flock {
     
     public static func run() {
         let taskExecutor = TaskExecutor(clusters: clusters)
-        let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) as CommandType }
+        let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) as Command }
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         CLI.router = FlockRouter()
-        CLI.registerCommands(commands)
-        CLI.go()
+        CLI.register(commands: commands)
+        let _ = CLI.go()
     }
     
     // MARK: - Internal
     
-    static func configureForEnvironment(environment: String) {
-        configurations[.Always]?.configure()
-        configurations[.Environment(environment)]?.configure()
+    static func configure(for environment: String) {
+        configurations[.always]?.configure()
+        configurations[.environment(environment)]?.configure()
     }
     
 }

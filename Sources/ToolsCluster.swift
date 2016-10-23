@@ -25,7 +25,7 @@ public class ToolsCluster: Cluster {
 class DependencyInstallationTask: Task {
     let name = "dependencies"
     
-    func run(server: ServerType) throws {
+    func run(on server: Server) throws {
         print("Installing Swift dependencies")
         try server.execute("sudo apt-get -yq install clang libicu-dev git")
     }
@@ -36,18 +36,18 @@ class SwiftInstallationTask: Task {
     
     private let swiftEnv = "~/.swiftenv"
     
-    func run(server: ServerType) throws {
+    func run(on server: Server) throws {
         if server.directoryExists(swiftEnv) {
             print("swiftenv alrady installed")
         } else {
-            try installSwiftenv(server)
+            try installSwiftenv(on: server)
         }
         
         guard let swiftVersion = Config.swiftVersion else {
-            throw TaskError.Error("You must specify in your configuration file which Swift version to install.")
+            throw TaskError.error("You must specify in your configuration file which Swift version to install.")
         }
         
-        if let existingSwifts = try server.capture("swiftenv versions") where existingSwifts.containsString(swiftVersion) {
+        if let existingSwifts = try server.capture("swiftenv versions"), existingSwifts.contains(swiftVersion) {
             try server.execute("swiftenv global \(swiftVersion)")
         } else {
             print("Installing Swift")
@@ -55,7 +55,7 @@ class SwiftInstallationTask: Task {
         }
     }
     
-    func installSwiftenv(server: ServerType) throws {
+    func installSwiftenv(on server: Server) throws {
         print("Installing swiftenv")
         try server.execute("git clone https://github.com/kylef/swiftenv.git \(swiftEnv)")
         
@@ -66,7 +66,7 @@ class SwiftInstallationTask: Task {
             "export SWIFTENV_ROOT=\"$HOME/.swiftenv\"",
             "export PATH=\"$SWIFTENV_ROOT/bin:$PATH\"",
             "eval \"$(swiftenv init -)\""
-        ].joinWithSeparator("; ")
+        ].joined(separator: "; ")
         try server.execute("echo -e '\(bashRC)' > \(tmpFile)")
         try server.execute("echo >> \(tmpFile)")
         try server.execute("cat \(bashrc) >> \(tmpFile)")
