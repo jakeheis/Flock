@@ -27,14 +27,15 @@ public class Flock {
         configurations[time] = configuration
     }
     
-    public static func run() {
+    @discardableResult
+    public static func run() -> Int32 {
         let taskExecutor = TaskExecutor(clusters: clusters)
         let commands = clusters.map { ClusterCommand(cluster: $0, taskExecutor: taskExecutor) as Command }
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         CLI.router = FlockRouter()
         CLI.register(commands: commands)
-        let _ = CLI.go()
+        return CLI.go()
     }
     
     // MARK: - Internal
