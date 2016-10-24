@@ -15,15 +15,15 @@ public class Flock {
   
     // MARK: - Public
         
-    public static func use(cluster: Cluster) {
+    public static func use(_ cluster: Cluster) {
         clusters.append(cluster)
     }
     
-    public static func use(clusters: [Cluster]) {
-        clusters.forEach { use(cluster: $0) }
+    public static func use(_ clusters: [Cluster]) {
+        clusters.forEach { use($0) }
     }
     
-    public static func configure(time: ConfigurationTime, with configuration: Configuration) {
+    public static func configure(_ time: ConfigurationTime, with configuration: Configuration) {
         configurations[time] = configuration
     }
     
@@ -41,7 +41,7 @@ public class Flock {
     
     static func configure(for environment: String) {
         configurations[.always]?.configure()
-        configurations[.environment(environment)]?.configure()
+        configurations[.env(environment)]?.configure()
     }
     
 }
