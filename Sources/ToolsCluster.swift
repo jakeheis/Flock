@@ -27,7 +27,7 @@ class DependencyInstallationTask: Task {
     
     func run(on server: Server) throws {
         print("Installing Swift dependencies")
-        try server.execute("sudo apt-get -yq install clang libicu-dev git libpython2.7")
+        try server.execute("sudo apt-get -yq install clang libicu-dev git libpython2.7 libcurl4-openssl-dev")
     }
 }
 
