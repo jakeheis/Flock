@@ -22,6 +22,9 @@ class TaskExecutor {
     func run(task keyedTask: KeyedTask, mode: Mode) throws {
         switch mode {
         case .execute:
+            guard !Servers.servers.isEmpty else {
+                throw TaskError.error("You must specify servers in your configuration files".red)
+            }
             for server in Servers.servers {
                 if Set(server.roles).intersection(Set(keyedTask.task.serverRoles)).isEmpty {
                     continue
