@@ -14,6 +14,7 @@ extension Flock {
 
 extension Config {
     public static var projectName = "Project" // Must be supplied
+    public static var executableName = "Project" // Must be supplied
     public static var deployDirectory = "/var/www"
     public static var repoURL: String? = nil // Must be supplied
 }
