@@ -23,7 +23,7 @@ public class Flock {
         clusters.forEach { use(cluster: $0) }
     }
     
-    public static func configure(time: ConfigurationTime, _ configuration: Configuration) {
+    public static func configure(time: ConfigurationTime, with configuration: Configuration) {
         configurations[time] = configuration
     }
     
