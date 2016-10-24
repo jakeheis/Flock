@@ -14,7 +14,7 @@ extension Config {
     public static var swiftVersion: String? = nil
 }
 
-public class ToolsCluster: Cluster {
+public class ToolsCluster: ExecutableCluster {
     public let name = "tools"
     public let tasks: [Task] = [
         DependencyInstallationTask(),

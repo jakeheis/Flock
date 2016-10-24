@@ -27,6 +27,8 @@ extension Cluster {
     
 }
 
+public protocol ExecutableCluster: Cluster {}
+
 // MARK: - KeyedTask extension
 
 extension Cluster {

@@ -19,7 +19,7 @@ extension Config {
     public static var repoURL: String? = nil // Must be supplied
 }
 
-public class DeployCluster: Cluster {
+public class DeployCluster: ExecutableCluster {
     public let name = "deploy"
     public let tasks: [Task] = [
         GitTask(),

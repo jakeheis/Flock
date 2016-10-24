@@ -12,6 +12,14 @@ class TaskExecutor {
     }
     
     func run(cluster: Cluster, mode: Mode) throws {
+        guard cluster is ExecutableCluster else {
+            print("Available tasks:")
+            for task in cluster.keyedTasks() {
+                print(task.key)
+            }
+            throw TaskError.error("This cluster is not executable - specify a specific task you would like to execute")
+        }
+        
         for keyedTask in cluster.keyedTasks() {
             try runTasks(scheduled: .before(keyedTask.key), mode: mode)
             try run(task: keyedTask, mode: mode)
@@ -23,7 +31,7 @@ class TaskExecutor {
         switch mode {
         case .execute:
             guard !Servers.servers.isEmpty else {
-                throw TaskError.error("You must specify servers in your configuration files".red)
+                throw TaskError.error("You must specify servers in your configuration files")
             }
             for server in Servers.servers {
                 if Set(server.roles).intersection(Set(keyedTask.task.serverRoles)).isEmpty {
