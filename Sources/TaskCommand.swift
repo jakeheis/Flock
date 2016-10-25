@@ -17,8 +17,8 @@ class TaskCommand: OptionCommand {
     }
     
     func setupOptions(options: OptionRegistry) {
-        options.add(flags: ["-p", "--path"]) {
-            self.mode = .print
+        options.add(flags: ["-n", "--none"]) {
+            self.mode = .dryRun
         }
         options.add(keys: ["-e", "--enviornment"]) { (value) in
             self.environment = value

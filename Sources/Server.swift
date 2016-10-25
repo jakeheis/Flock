@@ -86,10 +86,9 @@ public class SSHHostServer: Server {
     
     public func run(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
-        let finalCommand = finalCommands.joined(separator: "; ")
-        let call = "\(finalCommand)"
+        let call = finalCommands.joined(separator: "; ")
         
-        print("On \(SSHHost): \(call)".green)
+        Logger.logCall(call, on: SSHHost)
         
         let task = Process()
         task.launchPath = "/usr/bin/ssh"
@@ -130,8 +129,7 @@ public class DockerServer: Server {
     
     public func run(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
-        let finalCommand = finalCommands.joined(separator: "; ")
-        let call = "\(finalCommand)"
+        let call = finalCommands.joined(separator: "; ")
         
         let tmpFile = "/tmp/docker_call"
         try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
@@ -142,7 +140,7 @@ public class DockerServer: Server {
         copyTask.launch()
         copyTask.waitUntilExit()
         
-        print("On \(container): \(call)".green)
+        Logger.logCall(call, on: container)
         
         let task = Process()
         task.launchPath = "/usr/bin/env"
@@ -164,6 +162,20 @@ public class DockerServer: Server {
             let string = String(data: data, encoding: .utf8)
             return string
         }
+        return nil
+    }
+    
+}
+
+public class DummyServer: Server {
+    
+    public let roles: [ServerRole] = [.app, .db, .web]
+    public var commandStack: [String] = []
+    
+    public func run(commands: [String], capture: Bool) throws -> String? {
+        let finalCommands = commandStack + commands
+        let call = finalCommands.joined(separator: "; ")
+        Logger.logCall(call, on: "Dummy")
         return nil
     }
     

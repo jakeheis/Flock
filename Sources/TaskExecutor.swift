@@ -2,7 +2,7 @@ class TaskExecutor {
   
     enum Mode {
         case execute
-        case print
+        case dryRun
     }
     
     private static var tasks: [Task] = []
@@ -18,6 +18,8 @@ class TaskExecutor {
     static func run(task: Task) throws {
         try runTasks(scheduled: .before(task.fullName))
         
+        Logger.logTaskBegun(task)
+        
         switch mode {
         case .execute:
             guard !Servers.servers.isEmpty else {
@@ -29,8 +31,8 @@ class TaskExecutor {
                 }
                 try task.run(on: server)
             }
-        case .print:
-            print(task.fullName)
+        case .dryRun:
+            try task.run(on: DummyServer())
         }
         
         try runTasks(scheduled: .after(task.fullName))
