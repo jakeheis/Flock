@@ -6,6 +6,12 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+#if os(Linux)
+import Glibc
+#else
+import Darwin
+#endif
+
 import SwiftCLI
 
 public class Flock {
@@ -23,8 +29,7 @@ public class Flock {
         configurations[time] = configuration
     }
     
-    @discardableResult
-    public static func run() -> Int32 {
+    public static func run() -> Never {
         TaskExecutor.setup(with: tasks)
         
         let commands = tasks.map { TaskCommand(task: $0) as Command }
@@ -32,7 +37,8 @@ public class Flock {
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
 //        CLI.router = FlockRouter()
         CLI.register(commands: commands)
-        return CLI.go()
+        let result = CLI.go()
+        exit(result)
     }
     
     // MARK: - Internal
