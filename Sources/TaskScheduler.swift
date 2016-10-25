@@ -1,28 +1,22 @@
 class TaskScheduler {
     
-    private var schedule: [ScheduleTime: [KeyedTask]] = [:]
+    private var schedule: [HookTime: [String]] = [:]
     
-    init(clusters: [Cluster]) {
-        self.schedule(clusters)
+    init(tasks: [Task]) {
+        self.schedule(tasks: tasks)
     }
     
-    func schedule(_ clusters: [Cluster]) {
-        let allTasks = clusters.flatMap { $0.keyedTasks() }
-        
-        allTasks.forEach {(keyedTask) in
-            guard let scheduledTask = keyedTask.task as? ScheduledTask else {
-              return
-            }
-            
-            scheduledTask.scheduledTimes.forEach {(time) in
+    func schedule(tasks: [Task]) {
+        for task in tasks {
+            for time in task.hookTimes {
                 var timeTasks = schedule[time] ?? []
-                timeTasks.append(keyedTask)
+                timeTasks.append(task.fullName)
                 schedule[time] = timeTasks
             }
         }
     }
   
-    func scheduledTasks(at time: ScheduleTime) -> [KeyedTask] {
+    func scheduledTasks(at time: HookTime) -> [String] {
         return schedule[time] ?? []
     }
   

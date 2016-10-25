@@ -25,3 +25,7 @@ public func == (lhs: ConfigurationTime, rhs: ConfigurationTime) -> Bool {
     default: return false
   }
 }
+
+// MARK: - Config
+
+public struct Config {}

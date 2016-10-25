@@ -10,56 +10,74 @@
 
 public protocol Task {
     var name: String { get }
+    var namespace: Namespace? { get }
+    
     var serverRoles: [ServerRole] { get }
+    var hookTimes: [HookTime] { get }
     
     func run(on server: Server) throws
 }
 
-extension Task {
+public extension Task {
     
-    public var serverRoles: [ServerRole] { return [.app, .db, .web]}
-  
-    func internalRun(on server: Server, key: String) throws {
-        print("Task \(key) begun:".blue.bold)
-        try run(on: server)
+    var serverRoles: [ServerRole] {
+        return [.app, .db, .web]
     }
-  
+    
+    var hookTimes: [HookTime] {
+        return []
+    }
+    
+    var fullName: String {
+        if let namespaceName = namespace?.name {
+            return namespaceName + ":" + name
+        }
+        return name
+    }
+    
+    var namespace: Namespace? {
+        return nil
+    }
+    
+    func invoke(_ name: String) throws {
+        try TaskExecutor.run(taskNamed: name)
+    }
+    
 }
+
+// MARK: - Namespaces
+
+public struct Namespaces {}
+
+public struct Namespace {
+    let name: String
+}
+
+// MARK: - TaskError
 
 enum TaskError: Error {
     case commandFailed
     case error(String)
 }
 
-// MARK: - KeyedTask
+// MARK: - HookTime
 
-struct KeyedTask {
-    let key: String
-    let task: Task
-}
-
-// MARK: - ScheduledTask
-
-public protocol ScheduledTask: Task {
-    var scheduledTimes: [ScheduleTime] { get }
-}
-
-public enum ScheduleTime {
+public enum HookTime {
     case before(String)
     case after(String)
 }
 
-extension ScheduleTime: Equatable {}
-extension ScheduleTime: Hashable {
+extension HookTime: Equatable {}
+extension HookTime: Hashable {
     public var hashValue: Int {
         switch self {
-        case .before(let task): return "before:\(task)".hashValue
-        case .after(let task): return "after:\(task)".hashValue
+        case let .before(task): return "before:\(task)".hashValue
+        case let .after(task): return "after:\(task)".hashValue
         }
     }
 }
 
-public func == (lhs: ScheduleTime, rhs: ScheduleTime) -> Bool { 
+public func == (lhs: HookTime, rhs: HookTime) -> Bool {
   switch (lhs, rhs) {
     case let (.before(t1), .before(t2)) where t1 == t2: return true
     case let (.after(t1), .after(t2)) where t1 == t2: return true

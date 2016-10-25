@@ -9,7 +9,11 @@
 import Foundation
 
 extension Flock {
-    public static let Deploy = DeployCluster()
+    public static let Deploy: [Task] = [
+        DeployTask(),
+        GitTask(),
+        BuildTask()
+    ]
 }
 
 extension Config {
@@ -19,16 +23,20 @@ extension Config {
     public static var repoURL: String? = nil // Must be supplied
 }
 
-public class DeployCluster: ExecutableCluster {
-    public let name = "deploy"
-    public let tasks: [Task] = [
-        GitTask(),
-        BuildTask()
-    ]
+private let deploy = "deploy"
+
+class DeployTask: Task {
+    let name = deploy
+    
+    func run(on server: Server) throws {
+        try invoke("deploy:git")
+        try invoke("deploy:build")
+    }
 }
 
 class GitTask: Task {
     let name = "git"
+    let namespace = deploy
     
     func run(on server: Server) throws {
         guard let repoURL = Config.repoURL else {
@@ -48,6 +56,7 @@ class GitTask: Task {
 
 class BuildTask: Task {
     let name = "build"
+    let namespace = deploy
     
     func run(on server: Server) throws {
         print("Building swift project")

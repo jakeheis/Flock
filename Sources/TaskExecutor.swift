@@ -5,51 +5,53 @@ class TaskExecutor {
         case print
     }
     
-    private let scheduler: TaskScheduler
+    private static var tasks: [Task] = []
+    private static var scheduler: TaskScheduler?
     
-    init(clusters: [Cluster]) {
-        self.scheduler = TaskScheduler(clusters: clusters)
+    static var mode: Mode = .execute
+    
+    static func setup(with tasks: [Task]) {
+        self.tasks = tasks
+        self.scheduler = TaskScheduler(tasks: tasks)
     }
     
-    func run(cluster: Cluster, mode: Mode) throws {
-        guard cluster is ExecutableCluster else {
-            print("Available tasks:")
-            for task in cluster.keyedTasks() {
-                print(task.key)
-            }
-            throw TaskError.error("This cluster is not executable - specify a specific task you would like to execute")
-        }
+    static func run(task: Task) throws {
+        try runTasks(scheduled: .before(task.fullName))
         
-        for keyedTask in cluster.keyedTasks() {
-            try runTasks(scheduled: .before(keyedTask.key), mode: mode)
-            try run(task: keyedTask, mode: mode)
-            try runTasks(scheduled: .after(keyedTask.key), mode: mode)
-        }
-    }
-    
-    func run(task keyedTask: KeyedTask, mode: Mode) throws {
         switch mode {
         case .execute:
             guard !Servers.servers.isEmpty else {
                 throw TaskError.error("You must specify servers in your configuration files")
             }
             for server in Servers.servers {
-                if Set(server.roles).intersection(Set(keyedTask.task.serverRoles)).isEmpty {
+                if Set(server.roles).intersection(Set(task.serverRoles)).isEmpty {
                     continue
                 }
-                try keyedTask.task.internalRun(on: server, key: keyedTask.key)
+                try task.run(on: server)
             }
         case .print:
-            print(keyedTask.key)
+            print(task.fullName)
         }
+        
+        try runTasks(scheduled: .after(task.fullName))
+    }
+    
+    static func run(taskNamed name: String) throws {
+        guard let task = tasks.first(where: { $0.fullName == name }) else {
+            throw TaskError.error("Task \(name) not found")
+        }
+        try run(task: task)
     }
     
     // MARK: - Private
     
-    private func runTasks(scheduled scheduleTime: ScheduleTime, mode: Mode) throws {
-        let tasks = scheduler.scheduledTasks(at: scheduleTime)
-        for task in tasks {
-            try run(task: task, mode: mode)
+    private static func runTasks(scheduled scheduleTime: HookTime) throws {
+        guard let scheduler = scheduler else {
+            throw TaskError.error("Something went very very wrong")
+        }
+        let taskNames = scheduler.scheduledTasks(at: scheduleTime)
+        for name in taskNames {
+            try run(taskNamed: name)
         }
     }
     

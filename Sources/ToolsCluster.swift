@@ -7,23 +7,31 @@
 //
 
 extension Flock {
-    public static let Tools = ToolsCluster()
+    public static let Tools: [Task] = [
+        ToolsTask(),
+        DependencyInstallationTask(),
+        SwiftInstallationTask()
+    ]
 }
 
 extension Config {
     public static var swiftVersion: String? = nil
 }
 
-public class ToolsCluster: ExecutableCluster {
-    public let name = "tools"
-    public let tasks: [Task] = [
-        DependencyInstallationTask(),
-        SwiftInstallationTask()
-    ]
+private let tools = "tools"
+
+class ToolsTask: Task {
+    let name = tools
+    
+    func run(on server: Server) throws {
+        try invoke("tools:dependencies")
+        try invoke("tools:swift")
+    }
 }
 
 class DependencyInstallationTask: Task {
     let name = "dependencies"
+    let namespace = tools
     
     func run(on server: Server) throws {
         print("Installing Swift dependencies")
@@ -33,6 +41,7 @@ class DependencyInstallationTask: Task {
 
 class SwiftInstallationTask: Task {
     let name = "swift"
+    let namespace = tools
     
     private let swiftEnv = "~/.swiftenv"
     
