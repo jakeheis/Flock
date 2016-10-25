@@ -80,7 +80,9 @@ class LinkTask: Task {
     let namespace = deploy
     
     func run(on server: Server) throws {
-        let nextDestination = try server.capture("readlink \(Paths.nextDirectory)")
+        guard let nextDestination = try server.capture("readlink \(Paths.nextDirectory)") else {
+            throw TaskError.error("Couldn't find location of next directory to link - try running full `flock deploy`")
+        }
         try server.execute("ln -sfn \(nextDestination) \(Paths.currentDirectory)")
         try server.execute("rm \(Paths.nextDirectory)")
     }
