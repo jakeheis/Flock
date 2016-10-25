@@ -61,7 +61,13 @@ class BuildTask: Task {
     
     func run(on server: Server) throws {
         print("Building swift project")
-        let buildPath = FileManager.default.fileExists(atPath: Paths.nextDirectory) ? Paths.nextDirectory : Paths.currentDirectory
+        
+        let buildPath: String
+        if server.directoryExists(Paths.nextDirectory) {
+            buildPath = Paths.nextDirectory
+        } else {
+            buildPath = Paths.currentDirectory
+        }
         try server.within(buildPath) {
             try server.execute("swift build")
         }
@@ -73,7 +79,7 @@ class LinkTask: Task {
     let namespace = deploy
     
     func run(on server: Server) throws {
-        let nextDestination = try FileManager.default.destinationOfSymbolicLink(atPath: Paths.nextDirectory)
+        let nextDestination = try server.capture("readlinke \(Paths.nextDirectory)")
         try server.execute("ln -sfn \(nextDestination) \(Paths.currentDirectory)")
         try server.execute("rm \(Paths.nextDirectory)")
     }
