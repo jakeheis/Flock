@@ -35,7 +35,6 @@ public class Flock {
         let commands = tasks.map { TaskCommand(task: $0) as Command }
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
-//        CLI.router = FlockRouter()
         CLI.register(commands: commands)
         let result = CLI.go()
         exit(result)

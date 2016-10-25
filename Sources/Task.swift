@@ -10,7 +10,7 @@
 
 public protocol Task {
     var name: String { get }
-    var namespace: String? { get }
+    var namespace: String { get }
     
     var serverRoles: [ServerRole] { get }
     var hookTimes: [HookTime] { get }
@@ -29,14 +29,14 @@ public extension Task {
     }
     
     var fullName: String {
-        if let namespace = namespace {
+        if !namespace.isEmpty {
             return namespace + ":" + name
         }
         return name
     }
     
-    var namespace: String? {
-        return nil
+    var namespace: String {
+        return ""
     }
     
     func invoke(_ name: String) throws {
@@ -78,9 +78,9 @@ extension HookTime: Hashable {
 }
 
 public func == (lhs: HookTime, rhs: HookTime) -> Bool {
-  switch (lhs, rhs) {
+    switch (lhs, rhs) {
     case let (.before(t1), .before(t2)) where t1 == t2: return true
     case let (.after(t1), .after(t2)) where t1 == t2: return true
     default: return false
-  }
+    }
 }
