@@ -80,7 +80,7 @@ class LinkTask: Task {
     let namespace = deploy
     
     func run(on server: Server) throws {
-        let nextDestination = try server.capture("readlinke \(Paths.nextDirectory)")
+        let nextDestination = try server.capture("readlink \(Paths.nextDirectory)")
         try server.execute("ln -sfn \(nextDestination) \(Paths.currentDirectory)")
         try server.execute("rm \(Paths.nextDirectory)")
     }
