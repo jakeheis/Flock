@@ -45,14 +45,6 @@ public extension Task {
     
 }
 
-// MARK: - Namespaces
-
-public struct Namespaces {}
-
-public struct Namespace {
-    let name: String
-}
-
 // MARK: - TaskError
 
 enum TaskError: Error {
