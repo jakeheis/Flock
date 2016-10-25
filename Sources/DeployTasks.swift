@@ -12,7 +12,8 @@ extension Flock {
     public static let Deploy: [Task] = [
         DeployTask(),
         GitTask(),
-        BuildTask()
+        BuildTask(),
+        LinkTask()
     ]
 }
 
