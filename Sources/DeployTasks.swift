@@ -31,6 +31,7 @@ class DeployTask: Task {
     func run(on server: Server) throws {
         try invoke("deploy:git")
         try invoke("deploy:build")
+        try invoke("deploy:link")
     }
 }
 
@@ -50,7 +51,7 @@ class GitTask: Task {
         
         let cloneDirectory = "\(Paths.releasesDirectory)/\(timestamp)"
         try server.execute("git clone \(repoURL) \(cloneDirectory)")
-        try server.execute("ln -sfn \(cloneDirectory) \(Paths.currentDirectory)")
+        try server.execute("ln -sfn \(cloneDirectory) \(Paths.nextDirectory)")
     }
 }
 
@@ -60,8 +61,20 @@ class BuildTask: Task {
     
     func run(on server: Server) throws {
         print("Building swift project")
-        try server.within(Paths.currentDirectory) {
+        let buildPath = FileManager.default.fileExists(atPath: Paths.nextDirectory) ? Paths.nextDirectory : Paths.currentDirectory
+        try server.within(buildPath) {
             try server.execute("swift build")
         }
+    }
+}
+
+class LinkTask: Task {
+    let name = "link"
+    let namespace = deploy
+    
+    func run(on server: Server) throws {
+        let nextDestination = try FileManager.default.destinationOfSymbolicLink(atPath: Paths.nextDirectory)
+        try server.execute("ln -sfn \(nextDestination) \(Paths.currentDirectory)")
+        try server.execute("rm \(Paths.nextDirectory)")
     }
 }
