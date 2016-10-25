@@ -10,7 +10,7 @@
 
 public protocol Task {
     var name: String { get }
-    var namespace: Namespace? { get }
+    var namespace: String? { get }
     
     var serverRoles: [ServerRole] { get }
     var hookTimes: [HookTime] { get }
@@ -29,13 +29,13 @@ public extension Task {
     }
     
     var fullName: String {
-        if let namespaceName = namespace?.name {
-            return namespaceName + ":" + name
+        if let namespace = namespace {
+            return namespace + ":" + name
         }
         return name
     }
     
-    var namespace: Namespace? {
+    var namespace: String? {
         return nil
     }
     
