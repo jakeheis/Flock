@@ -18,10 +18,10 @@ extension Flock {
 }
 
 extension Config {
-    public static var projectName = "Project" // Must be supplied
-    public static var executableName = "Project" // Must be supplied
+    public static var projectName = "" // Must be supplied
+    public static var executableName = "" // Must be supplied
+    public static var repoURL = "" // Must be supplied
     public static var deployDirectory = "/var/www"
-    public static var repoURL: String? = nil // Must be supplied
 }
 
 private let deploy = "deploy"
@@ -41,7 +41,10 @@ class GitTask: Task {
     let namespace = deploy
     
     func run(on server: Server) throws {
-        guard let repoURL = Config.repoURL else {
+        guard !Config.projectName.isEmpty else {
+            throw TaskError.error("You must supply a projectName in your configuration")
+        }
+        guard !Config.repoURL.isEmpty else {
             throw TaskError.error("You must supply a repoURL in your configuration")
         }
         
@@ -51,7 +54,7 @@ class GitTask: Task {
         let timestamp = formatter.string(from: currentTime)
         
         let cloneDirectory = "\(Paths.releasesDirectory)/\(timestamp)"
-        try server.execute("git clone \(repoURL) \(cloneDirectory)")
+        try server.execute("git clone \(Config.repoURL) \(cloneDirectory)")
         try server.execute("ln -sfn \(cloneDirectory) \(Paths.nextDirectory)")
     }
 }
