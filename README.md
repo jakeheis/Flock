@@ -1,5 +1,16 @@
-The framework which actually runs tasks on the servers.
+# Flock
 
-Project CLIs (built by FlockCLI) depend on this.
+Automated deployment of your Swift project to servers. Heavily inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
-Imported by `Flockfile`, `deploy/production.swift`, and `deploy/staging.swift`.
+## Installation
+### Homebrew
+```bash
+brew install jakeheis/repo/flock
+```
+### Manual
+```bash
+git clone https://github.com/jakeheis/FlockCLI
+cd FlockCLI
+swift build -c release
+ln -s .build/release/FlockCLI /usr/bin/local/flock
+```
