@@ -6,17 +6,18 @@ public class Servers {
     
     static var servers: [Server] = []
     
+    public static func add(ip: String, user: String, roles: [ServerRole]) {
+        servers.append(Server(ip: ip, user: user, roles: roles))
+    }
+    
     public static func add(SSHHost: String, roles: [ServerRole]) {
-        servers.append(SSHHostServer(SSHHost: SSHHost, roles: roles))
+        servers.append(Server(SSHHost: SSHHost, roles: roles))
     }
     
     public static func add(docker container: String, roles: [ServerRole]) {
-        servers.append(DockerServer(container: container, roles: roles))
+        servers.append(Server(dockerContainer: container, roles: roles))
     }
     
-    // public static func add(IP IP: String, user: String, roles: [ServerRole]) {
-    //     servers.append(UserServer(IP: IP, user: user, roles: roles))
-    // }
 }
 
 public enum ServerRole {
@@ -25,16 +26,34 @@ public enum ServerRole {
     case web
 }
 
-public protocol Server: class {
+public class Server {
   
-    var roles: [ServerRole] { get }
-    var commandStack: [String] { get set }
+    let roles: [ServerRole]
+    let commandExecutor: ServerCommandExecutor
+    var commandStack: [String] = []
     
-    func run(commands: [String], capture: Bool) throws -> String?
+    static func createDummyServer() -> Server {
+        return Server(commandExecutor: DummyServer(), roles: [.app, .db, .web])
+    }
     
-}
-
-extension Server {
+    public convenience init(ip: String, user: String, roles: [ServerRole]) {
+        self.init(commandExecutor: UserServer(ip: ip, user: user), roles: roles)
+    }
+    
+    public convenience init(SSHHost: String, roles: [ServerRole]) {
+        self.init(commandExecutor: SSHHostServer(SSHHost: SSHHost), roles: roles)
+    }
+    
+    public convenience init(dockerContainer: String, roles: [ServerRole]) {
+        self.init(commandExecutor: DockerServer(container: dockerContainer), roles: roles)
+    }
+    
+    public init(commandExecutor: ServerCommandExecutor, roles: [ServerRole]) {
+        self.roles = roles
+        self.commandExecutor = commandExecutor
+    }
+    
+    // MARK: - Public
     
     public func within(_ directory: String, block: () throws -> ()) rethrows {
         commandStack.append("cd \(directory)")
@@ -70,94 +89,28 @@ extension Server {
         return try run(commands: [command], capture: true)
     }
     
-}
-
-public class SSHHostServer: Server {
-  
-    public let SSHHost: String
-    public let roles: [ServerRole]
+    // MARK: - Private
     
-    public var commandStack: [String] = []
-    
-    public init(SSHHost: String, roles: [ServerRole]) {
-        self.SSHHost = SSHHost
-        self.roles = roles
-    }
-    
-    public func run(commands: [String], capture: Bool) throws -> String? {
+    private func run(commands: [String], capture: Bool) throws -> String? {
         let finalCommands = commandStack + commands
         let call = finalCommands.joined(separator: "; ")
         
-        Logger.logCall(call, on: SSHHost)
+        Logger.logCall(call, on: commandExecutor.id)
         
-        let task = Process()
-        task.launchPath = "/usr/bin/ssh"
-        task.arguments = ["\(SSHHost)", "\(call)"]
+        let process = try commandExecutor.createProcess(for: call)
         
         if capture {
-            task.standardOutput = Pipe()
+            process.standardOutput = Pipe()
         }
         
-        task.launch()
-        task.waitUntilExit()
+        process.launch()
+        process.waitUntilExit()
         
-        guard task.terminationStatus == 0 else {
+        guard process.terminationStatus == 0 else {
             throw TaskError.commandFailed
         }
         
-        if let pipe = task.standardOutput as? Pipe {
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let string = String(data: data, encoding: .utf8)
-            return string
-        }
-        return nil
-    }
-  
-}
-
-public class DockerServer: Server {
-
-    public let container: String
-    public let roles: [ServerRole]
-    
-    public var commandStack: [String] = []
-    
-    public init(container: String, roles: [ServerRole]) {
-        self.container = container
-        self.roles = roles
-    }
-    
-    public func run(commands: [String], capture: Bool) throws -> String? {
-        let finalCommands = commandStack + commands
-        let call = finalCommands.joined(separator: "; ")
-        
-        let tmpFile = "/tmp/docker_call"
-        try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
-        
-        let copyTask = Process()
-        copyTask.launchPath = "/usr/bin/env"
-        copyTask.arguments = ["docker", "cp", tmpFile, "\(container):\(tmpFile)"]
-        copyTask.launch()
-        copyTask.waitUntilExit()
-        
-        Logger.logCall(call, on: container)
-        
-        let task = Process()
-        task.launchPath = "/usr/bin/env"
-        task.arguments = ["docker", "exec", container, "bash", tmpFile]
-        
-        if capture {
-            task.standardOutput = Pipe()
-        }
-        
-        task.launch()
-        task.waitUntilExit()
-        
-        guard task.terminationStatus == 0 else {
-            throw TaskError.commandFailed
-        }
-        
-        if let pipe = task.standardOutput as? Pipe {
+        if let pipe = process.standardOutput as? Pipe {
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             let string = String(data: data, encoding: .utf8)
             return string
@@ -167,88 +120,101 @@ public class DockerServer: Server {
     
 }
 
-public class DummyServer: Server {
+public protocol ServerCommandExecutor {
+    var id: String { get }
     
-    public let roles: [ServerRole] = [.app, .db, .web]
-    public var commandStack: [String] = []
-    
-    public func run(commands: [String], capture: Bool) throws -> String? {
-        let finalCommands = commandStack + commands
-        let call = finalCommands.joined(separator: "; ")
-        Logger.logCall(call, on: "Dummy")
-        return nil
-    }
-    
+    func createProcess(for call: String) throws -> Process
 }
 
-/*public class UserServer: ServerType {
-    
-    public let IP: String
-    public let user: String
-    public let roles: [ServerRole]
-        
-    public var commandStack: [String] = []
-    
-    public init(IP: String, user: String, roles: [ServerRole]) {
-        self.IP = IP
-        self.user = user
-        self.roles = roles
-    }
-    
-    public func execute(commands: [String], capture: Bool) -> String? {
-        // let config = NMSSHHostConfig()
-        // config.hostname = IP
-        // config.user = user
-        // config.port = 22
-        // config.identityFiles = [Config.SSHKey]
-        // 
-        // let session = NMSSHSession(host: IP, configs: [config], withDefaultPort: 8080, defaultUsername: user)
-        // session.connect()
-        // defer { session.disconnect() }
-        
-        // let finalCommands = commandStack + commands
-        // let finalCommand = finalCommands.joinWithSeparator("; ")
-        // let call = "\(finalCommand)"
-        
-        // print("On \(IP): \(call)")
-        // do {
-        //     try session.channel.execute(call)
-        // } catch let error as NSError {
-        //     print(error)
-        // }
-        return nil
-    }
-    
-}*/
+// MARK: - UserServer
 
 extension Config {
     public static var SSHKey: String = ""
 }
 
-//extension Process {
-//    var commandCall: String {
-//        let launch = launchPath ?? ""
-//        let args = arguments?.joined(separator: " ") ?? ""
-//        return "\(launch) \(args)"
-//    }
-//}
+public class UserServer: ServerCommandExecutor {
+    
+    public var id: String {
+        return "\(user)@\(ip)"
+    }
+    
+    public let ip: String
+    public let user: String
+    
+    public init(ip: String, user: String) {
+        self.ip = ip
+        self.user = user
+    }
+    
+    public func createProcess(for call: String) throws -> Process {
+        let process = Process()
+        process.launchPath = "/usr/bin/ssh"
+        process.arguments = ["\(user)@\(ip) -i \(Config.SSHKey)", "\(call)"]
+        
+        return process
+        //        ssh root@159.203.167.192 -i ~/.ssh/digital_ocean
+    }
+    
+}
 
-//class ErrorPipe: Pipe {
-//    
-//    override init() {
-//        super.init()
-//        
-//        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("dataAvailable:"), name: NSFileHandleDataAvailableNotification, object: nil)
-//        
-//        fileHandleForReading.waitForDataInBackgroundAndNotify()
-//    }
-//    
-//    func dataAvailable(note: NSNotification) {
-//        var data = fileHandleForReading.availableData
-//        while data.length > 0 {
-//            print("Got: ", String(data: data, encoding: NSUTF8StringEncoding))
-//            data = fileHandleForReading.availableData
-//        }
-//    }
-//    
-//}
+// MARK: - SSHHostServer
+
+public class SSHHostServer: ServerCommandExecutor {
+  
+    public let id: String
+    
+    public init(SSHHost: String) {
+        self.id = SSHHost
+    }
+    
+    public func createProcess(for call: String) throws -> Process {
+        let process = Process()
+        process.launchPath = "/usr/bin/ssh"
+        process.arguments = ["\(id)", "\(call)"]
+        
+        return process
+    }
+  
+}
+
+// MARK: - DockerServer
+
+public class DockerServer: ServerCommandExecutor {
+
+    public let id: String
+    
+    public init(container: String) {
+        self.id = container
+    }
+    
+    public func createProcess(for call: String) throws -> Process {
+        let tmpFile = "/tmp/docker_call"
+        try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
+        
+        let copyTask = Process()
+        copyTask.launchPath = "/usr/bin/env"
+        copyTask.arguments = ["docker", "cp", tmpFile, "\(id):\(tmpFile)"]
+        copyTask.launch()
+        copyTask.waitUntilExit()
+        
+        let process = Process()
+        process.launchPath = "/usr/bin/env"
+        process.arguments = ["docker", "exec", id, "bash", tmpFile]
+        
+        return process
+    }
+    
+}
+
+public class DummyServer: ServerCommandExecutor {
+    
+    public let id = "DummyServer"
+    
+    public func createProcess(for call: String) throws -> Process {
+        let process = Process()
+        process.launchPath = "/bin/echo"
+        
+        return process
+    }
+    
+}

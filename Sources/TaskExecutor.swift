@@ -32,7 +32,9 @@ class TaskExecutor {
                 try task.run(on: server)
             }
         case .dryRun:
-            try task.run(on: DummyServer())
+            do {
+                try task.run(on: Server.createDummyServer())
+            } catch {}
         }
         
         try runTasks(scheduled: .after(task.fullName))
