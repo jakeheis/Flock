@@ -30,9 +30,9 @@ The Flockfile specifies which tasks and configurations you want Flock to use. In
 import Flock
 import VaporFlock
 
-Flock.use(Flock.Deploy) # Located in Flock
-Flock.use(Flock.Tools) # Located in Flock
-Flock.use(Flock.Vapor) # Located in VaporFlock
+Flock.use(Flock.Deploy) // Located in Flock
+Flock.use(Flock.Tools) // Located in Flock
+Flock.use(Flock.Vapor) // Located in VaporFlock
 
 ...
 ```
@@ -94,4 +94,54 @@ flock deploy # Run the deploy task
 flock deploy:build # Run the build task located under the deploy namespace
 flock tools -e staging # Run the tools task using the staging configuration
 flock vapor:start -n # Do a dry-run of the start task located under the Vapor namespace - print the commands that would be executed without actually executing anything
+```
+
+### Writing your own tasks
+Start by running:
+```bash
+flock --create db:create # Or whatever you want to call your new task
+```
+
+This will create file at deploy/DbCreateTask.swift with the following contents:
+```swift
+import Flock
+
+extension Flock {
+   public static let <NameThisGroup>: [Task] = [
+       StartTask()
+   ]
+}
+
+// Delete if no custom Config properties are needed
+extension Config {
+   // public static var myVar = ""
+}
+
+class StartTask: Task {
+   let name = "start"
+   let namespace = "db"
+
+   func run(on server: Server) throws {
+      // Do work
+   }
+}
+```
+
+After running this command, make sure you:
+1. Replace <NameThisGroup> at the top of your new file with a custom name
+2. In your Flockfile, add `Flock.use(WhateverINamedIt)`
+
+#### Hooking
+
+If you wish to hook your task onto another task (i.e. always run this task before/after another task, just add an array of hook times to your Task:
+```swift
+class StartTask: Task {
+   let name = "start"
+   let namespace = "db"
+   let hookTimes: [HookTime] = [.after("deploy:build")]
+   
+   func run(on server: Server) throws {
+      // Do work
+   }
+}
 ```
