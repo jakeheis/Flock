@@ -149,10 +149,9 @@ public class UserServer: ServerCommandExecutor {
     public func createProcess(for call: String) throws -> Process {
         let process = Process()
         process.launchPath = "/usr/bin/ssh"
-        process.arguments = ["\(user)@\(ip) -i \(Config.SSHKey)", "\(call)"]
-        
+        process.arguments = ["-i", "\(Config.SSHKey)", "\(user)@\(ip)", "\(call)"]
+
         return process
-        //        ssh root@159.203.167.192 -i ~/.ssh/digital_ocean
     }
     
 }
