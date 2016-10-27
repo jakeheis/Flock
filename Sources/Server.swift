@@ -147,6 +147,10 @@ public class UserServer: ServerCommandExecutor {
     }
     
     public func createProcess(for call: String) throws -> Process {
+        guard !Config.SSHKey.isEmpty else {
+            throw TaskError.error("You must specify `Config.SSHKey` in your configuration file")
+        }
+        
         let process = Process()
         process.launchPath = "/usr/bin/ssh"
         process.arguments = ["-i", "\(Config.SSHKey)", "\(user)@\(ip)", "\(call)"]
