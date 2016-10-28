@@ -38,14 +38,16 @@ Flock.use(Flock.Vapor) // Located in VaporFlock
 ```
 If the tasks are in a separate library (as `Flock.Vapor` is above), you'll also need to add `VaporFlock` as a dependency as described in the next section.
 
-Additionally, if you want to add additional configuration environments, you can do that here in the `Flockfile`. First run `flock --add-env TestEnvironment` and then modify the `Flockfile`:
+By default, `Flock.Deploy` and `Flock.Tools` will be used. Using `Flock.Deploy` allows you to run `flock deploy` which deploys your project onto your servers. Using `Flock.Tools` allows you run `flock tools` which will install the necessary tools for your swift project to run on the server.
+
+If you want to add additional configuration environments (beyond "staging" and "production), you can do that here in the `Flockfile`. First run `flock --add-env Testing` and then modify the `Flockfile`:
 ```swift
 ...
 
 Flock.configure(.always, with: Always()) // Located at deploy/Always.swift
 Flock.configure(.env("production"), with: Production()) // Located at deploy/Production.swift
 Flock.configure(.env("staging"), with: Staging()) // Located at deploy/Staging.swift
-Flock.configure(.env("test"), with: TestEnvironment()) // Located at deploy/TestEnvironment.swift
+Flock.configure(.env("test"), with: Testing()) // Located at deploy/Testing.swift
 
 ...
 ```
@@ -81,7 +83,16 @@ Config.repoURL = "URL"
 ```
 
 #### deploy/Production.swift and deploy/Staging.swift
-These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers.
+These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are two ways to specify a server:
+```swift
+func configure() {
+      Config.SSHKey = "/Location/of/my/key"
+      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
+
+      // Or, if you've added your server to your `.ssh/config` file, you can use this shorthand:
+      Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
+}
+```
 
 #### deploy/.flock
 You can (in general) ignore all the files in this directory.
@@ -145,3 +156,18 @@ class StartTask: Task {
    }
 }
 ```
+
+#### Invoking another task
+```swift
+func run(on server: Server) throws {
+      try invoke("other:task")
+}
+```
+
+## Server dependencies
+If your Swift server uses one of these popular libraries, there are Flock dependencies already available which will hook into the deploy process and restart the server after the new release is built.
+
+- [VaporFlock](https://github.com/jakeheis/VaporFlock)
+- [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
+- [ZewoFlock](https://github.com/jakeheis/ZewoFlock)
+- [KituraFlock](https://github.com/jakeheis/KituraFlock)
