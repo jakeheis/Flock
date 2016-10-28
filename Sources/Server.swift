@@ -7,6 +7,7 @@
 import Foundation
 import Rainbow
 import SwiftCLI
+import Spawn
 
 public class Servers {
     
@@ -105,36 +106,16 @@ public class Server {
         
         let arguments = try commandExecutor.createArguments(for: call)
         
-        // if capture {
-        //     process.standardOutput = Pipe()
-        // }
+        var captured: String?
+        let spawned = try Spawn(args: arguments, output: { (output) in
+            captured = output
+        })
         
-        let pid = UnsafeMutablePointer<pid_t>.allocate(capacity: 1)
-        let argv: [UnsafeMutablePointer<CChar>?] = arguments.map{ strdup($0) }
-        defer { for case let arg? in argv { free(arg) } }
-        
-        let status = posix_spawn(pid, arguments[0], nil, nil, argv + [nil], nil)
-        
-        guard status == 0 else {
+        guard spawned.waitForExit() == 0 else {
             throw TaskError.commandFailed
         }
         
-        let terminationStatus = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
-        
-        guard waitpid(pid.pointee, terminationStatus, 0) != -1 else {
-            throw TaskError.commandFailed
-        }
-        
-        guard terminationStatus.pointee == 0 else {
-            throw TaskError.commandFailed
-        }
-        
-        // if let pipe = process.standardOutput as? Pipe {
-        //     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        //     let string = String(data: data, encoding: .utf8)
-        //     return string
-        // }
-        return nil
+        return captured
     }
     
 }
