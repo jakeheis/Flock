@@ -103,6 +103,8 @@ public class Server {
             process.standardOutput = Pipe()
         }
         
+        process.standardInput = FileHandle.standardInput
+        
         process.launch()
         process.waitUntilExit()
         
