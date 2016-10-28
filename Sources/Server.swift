@@ -108,7 +108,7 @@ public class Server {
         
         var captured = ""
         let spawned = try Spawn(args: arguments, output: { (output) in
-            print(output)
+            print(output, terminator: "")
             captured += output
         })
         
