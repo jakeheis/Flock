@@ -202,8 +202,9 @@ class MigrateTask: Task {
 ```
 
 After running this command, make sure you:
-1. Replace <NameThisGroup> at the top of your new file with a custom name
-2. In your Flockfile, add `Flock.use(WhateverINamedIt)`
+
+1. Replace \<NameThisGroup\> at the top of your new file with a custom name
+1. In your Flockfile, add `Flock.use(WhateverINamedIt)`
 
 #### Hooking
 
