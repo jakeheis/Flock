@@ -26,8 +26,19 @@ class HelpCommand: SwiftCLI.HelpCommand {
     func execute(arguments: CommandArguments) throws {
         print("Available tasks:")
         for task in Flock.tasks {
-            print(task.fullName)
+            print("flock \(task.fullName)")
         }
     }
+    
+}
+
+// This will never actually be invoked
+class VersionCommand: Command {
+    
+    let name = "--version"
+    let signature = ""
+    let shortDescription = ""
+    
+    func execute(arguments: CommandArguments) throws {}
     
 }
