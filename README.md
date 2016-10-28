@@ -2,6 +2,22 @@
 
 Automated deployment of your Swift project to servers. Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
+Table of Contents
+=================
+
+   * [Flock](#flock)
+   * [Installation](#installation)
+       * [Homebrew](#homebrew)
+       * [Manual](#manual)
+   * [Setup](#setup)
+      * [Init](#init)
+      * [Dependencies](#dependencies)
+         * [Server dependencies](#server-dependencies)
+      * [Environments](#environments)
+   * [Tasks](#tasks)
+       * [Running tasks](#running-tasks)
+       * [Writing your own tasks](#writing-your-own-tasks)
+
 # Installation
 ### Homebrew
 ```bash
