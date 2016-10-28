@@ -36,8 +36,7 @@ To start using Flock, run:
 ```bash
 flock --init
 ```
-
-Flock will create a number of files:
+After this command completes, you should follow the instructions Flock prints. Following these instructions should be enough to get your project up and running. For more information about the files Flock creates, read on.
 
 ### Flockfile
 The Flockfile specifies which tasks and configurations you want Flock to use. In order to use some other tasks, just import the task library and tell Flock to use them:
