@@ -13,8 +13,8 @@ public class Servers {
     
     static var servers: [Server] = []
     
-    public static func add(ip: String, user: String, roles: [ServerRole]) {
-        servers.append(Server(ip: ip, user: user, roles: roles))
+    public static func add(ip: String, user: String, roles: [ServerRole], authMethod: SSHAuthMethod? = nil) {
+        servers.append(Server(ip: ip, user: user, roles: roles, authMethod: authMethod))
     }
     
     public static func add(SSHHost: String, roles: [ServerRole]) {
@@ -43,8 +43,8 @@ public class Server {
         return Server(commandExecutor: DummyServer(), roles: [.app, .db, .web])
     }
     
-    public convenience init(ip: String, user: String, roles: [ServerRole]) {
-        self.init(commandExecutor: UserServer(ip: ip, user: user), roles: roles)
+    public convenience init(ip: String, user: String, roles: [ServerRole], authMethod: SSHAuthMethod?) {
+        self.init(commandExecutor: UserServer(ip: ip, user: user, authMethod: authMethod), roles: roles)
     }
     
     public convenience init(SSHHost: String, roles: [ServerRole]) {
@@ -129,8 +129,13 @@ public protocol ServerCommandExecutor {
 
 // MARK: - UserServer
 
+public enum SSHAuthMethod {
+    case key(String)
+    // case password(String) TODO
+}
+
 extension Config {
-    public static var SSHKey: String = ""
+    public static var SSHAuthMethod: SSHAuthMethod? = nil
 }
 
 public class UserServer: ServerCommandExecutor {
@@ -141,18 +146,35 @@ public class UserServer: ServerCommandExecutor {
     
     public let ip: String
     public let user: String
+    public let authMethod: SSHAuthMethod?
     
-    public init(ip: String, user: String) {
+    public init(ip: String, user: String, authMethod: SSHAuthMethod?) {
         self.ip = ip
         self.user = user
+        self.authMethod = authMethod
     }
     
     public func createArguments(for call: String) throws -> [String] {
-        guard !Config.SSHKey.isEmpty else {
-            throw TaskError.error("You must specify `Config.SSHKey` in your configuration file")
+        var args = ["/usr/bin/ssh", "-l", user]
+        
+        
+        let auth: SSHAuthMethod
+        if let authMethod = authMethod {
+            auth = authMethod
+        } else {
+            guard let method = Config.SSHAuthMethod else {
+                throw TaskError.error("You must either pass in a SSH auth method in your `Server.add` call or specify `Config.SSHAuthMethod` in your configuration file")
+            }
+            auth = method
         }
         
-        return ["/usr/bin/ssh", "-i", Config.SSHKey, "-l", user, ip, call]
+        switch auth {
+        case let .key(key): args += ["-i" , key]
+        }
+        
+        args += [ip, call]
+        
+        return args
     }
     
 }
