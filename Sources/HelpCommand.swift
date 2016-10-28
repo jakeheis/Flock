@@ -29,7 +29,20 @@ class HelpCommand: SwiftCLI.HelpCommand {
             print("flock \(task.fullName)")
         }
         print()
+        
+        if printCLIDescription {
+            print("Task options:")
+            printOption("-e <env>", description: "Run in the given environment, usually either `production` or `staging`. Defaults to `production`")
+            printOption("-n", description: "Dry run -- dont actually execute any commands, just print them")
+            print()
+        }
+        
         print("To print help information: flock --help")
+    }
+    
+    func printOption(_ option: String, description: String) {
+        let spacing = String(repeating: " ", count: 20 - option.characters.count)
+        print("- \(option)\(spacing)\(description)")
     }
     
 }
