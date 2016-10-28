@@ -5,7 +5,6 @@ Automated deployment of your Swift project to servers. Inspired by [Capistrano](
 Table of Contents
 =================
 
-   * [Flock](#flock)
    * [Installation](#installation)
        * [Homebrew](#homebrew)
        * [Manual](#manual)
