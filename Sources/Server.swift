@@ -155,7 +155,7 @@ public class UserServer: ServerCommandExecutor {
         
         let process = Process()
         process.launchPath = "/usr/bin/ssh"
-        process.arguments = ["-i", "\(Config.SSHKey)", "\(user)@\(ip)", "\(call)"]
+        process.arguments = ["-i", "\(Config.SSHKey)", "-n", "\(user)@\(ip)", "\(call)"]
 
         return process
     }
@@ -175,7 +175,7 @@ public class SSHHostServer: ServerCommandExecutor {
     public func createProcess(for call: String) throws -> Process {
         let process = Process()
         process.launchPath = "/usr/bin/ssh"
-        process.arguments = ["\(id)", "\(call)"]
+        process.arguments = ["-n", "\(id)", "\(call)"]
         
         return process
     }
