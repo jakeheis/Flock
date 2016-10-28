@@ -16,7 +16,7 @@ import SwiftCLI
 
 public class Flock {
   
-    private static var tasks: [Task] = []
+    private(set) static var tasks: [Task] = []
     private static var configurations: [ConfigurationTime: Configuration] = [:]
   
     // MARK: - Public
@@ -36,6 +36,7 @@ public class Flock {
         
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         CLI.register(commands: commands)
+        CLI.helpCommand = HelpCommand()
         let result = CLI.go()
         exit(result)
     }
