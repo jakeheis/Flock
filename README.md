@@ -44,16 +44,16 @@ If you want to add additional configuration environments (beyond "staging" and "
 ```swift
 ...
 
-Flock.configure(.always, with: Always()) // Located at deploy/Always.swift
-Flock.configure(.env("production"), with: Production()) // Located at deploy/Production.swift
-Flock.configure(.env("staging"), with: Staging()) // Located at deploy/Staging.swift
-Flock.configure(.env("test"), with: Testing()) // Located at deploy/Testing.swift
+Flock.configure(.always, with: Always()) // Located at config/deploy/Always.swift
+Flock.configure(.env("production"), with: Production()) // Located at config/deploy/Production.swift
+Flock.configure(.env("staging"), with: Staging()) // Located at config/deploy/Staging.swift
+Flock.configure(.env("test"), with: Testing()) // Located at config/deploy/Testing.swift
 
 ...
 ```
 
 #### config/deploy/FlockDependencies.json
-This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to do this):
+This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to specify version):
 ```json
 {
    "dependencies" : [
@@ -75,7 +75,7 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
 ```
 
 #### config/deploy/Always.swift
-This file contains configuration which will always be used. This is where configuration info which is needed regardless of environment. Some fields you'll need to update before using Flock:
+This file contains configuration which will always be used. This is where configuration info which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
 ```
 Config.projectName = "ProjectName"
 Config.executableName = "ExecutableName"
@@ -83,11 +83,15 @@ Config.repoURL = "URL"
 ```
 
 #### config/deploy/Production.swift and config/deploy/Staging.swift
-These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are two ways to specify a server:
+These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are multiple ways to specify a server:
 ```swift
 func configure() {
-      Config.SSHKey = "/Location/of/my/key"
+      // For project-wide auth:
+      Config.SSHAuthMethod = .key("/path/to/my/key")
       Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
+      
+      // For server-specific auth:
+      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key)
 
       // Or, if you've added your server to your `.ssh/config` file, you can use this shorthand:
       Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
