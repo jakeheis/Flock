@@ -52,7 +52,7 @@ Flock.configure(.env("test"), with: Testing()) // Located at deploy/Testing.swif
 ...
 ```
 
-#### deploy/FlockDependencies.json
+#### config/deploy/FlockDependencies.json
 This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to do this):
 ```json
 {
@@ -74,7 +74,7 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
 }
 ```
 
-#### deploy/Always.swift
+#### config/deploy/Always.swift
 This file contains configuration which will always be used. This is where configuration info which is needed regardless of environment. Some fields you'll need to update before using Flock:
 ```
 Config.projectName = "ProjectName"
@@ -82,7 +82,7 @@ Config.executableName = "ExecutableName"
 Config.repoURL = "URL"
 ```
 
-#### deploy/Production.swift and deploy/Staging.swift
+#### config/deploy/Production.swift and config/deploy/Staging.swift
 These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are two ways to specify a server:
 ```swift
 func configure() {
@@ -94,7 +94,7 @@ func configure() {
 }
 ```
 
-#### deploy/.flock
+#### .flock
 You can (in general) ignore all the files in this directory.
 
 ### Running tasks
