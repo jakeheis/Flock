@@ -2,7 +2,7 @@
 
 Automated deployment of your Swift project to servers. Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
-## Installation
+# Installation
 ### Homebrew
 ```bash
 brew install jakeheis/repo/flock
@@ -15,8 +15,7 @@ swift build -c release
 ln -s .build/release/FlockCLI /usr/bin/local/flock
 ```
 
-## Usage
-### Set up
+# Setup
 To start using Flock, run:
 ```bash
 flock --init
@@ -101,14 +100,21 @@ func configure() {
 #### .flock
 You can (in general) ignore all the files in this directory.
 
-### Running tasks
+# Tasks
 
-You can see the available tasks by just running `flock` with no arguments. Running a task is as easy as:
+### Running tasks
+You can see the available tasks by running `flock` with no arguments. To run a task, just call:
 ```bash
 flock deploy # Run the deploy task
 flock deploy:build # Run the build task located under the deploy namespace
-flock tools -e staging # Run the tools task using the staging configuration
-flock vapor:start -n # Do a dry-run of the start task located under the Vapor namespace - print the commands that would be executed without actually executing anything
+```
+Passing the `-n` flag tells Flock to do a dry-run, meaning to only print commands without actually executing any.
+```bash
+flock vapor:start -n # Do a dry-run of the start task located under the vapor namespace
+```
+You can also pass the `-e <env>` key, telling Flock to run the task in a certain environment:
+```bash
+flock tools -e staging # Run the tools task in the staging environment
 ```
 
 ### Writing your own tasks
@@ -168,7 +174,7 @@ func run(on server: Server) throws {
 }
 ```
 
-## Server dependencies
+# Server dependencies
 If your Swift server uses one of these popular libraries, there are Flock dependencies already available which will hook into the deploy process and restart the server after the new release is built.
 
 - [VaporFlock](https://github.com/jakeheis/VaporFlock)
