@@ -106,16 +106,17 @@ public class Server {
         
         let arguments = try commandExecutor.createArguments(for: call)
         
-        var captured: String?
+        var captured = ""
         let spawned = try Spawn(args: arguments, output: { (output) in
-            captured = output
+            print(output)
+            captured += output
         })
         
         guard spawned.waitForExit() == 0 else {
             throw TaskError.commandFailed
         }
         
-        return captured
+        return captured.isEmpty ? nil : captured
     }
     
 }
