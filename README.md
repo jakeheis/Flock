@@ -1,6 +1,6 @@
 # Flock
 
-Automated deployment of your Swift project to servers. Heavily inspired by [Capistrano](https://github.com/capistrano/capistrano).
+Automated deployment of your Swift project to servers. Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
 ## Installation
 ### Homebrew
@@ -110,16 +110,16 @@ flock vapor:start -n # Do a dry-run of the start task located under the Vapor na
 ### Writing your own tasks
 Start by running:
 ```bash
-flock --create db:create # Or whatever you want to call your new task
+flock --create db:migrate # Or whatever you want to call your new task
 ```
 
-This will create file at deploy/DbCreateTask.swift with the following contents:
+This will create file at config/deploy/DbMigrateTask.swift with the following contents:
 ```swift
 import Flock
 
 extension Flock {
    public static let <NameThisGroup>: [Task] = [
-       StartTask()
+       MigrateTask()
    ]
 }
 
@@ -128,8 +128,8 @@ extension Config {
    // public static var myVar = ""
 }
 
-class StartTask: Task {
-   let name = "start"
+class MigrateTask: Task {
+   let name = "migrate"
    let namespace = "db"
 
    func run(on server: Server) throws {
@@ -146,8 +146,8 @@ After running this command, make sure you:
 
 If you wish to hook your task onto another task (i.e. always run this task before/after another task, just add an array of hook times to your Task:
 ```swift
-class StartTask: Task {
-   let name = "start"
+class MigrateTask: Task {
+   let name = "migrate"
    let namespace = "db"
    let hookTimes: [HookTime] = [.after("deploy:build")]
    
