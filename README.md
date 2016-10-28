@@ -16,6 +16,7 @@ ln -s .build/release/FlockCLI /usr/bin/local/flock
 ```
 
 # Setup
+## Init
 To start using Flock, run:
 ```bash
 flock --init
@@ -23,35 +24,32 @@ flock --init
 
 Flock will create a number of files:
 
-#### Flockfile
+### Flockfile
 The Flockfile specifies which tasks and configurations you want Flock to use. In order to use some other tasks, just import the task library and tell Flock to use them:
 ```swift
 import Flock
-import VaporFlock
 
 Flock.use(Flock.Deploy) // Located in Flock
 Flock.use(Flock.Tools) // Located in Flock
-Flock.use(Flock.Vapor) // Located in VaporFlock
-
-...
-```
-If the tasks are in a separate library (as `Flock.Vapor` is above), you'll also need to add `VaporFlock` as a dependency as described in the next section.
-
-By default, `Flock.Deploy` and `Flock.Tools` will be used. Using `Flock.Deploy` allows you to run `flock deploy` which deploys your project onto your servers. Using `Flock.Tools` allows you run `flock tools` which will install the necessary tools for your swift project to run on the server.
-
-If you want to add additional configuration environments (beyond "staging" and "production), you can do that here in the `Flockfile`. First run `flock --add-env Testing` and then modify the `Flockfile`:
-```swift
-...
-
-Flock.configure(.always, with: Always()) // Located at config/deploy/Always.swift
-Flock.configure(.env("production"), with: Production()) // Located at config/deploy/Production.swift
-Flock.configure(.env("staging"), with: Staging()) // Located at config/deploy/Staging.swift
-Flock.configure(.env("test"), with: Testing()) // Located at config/deploy/Testing.swift
 
 ...
 ```
 
-#### config/deploy/FlockDependencies.json
+`Flock.Deploy` includes the following tasks:
+```bash
+flock deploy          # Invokes deploy:git, deploy:build, and deploy:link 
+flock deploy:git          
+flock deploy:build        
+flock deploy:link
+```
+`Flock.Tools` includes tasks which assist in installing the necessary tools for your swift project to run on the server:
+```bash
+flock tools                 # Invokes tools:dependencies, tools:swift       
+flock tools:dependencies  
+flock tools:swift
+```
+
+### config/deploy/FlockDependencies.json
 This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to specify version):
 ```json
 {
@@ -72,8 +70,8 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
    ]
 }
 ```
-
-#### config/deploy/Always.swift
+See the [dependencies](#dependencies) section below for more information on third party dependencies.
+### config/deploy/Always.swift
 This file contains configuration which will always be used. This is where configuration info which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
 ```
 Config.projectName = "ProjectName"
@@ -81,7 +79,7 @@ Config.executableName = "ExecutableName"
 Config.repoURL = "URL"
 ```
 
-#### config/deploy/Production.swift and config/deploy/Staging.swift
+### config/deploy/Production.swift and config/deploy/Staging.swift
 These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are multiple ways to specify a server:
 ```swift
 func configure() {
@@ -97,8 +95,63 @@ func configure() {
 }
 ```
 
-#### .flock
+### .flock
 You can (in general) ignore all the files in this directory.
+
+## Dependencies
+
+To add a third party dependency, you first add the repository to config/deploy/FlockDependencies.json:
+```json
+{
+   "dependencies" : [
+       {
+           "name" : "https://github.com/jakeheis/Flock",
+           "version": "0.0.1"
+       },
+       {
+           "name" : "https://github.com/jakeheis/VaporFlock",
+           "major": 0,
+           "minor": 0
+       }
+   ]
+}
+```
+
+In your Flockfile, notify Flock of your new source of tasks:
+```swift
+import Flock
+import VaporFlock
+
+Flock.use(Flock.Tools)
+Flock.use(Flock.Deploy)
+Flock.use(Flock.Vapor)
+
+...
+
+Flock.run()
+```
+
+### Server dependencies
+If your Swift server uses one of these popular libraries, there are Flock dependencies already available which will hook into `flock deploy` and restart the server after the new release is built.
+
+- [VaporFlock](https://github.com/jakeheis/VaporFlock)
+- [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
+- [ZewoFlock](https://github.com/jakeheis/ZewoFlock)
+- [KituraFlock](https://github.com/jakeheis/KituraFlock)
+
+## Environments
+
+If you want to add additional configuration environments (beyond "staging" and "production), you can do that in the `Flockfile`. Start by running `flock --add-env MyNewEnv` and then modify the `Flockfile` as such:
+```swift
+...
+
+Flock.configure(.always, with: Always()) // Located at config/deploy/Always.swift
+Flock.configure(.env("production"), with: Production()) // Located at config/deploy/Production.swift
+Flock.configure(.env("staging"), with: Staging()) // Located at config/deploy/Staging.swift
+Flock.configure(.env("test"), with: MyNewEnv()) // Located at config/deploy/MyNewEnv.swift
+
+...
+```
 
 # Tasks
 
@@ -173,11 +226,3 @@ func run(on server: Server) throws {
       try invoke("other:task")
 }
 ```
-
-# Server dependencies
-If your Swift server uses one of these popular libraries, there are Flock dependencies already available which will hook into the deploy process and restart the server after the new release is built.
-
-- [VaporFlock](https://github.com/jakeheis/VaporFlock)
-- [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
-- [ZewoFlock](https://github.com/jakeheis/ZewoFlock)
-- [KituraFlock](https://github.com/jakeheis/KituraFlock)
