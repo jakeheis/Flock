@@ -28,6 +28,8 @@ class HelpCommand: SwiftCLI.HelpCommand {
         for task in Flock.tasks {
             print("flock \(task.fullName)")
         }
+        print()
+        print("flock --help")
     }
     
 }
