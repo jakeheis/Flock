@@ -1,3 +1,9 @@
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
 import Foundation
 import Rainbow
 import SwiftCLI
@@ -27,7 +33,7 @@ public enum ServerRole {
 }
 
 public class Server {
-  
+    
     let roles: [ServerRole]
     let commandExecutor: ServerCommandExecutor
     var commandStack: [String] = []
@@ -97,26 +103,37 @@ public class Server {
         
         Logger.logCall(call, on: commandExecutor.id)
         
-        let process = try commandExecutor.createProcess(for: call)
+        let arguments = try commandExecutor.createArguments(for: call)
         
-        if capture {
-            process.standardOutput = Pipe()
-        }
+        // if capture {
+        //     process.standardOutput = Pipe()
+        // }
         
-        process.standardInput = FileHandle.standardInput
+        let pid = UnsafeMutablePointer<pid_t>.allocate(capacity: 1)
+        let argv: [UnsafeMutablePointer<CChar>?] = arguments.map{ strdup($0) }
+        defer { for case let arg? in argv { free(arg) } }
         
-        process.launch()
-        process.waitUntilExit()
+        let status = posix_spawn(pid, arguments[0], nil, nil, argv + [nil], nil)
         
-        guard process.terminationStatus == 0 else {
+        guard status == 0 else {
             throw TaskError.commandFailed
         }
         
-        if let pipe = process.standardOutput as? Pipe {
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let string = String(data: data, encoding: .utf8)
-            return string
+        let terminationStatus = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
+        
+        guard waitpid(pid.pointee, terminationStatus, 0) != -1 else {
+            throw TaskError.commandFailed
         }
+        
+        guard terminationStatus.pointee == 0 else {
+            throw TaskError.commandFailed
+        }
+        
+        // if let pipe = process.standardOutput as? Pipe {
+        //     let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        //     let string = String(data: data, encoding: .utf8)
+        //     return string
+        // }
         return nil
     }
     
@@ -125,7 +142,7 @@ public class Server {
 public protocol ServerCommandExecutor {
     var id: String { get }
     
-    func createProcess(for call: String) throws -> Process
+    func createArguments(for call: String) throws -> [String]
 }
 
 // MARK: - UserServer
@@ -148,16 +165,12 @@ public class UserServer: ServerCommandExecutor {
         self.user = user
     }
     
-    public func createProcess(for call: String) throws -> Process {
+    public func createArguments(for call: String) throws -> [String] {
         guard !Config.SSHKey.isEmpty else {
             throw TaskError.error("You must specify `Config.SSHKey` in your configuration file")
         }
         
-        let process = Process()
-        process.launchPath = "/usr/bin/ssh"
-        process.arguments = ["-i", "\(Config.SSHKey)", "-n", "\(user)@\(ip)", "\(call)"]
-
-        return process
+        return ["/usr/bin/ssh", "-i", Config.SSHKey, "-l", user, ip, call]
     }
     
 }
@@ -165,34 +178,30 @@ public class UserServer: ServerCommandExecutor {
 // MARK: - SSHHostServer
 
 public class SSHHostServer: ServerCommandExecutor {
-  
+    
     public let id: String
     
     public init(SSHHost: String) {
         self.id = SSHHost
     }
     
-    public func createProcess(for call: String) throws -> Process {
-        let process = Process()
-        process.launchPath = "/usr/bin/ssh"
-        process.arguments = ["-n", "\(id)", "\(call)"]
-        
-        return process
+    public func createArguments(for call: String) throws -> [String] {
+        return ["/usr/bin/ssh", id, "\(call)"]
     }
-  
+    
 }
 
 // MARK: - DockerServer
 
 public class DockerServer: ServerCommandExecutor {
-
+    
     public let id: String
     
     public init(container: String) {
         self.id = container
     }
     
-    public func createProcess(for call: String) throws -> Process {
+    public func createArguments(for call: String) throws -> [String] {
         let tmpFile = "/tmp/docker_call"
         try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
         
@@ -202,11 +211,7 @@ public class DockerServer: ServerCommandExecutor {
         copyTask.launch()
         copyTask.waitUntilExit()
         
-        let process = Process()
-        process.launchPath = "/usr/bin/env"
-        process.arguments = ["docker", "exec", id, "bash", tmpFile]
-        
-        return process
+        return ["/usr/bin/env", "docker", "exec", id, "bash", tmpFile]
     }
     
 }
@@ -215,11 +220,8 @@ public class DummyServer: ServerCommandExecutor {
     
     public let id = "DummyServer"
     
-    public func createProcess(for call: String) throws -> Process {
-        let process = Process()
-        process.launchPath = "/bin/echo"
-        
-        return process
+    public func createArguments(for call: String) throws -> [String] {
+        return ["/bin/echo"]
     }
     
 }
