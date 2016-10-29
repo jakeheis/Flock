@@ -9,15 +9,10 @@
 import XCTest
 @testable import Flock
 
-class TaskExecutorTests: XCTestCase {
+class TaskExecutorTests: FlockTestCase {
     
     override func setUp() {
         TaskExecutor.setup(with: TestTasks)
-    }
-    
-    override func tearDown() {
-        TestTaskMonitor.reset()
-        Servers.servers = []
     }
     
     func testTask() {

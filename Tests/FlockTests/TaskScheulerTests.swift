@@ -9,7 +9,7 @@
 import XCTest
 @testable import Flock
 
-class TaskScheulerTests: XCTestCase {
+class TaskScheulerTests: FlockTestCase {
   
     func testSchedule() {
         let scheduler = TaskScheduler(tasks: TestTasks)

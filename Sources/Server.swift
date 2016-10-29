@@ -175,7 +175,6 @@ public class UserServer: ServerCommandExecutor {
     public func createArguments(for call: String) throws -> [String] {
         var args = ["/usr/bin/ssh", "-l", user]
         
-        
         let auth: SSHAuthMethod
         if let authMethod = authMethod {
             auth = authMethod
