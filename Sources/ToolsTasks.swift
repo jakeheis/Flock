@@ -1,5 +1,5 @@
 //
-//  DeployCluster.swift
+//  ToolsCluster.swift
 //  Flock
 //
 //  Created by Jake Heiser on 12/28/15.

@@ -1,3 +1,11 @@
+//
+//  Server.swift
+//  Flock
+//
+//  Created by Jake Heiser on 12/28/15.
+//  Copyright © 2015 jakeheis. All rights reserved.
+//
+
 #if os(Linux)
     import Glibc
 #else
@@ -120,6 +128,16 @@ public class Server {
     }
     
 }
+
+extension Server: CustomStringConvertible {
+
+    public var description: String {
+        return commandExecutor.id
+    }
+    
+}
+
+// MARK: - ServerCommandExecutor
 
 public protocol ServerCommandExecutor {
     var id: String { get }
