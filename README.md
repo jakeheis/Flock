@@ -16,6 +16,7 @@ Table of Contents
    * [Tasks](#tasks)
        * [Running tasks](#running-tasks)
        * [Writing your own tasks](#writing-your-own-tasks)
+   * [Related projects](#related-projects)
 
 # Installation
 ### Homebrew
@@ -52,15 +53,21 @@ Flock.use(Flock.Tools) // Located in Flock
 `Flock.Deploy` includes the following tasks:
 ```bash
 flock deploy          # Invokes deploy:git, deploy:build, and deploy:link 
-flock deploy:git          
-flock deploy:build        
-flock deploy:link
+flock deploy:git      # Clones your project onto your server into a timestamped directory
+flock deploy:build    # Builds your project
+flock deploy:link     # Links your newly built project directory as the current directory
 ```
+Running `flock deploy` will:
+
+1. Clone your project onto your server into a timestamped directory (e.g. `/var/www/VaporExample/releases/20161028211084`)
+1. Build your project
+1. Link your built project to the `current` directory (e.g. `/var/www/VaporExample/current`)
+
 `Flock.Tools` includes tasks which assist in installing the necessary tools for your swift project to run on the server:
 ```bash
 flock tools                 # Invokes tools:dependencies, tools:swift       
-flock tools:dependencies  
-flock tools:swift
+flock tools:dependencies    # Installs dependencies necessary for Swift to work
+flock tools:swift           # Installs Swift using swiftenv
 ```
 
 ### config/deploy/FlockDependencies.json
@@ -104,7 +111,7 @@ func configure() {
       // For server-specific auth:
       Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key)
 
-      // Or, if you've added your server to your `.ssh/config` file, you can use this shorthand:
+      // Or, if you've added your server to your .ssh/config file, you can use this shorthand:
       Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
 }
 ```
@@ -241,3 +248,16 @@ func run(on server: Server) throws {
       try invoke("other:task")
 }
 ```
+# Related projects
+#### [FlockCLI](https://github.com/jakeheis/FlockCLI) 
+The CLI used to interact with Flock
+#### [VaporFlock](https://github.com/jakeheis/VaporFlock)
+Automated deployment of your Vapor server using Flock
+#### [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
+Automated deployment of your Perfect server using Flock
+#### [KituraFlock](https://github.com/jakeheis/KituraFlock)
+Automated deployment of your Kitura server using Flock
+#### [ZewoFlock](https://github.com/jakeheis/ZewoFlock)
+Automated deployment of your Zewo server using Flock
+#### [VaporExample](https://github.com/jakeheis/VaporExample)
+An example of a Vapor server deployed with Flock
