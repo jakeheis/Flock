@@ -6,6 +6,8 @@ $ flock deploy
 ```
 Flock will clone your project onto your server(s), build it, and start the application (and do anything else you want it to do). Flock already works great with [Vapor](https://github.com/vapor/vapor), [Zewo](https://github.com/Zewo/Zewo), [Perfect](https://github.com/PerfectlySoft/Perfect), and [Kitura](https://github.com/IBM-Swift/Kitura) -- see [below](#server-dependencies) for more information.
 
+Check out [this post](https://medium.com/@jakeheis/flock-f54ae40ce48#.nb22b4plo) for a step by step walkthrough of how to use Flock, or read the documentation below.
+
 Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
 Table of Contents
