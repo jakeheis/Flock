@@ -224,18 +224,28 @@ class MigrateTask: Task {
 
    func run(on server: Server) throws {
       // Do work
-      try server.execute("mysql -e something")
-      try server.within(Path.currentDirectory) {
-          let output = try server.capture("ls")
-          try server.execute("echo \(output) >> file.txt")
-      }
    }
 }
 ```
 
-Check out [Server.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Server.swift#L73) to see all of `Server`'s available methods.
+Some of `Server`'s available methods are:
+```swift
+try server.execute("mysql -v") // Execute a command remotely
 
-After running this command, make sure you:
+let contents = try server.capture("cat myFile") // Execute a command remotely and capture the output
+
+// Execute all commands in this closure within Path.currentDirectory
+try server.within(Path.currentDirectory) {
+    try server.execute("ls")
+    if server.fileExists("anotherFile.txt") { // Check existence of file on server
+        try server.execute("cat anotherFile.txt")
+    }
+}
+```
+
+Check out [Server.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Server.swift#L73) to see all of `Server`'s available methods. Also take a look at [Paths.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Paths.swift) to see the built-in paths for your `server.within` calls.
+
+After running this `flock --create`, make sure you:
 
 1. Replace \<NameThisGroup\> at the top of your new file with a custom name
 1. In your Flockfile, add `Flock.use(WhateverINamedIt)`
