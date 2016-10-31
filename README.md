@@ -1,6 +1,12 @@
 # Flock
 
-Automated deployment of your Swift project to servers. Inspired by [Capistrano](https://github.com/capistrano/capistrano).
+Automated deployment of your Swift project to servers. Once set up, deploying your project is as simple as:
+```
+$ flock deploy
+```
+Flock will clone your project onto your server(s), build it, and start the application (and do anything else you want it to do). Flock already works great with [Vapor](https://github.com/vapor/vapor), [Zewo](https://github.com/Zewo/Zewo), [Perfect](https://github.com/PerfectlySoft/Perfect), and [Kitura](https://github.com/IBM-Swift/Kitura) -- see [below](#server-dependencies) for more information.
+
+Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
 Table of Contents
 =================
