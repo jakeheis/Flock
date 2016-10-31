@@ -1,6 +1,6 @@
 # Flock
 
-Automated deployment of your Swift project to servers. Once set up, deploying your project is as simple as:
+Automated deployment of Swift projects to servers. Once set up, deploying your project is as simple as:
 ```
 $ flock deploy
 ```
