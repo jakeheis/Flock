@@ -224,9 +224,16 @@ class MigrateTask: Task {
 
    func run(on server: Server) throws {
       // Do work
+      try server.execute("mysql -e something")
+      try server.within(Path.currentDirectory) {
+          let output = try server.capture("ls")
+          try server.execute("echo \(output) >> file.txt")
+      }
    }
 }
 ```
+
+Check out [Server.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Server.swift#L73) to see all of `Server`'s available methods.
 
 After running this command, make sure you:
 
