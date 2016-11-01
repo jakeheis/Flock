@@ -47,7 +47,7 @@ public extension Task {
 
 // MARK: - TaskError
 
-enum TaskError: Error {
+public enum TaskError: Error {
     case commandFailed
     case error(String)
 }
