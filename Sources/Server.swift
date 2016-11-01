@@ -116,8 +116,11 @@ public class Server {
         
         var captured = ""
         let spawned = try Spawn(args: arguments, output: { (output) in
-            print(output, terminator: "")
-            captured += output
+            if capture {
+                captured += output
+            } else {
+                print(output, terminator: "")
+            }
         })
         
         guard spawned.waitForExit() == 0 else {
