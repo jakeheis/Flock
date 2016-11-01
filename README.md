@@ -101,7 +101,7 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
 ```
 See the [dependencies](#dependencies) section below for more information on third party dependencies.
 ### config/deploy/Always.swift
-This file contains configuration which will always be used. This is where configuration info which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
+This file contains configuration which will always be used. This is where config which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
 ```
 Config.projectName = "ProjectName"
 Config.executableName = "ExecutableName"
@@ -117,7 +117,7 @@ func configure() {
       Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
       
       // For server-specific auth:
-      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key)
+      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key))
 
       // Or, if you've added your server to your .ssh/config file, you can use this shorthand:
       Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
@@ -170,14 +170,14 @@ If your Swift server uses one of these popular libraries, there are Flock depend
 
 ## Environments
 
-If you want to add additional configuration environments (beyond "staging" and "production), you can do that in the `Flockfile`. Start by running `flock --add-env MyNewEnv` and then modify the `Flockfile` as such:
+If you want to add additional configuration environments (beyond "staging" and "production), you can do that in the `Flockfile`. To create a `testing` environment, for example, you would start by running `flock --add-env Testing` and then modify the `Flockfile` as such:
 ```swift
 ...
 
 Flock.configure(.always, with: Always()) // Located at config/deploy/Always.swift
 Flock.configure(.env("production"), with: Production()) // Located at config/deploy/Production.swift
 Flock.configure(.env("staging"), with: Staging()) // Located at config/deploy/Staging.swift
-Flock.configure(.env("test"), with: MyNewEnv()) // Located at config/deploy/MyNewEnv.swift
+Flock.configure(.env("testing"), with: Testing()) // Located at config/deploy/Testing.swift
 
 ...
 ```
@@ -185,7 +185,7 @@ Flock.configure(.env("test"), with: MyNewEnv()) // Located at config/deploy/MyNe
 # Tasks
 
 ### Running tasks
-You can see the available tasks by running `flock` with no arguments. To run a task, just call:
+You can see the available tasks by running `flock` with no arguments. To run a task, just call `flock <task>`, such as:
 ```bash
 flock deploy # Run the deploy task
 flock deploy:build # Run the build task located under the deploy namespace
@@ -239,7 +239,7 @@ let contents = try server.capture("cat myFile") // Execute a command remotely an
 // Execute all commands in this closure within Path.currentDirectory
 try server.within(Path.currentDirectory) {
     try server.execute("ls")
-    if server.fileExists("anotherFile.txt") { // Check existence of file on server
+    if server.fileExists("anotherFile.txt") { // Check the existence of a file on the server
         try server.execute("cat anotherFile.txt")
     }
 }
@@ -247,7 +247,7 @@ try server.within(Path.currentDirectory) {
 
 Check out [Server.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Server.swift#L73) to see all of `Server`'s available methods. Also take a look at [Paths.swift](https://github.com/jakeheis/Flock/blob/master/Sources/Paths.swift) to see the built-in paths for your `server.within` calls.
 
-After running this `flock --create`, make sure you:
+After running `flock --create`, make sure you:
 
 1. Replace \<NameThisGroup\> at the top of your new file with a custom name
 1. In your Flockfile, add `Flock.use(WhateverINamedIt)`
