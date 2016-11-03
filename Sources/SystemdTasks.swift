@@ -8,30 +8,72 @@
 
 import Foundation
 
-extension Flock {
-    static let Zewo = SystemdTasks(provider: ZewoProvider()).createTasks()
+public protocol SystemdProvider {
+    var name: String { get }
 }
 
-class ZewoProvider: SystemdProvider {
- 
-    let name = "Zewo"
+extension SystemdProvider {
     
+    var namespace: String {
+        return name.lowercased()
+    }
+    
+    var serviceFile: String {
+        return "/lib/systemd/system/\(namespace).service"
+    }
 }
 
-class SystemdTasks {
+public class SystemdTasks {
     
     let provider: SystemdProvider
     
-    init(provider: SystemdProvider) {
+    public init(provider: SystemdProvider) {
         self.provider = provider
     }
     
-    func createTasks() -> [Task] {
+    public func createTasks() -> [Task] {
         return [
+            WriteServiceTask(provider: provider),
             StartTask(provider: provider),
             StopTask(provider: provider),
             RestartTask(provider: provider)
         ]
+    }
+    
+}
+
+class WriteServiceTask: Task {
+    
+    let name = "write-service"
+    let namespace: String
+    let provider: SystemdProvider
+    
+    init(provider: SystemdProvider) {
+        self.namespace = provider.namespace
+        self.provider = provider
+    }
+    
+    func run(on server: Server) throws {
+        let path = provider.serviceFile
+        
+        guard !server.fileExists(path) else {
+            return
+        }
+        
+        print("Writing \(path)")
+        try server.execute("echo \"\(generateServiceContents())\" > \(path)")
+    }
+    
+    func generateServiceContents() -> String {
+        return [
+            "[Unit]",
+            "Description=\"Starts the \(provider.name) server\"",
+            "",
+            "[Service]",
+            "ExecStart=\"\(Paths.executable)\"",
+            "Restart=on-failure",
+            ""
+            ].joined(separator: "\n")
     }
     
 }
@@ -48,26 +90,8 @@ class StartTask: Task {
     }
     
     func run(on server: Server) throws {
-        let path = "/lib/systemd/system/\(provider.namespace).service"
-        print("Writing \(path)")
-        
-        try server.execute("echo \"\(generateServiceContents())\" > \(path)")
-        
         print("Starting \(provider.name)")
-        
-        try server.execute("service start \(provider.namespace)")
-    }
-    
-    func generateServiceContents() -> String {
-        return [
-            "[Unit]",
-            "Description=\"Starts the \(provider.name) server\"",
-            "",
-            "[Service]",
-            "ExecStart=\"\(Paths.executable)\"",
-            "Restart=on-failure",
-            ""
-        ].joined(separator: "\n")
+        try server.execute("service \(provider.namespace) start")
     }
     
 }
@@ -85,8 +109,7 @@ class StopTask: Task {
     
     func run(on server: Server) throws {
         print("Stopping \(provider.name)")
-        
-        try server.execute("service stop \(provider.namespace)")
+        try server.execute("service \(provider.namespace) stop")
     }
     
 }
@@ -97,25 +120,20 @@ class RestartTask: Task {
     let namespace: String
     let provider: SystemdProvider
     
+    let hookTimes: [HookTime] = [.after("deploy:link")]
+    
     init(provider: SystemdProvider) {
         self.namespace = provider.namespace
         self.provider = provider
     }
     
     func run(on server: Server) throws {
-        try invoke("\(namespace):stop")
-        try invoke("\(namespace):start")
+        if !server.fileExists(provider.serviceFile) {
+            try invoke("\(namespace):write-service")
+        }
+        
+        print("Restarting \(provider.name)")
+        try server.execute("service \(provider.namespace) restart")
     }
     
-}
-
-
-protocol SystemdProvider {
-    var name: String { get }
-}
-
-extension SystemdProvider {
-    var namespace: String {
-        return name.lowercased()
-    }
 }
