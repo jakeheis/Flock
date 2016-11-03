@@ -73,7 +73,7 @@ class BuildTask: Task {
             buildPath = Paths.currentDirectory
         }
         try server.within(buildPath) {
-            try server.execute("swift build")
+            try server.execute("swift build -c release")
         }
     }
 }

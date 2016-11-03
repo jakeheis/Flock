@@ -27,7 +27,7 @@ public struct Paths {
     }
     
     public static var executable: String {
-        return "\(currentDirectory)/.build/debug/\(Config.executableName)"
+        return "\(currentDirectory)/.build/release/\(Config.executableName)"
     }
     
 }
