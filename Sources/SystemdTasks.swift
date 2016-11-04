@@ -10,17 +10,38 @@ import Foundation
 
 public protocol SystemdProvider {
     var name: String { get }
+    
+    var serviceFilePath: String { get } // Defaults to /lib/systemd/system/\(namespace).service
+    var serviceFileContents: String { get } // Defaults to spawning a single instance of your executable with no arguments
+    var additionalTasks: [Task] { get } // Defaults to empty array
 }
 
-extension SystemdProvider {
+public extension SystemdProvider {
     
     var namespace: String {
         return name.lowercased()
     }
     
-    var serviceFile: String {
+    var serviceFilePath: String {
         return "/lib/systemd/system/\(namespace).service"
     }
+    
+    var serviceFileContents: String {
+        return [
+            "[Unit]",
+            "Description=\"Starts the \(name) server\"",
+            "",
+            "[Service]",
+            "ExecStart=\"\(Paths.executable)\"",
+            "Restart=on-failure",
+            ""
+        ].joined(separator: "\n")
+    }
+    
+    var additionalTasks: [Task] {
+        return []
+    }
+    
 }
 
 public class SystemdTasks {
@@ -36,8 +57,9 @@ public class SystemdTasks {
             WriteServiceTask(provider: provider),
             StartTask(provider: provider),
             StopTask(provider: provider),
-            RestartTask(provider: provider)
-        ]
+            RestartTask(provider: provider),
+            StatusTask(provider: provider)
+        ] + provider.additionalTasks
     }
     
 }
@@ -54,7 +76,7 @@ class WriteServiceTask: Task {
     }
     
     func run(on server: Server) throws {
-        let path = provider.serviceFile
+        let path = provider.serviceFilePath
         
         guard !server.fileExists(path) else {
             return
@@ -73,7 +95,7 @@ class WriteServiceTask: Task {
             "ExecStart=\"\(Paths.executable)\"",
             "Restart=on-failure",
             ""
-            ].joined(separator: "\n")
+        ].joined(separator: "\n")
     }
     
 }
@@ -90,6 +112,9 @@ class StartTask: Task {
     }
     
     func run(on server: Server) throws {
+        if !server.fileExists(provider.serviceFilePath) {
+            try invoke("\(namespace):write-service")
+        }
         print("Starting \(provider.name)")
         try server.execute("service \(provider.namespace) start")
     }
@@ -128,12 +153,29 @@ class RestartTask: Task {
     }
     
     func run(on server: Server) throws {
-        if !server.fileExists(provider.serviceFile) {
+        if !server.fileExists(provider.serviceFilePath) {
             try invoke("\(namespace):write-service")
         }
         
         print("Restarting \(provider.name)")
         try server.execute("service \(provider.namespace) restart")
+    }
+    
+}
+
+class StatusTask: Task {
+    
+    let name = "status"
+    let namespace: String
+    let provider: SystemdProvider
+    
+    init(provider: SystemdProvider) {
+        self.namespace = provider.namespace
+        self.provider = provider
+    }
+    
+    func run(on server: Server) throws {
+        try server.execute("service \(provider.namespace) status")
     }
     
 }
