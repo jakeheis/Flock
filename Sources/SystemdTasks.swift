@@ -9,11 +9,18 @@
 import Foundation
 
 public protocol SystemdProvider {
+    
     var name: String { get }
     
     var serviceFilePath: String { get } // Defaults to /lib/systemd/system/\(namespace).service
     var serviceFileContents: String { get } // Defaults to spawning a single instance of your executable with no arguments
     var additionalTasks: [Task] { get } // Defaults to empty array
+    
+    func start(on server: Server) throws // Defaults to calling `service (name) start`
+    func stop(on server: Server) throws // Defaults to calling `service (name) stop`
+    func restart(on server: Server) throws // Defaults to calling `service (name) restart`
+    func status(on server: Server) throws // Defaults to calling `service (name) status`
+    
 }
 
 public extension SystemdProvider {
@@ -29,7 +36,7 @@ public extension SystemdProvider {
     var serviceFileContents: String {
         return [
             "[Unit]",
-            "Description=\"Starts the \(name) server\"",
+            "Description=\"The \(name) server\"",
             "",
             "[Service]",
             "ExecStart=\"\(Paths.executable)\"",
@@ -40,6 +47,22 @@ public extension SystemdProvider {
     
     var additionalTasks: [Task] {
         return []
+    }
+    
+    func start(on server: Server) throws {
+        try server.execute("service \(namespace) start")
+    }
+    
+    func stop(on server: Server) throws {
+        try server.execute("service \(namespace) stop")
+    }
+    
+    func restart(on server: Server) throws {
+        try server.execute("service \(namespace) restart")
+    }
+    
+    func status(on server: Server) throws {
+        try server.execute("service \(namespace) status")
     }
     
 }
@@ -83,19 +106,7 @@ class WriteServiceTask: Task {
         }
         
         print("Writing \(path)")
-        try server.execute("echo \"\(generateServiceContents())\" > \(path)")
-    }
-    
-    func generateServiceContents() -> String {
-        return [
-            "[Unit]",
-            "Description=\"Starts the \(provider.name) server\"",
-            "",
-            "[Service]",
-            "ExecStart=\"\(Paths.executable)\"",
-            "Restart=on-failure",
-            ""
-        ].joined(separator: "\n")
+        try server.execute("echo \"\(provider.serviceFileContents)\" > \(path)")
     }
     
 }
@@ -116,7 +127,8 @@ class StartTask: Task {
             try invoke("\(namespace):write-service")
         }
         print("Starting \(provider.name)")
-        try server.execute("service \(provider.namespace) start")
+        
+        try provider.start(on: server)
     }
     
 }
@@ -134,7 +146,7 @@ class StopTask: Task {
     
     func run(on server: Server) throws {
         print("Stopping \(provider.name)")
-        try server.execute("service \(provider.namespace) stop")
+        try provider.stop(on: server)
     }
     
 }
@@ -158,7 +170,7 @@ class RestartTask: Task {
         }
         
         print("Restarting \(provider.name)")
-        try server.execute("service \(provider.namespace) restart")
+        try provider.restart(on: server)
     }
     
 }
@@ -175,7 +187,7 @@ class StatusTask: Task {
     }
     
     func run(on server: Server) throws {
-        try server.execute("service \(provider.namespace) status")
+        try provider.status(on: server)
     }
     
 }
