@@ -52,8 +52,9 @@ The Flockfile specifies which tasks and configurations you want Flock to use. In
 ```swift
 import Flock
 
-Flock.use(Flock.Deploy) // Located in Flock
-Flock.use(Flock.Tools) // Located in Flock
+Flock.use(Flock.Tools)
+Flock.use(Flock.Deploy)
+Flock.use(Flock.Server)
 
 ...
 ```
@@ -65,11 +66,19 @@ flock deploy:git      # Clones your project onto your server into a timestamped 
 flock deploy:build    # Builds your project
 flock deploy:link     # Links your newly built project directory as the current directory
 ```
+`Flock.Server` includes:
+```bash
+flock server:restart  # Hooks after deploy:link
+flock server:start
+flock server:stop
+flock server:status
+```
 Running `flock deploy` will:
 
 1. Clone your project onto your server into a timestamped directory (e.g. `/var/www/VaporExample/releases/20161028211084`)
 1. Build your project
 1. Link your built project to the `current` directory (e.g. `/var/www/VaporExample/current`)
+1. If you use `Flock.Server`, Flock will then use systemd to start your executable and run it as a daemon.
 
 `Flock.Tools` includes tasks which assist in installing the necessary tools for your swift project to run on the server:
 ```bash
@@ -117,7 +126,7 @@ func configure() {
       Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
       
       // For server-specific auth:
-      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key))
+      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key"))
 
       // Or, if you've added your server to your .ssh/config file, you can use this shorthand:
       Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
