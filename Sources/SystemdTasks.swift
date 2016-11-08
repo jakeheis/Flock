@@ -104,10 +104,6 @@ class WriteServiceTask: SystemdTask {
     override func run(on server: Server) throws {
         let path = provider.serviceFilePath
         
-        guard !server.fileExists(path) else {
-            return
-        }
-        
         print("Writing \(path)")
         try server.execute("echo \"\(provider.serviceFileContents)\" > \(path)")
     }
