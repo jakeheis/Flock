@@ -170,7 +170,8 @@ Flock.run()
 ```
 
 ### Server dependencies
-If your Swift server uses one of these popular libraries, there are Flock dependencies already available which will hook into `flock deploy` and restart the server after the new release is built.
+
+If you just want Flock to restart your app after deployment, the built-in `Flock.Server` tasks will do that for you, so you don't need to change anything. If, however, your Swift server uses one of these popular libraries, there are Flock dependencies which add features on top of `Flock.Server` particular to their respective libraries:
 
 - [VaporFlock](https://github.com/jakeheis/VaporFlock)
 - [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
