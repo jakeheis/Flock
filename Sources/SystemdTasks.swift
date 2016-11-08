@@ -106,6 +106,7 @@ class WriteServiceTask: SystemdTask {
         
         print("Writing \(path)")
         try server.execute("echo \"\(provider.serviceFileContents)\" > \(path)")
+        try server.execute("systemctl daemon-reload") // Reload systemctl
     }
     
 }
