@@ -79,9 +79,8 @@ public class SystemdTasks {
 
 class SystemdTask: Task {
     
-    var name: String {
-        return ""
-    }
+    var name: String { return "" }
+    var hookTimes: [HookTime] { return [] }
     let namespace: String
     let provider: SystemdProvider
     
@@ -151,7 +150,9 @@ class RestartTask: SystemdTask {
         return "restart"
     }
     
-    let hookTimes: [HookTime] = [.after("deploy:link")]
+    override var hookTimes: [HookTime] {
+        return [.after("deploy:link")]
+    }
     
     override func run(on server: Server) throws {
         if !server.fileExists(provider.serviceFilePath) {
