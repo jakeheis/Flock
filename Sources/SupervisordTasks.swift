@@ -22,8 +22,8 @@ public class DefaultSupervisordProvider: SupervisordProvider {
 }
 
 public extension Config {
-    static var outputLog = "/var/log/%%(program_name)s/%%(process_num)s-out.log"
-    static var errorLog = "/var/log/%%(program_name)s/%%(process_num)s-err.log"
+    static var outputLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.out"
+    static var errorLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.err"
 }
 
 // MARK: - SystemdProvider
