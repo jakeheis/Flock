@@ -21,6 +21,11 @@ public class DefaultSupervisordProvider: SupervisordProvider {
     }
 }
 
+public extension Config {
+    static var outputLog = "/var/log/\(Config.projectName)/out.log"
+    static var errorLog = "/var/log/\(Config.projectName)/err.log"
+}
+
 // MARK: - SystemdProvider
 
 public protocol SupervisordProvider {
@@ -41,6 +46,8 @@ public extension SupervisordProvider {
             "process_name=%(process_num)s",
             "autostart=false",
             "autorestart=unexpected",
+            "stdout_logfile=\(Config.outputLog)",
+            "stderr_logfile=\(Config.errorLog)",
             ""
         ].joined(separator: "\n")
     }
