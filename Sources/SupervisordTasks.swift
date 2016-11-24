@@ -25,16 +25,16 @@ public class DefaultSupervisordProvider: SupervisordProvider {
 
 public protocol SupervisordProvider {
     var name: String { get }
-    
-    var confFileContents: String { get } // Defaults to spawning a single instance of your executable with no arguments
     var programName: String { get }
+    
+    func confFileContents(for server: Server) -> String // Defaults to spawning a single instance of your executable with no arguments
 }
 
 public extension SupervisordProvider {
     
     // Defaults
-    
-    var confFileContents: String {
+
+    func confFileContents(for server: Server) -> String {
         return [
             "[program:\(programName)]",
             "command=\(Paths.executable)",
