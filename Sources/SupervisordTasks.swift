@@ -120,7 +120,7 @@ class WriteConfTask: SupervisordTask {
         let path = provider.confFilePath
         
         print("Writing \(path)")
-        try server.execute("echo \"\(provider.confFileContents)\" > \(path)")
+        try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(path)")
         try server.execute("supervisorctl reread")
         try server.execute("supervisorctl update")
     }
