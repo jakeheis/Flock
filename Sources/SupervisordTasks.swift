@@ -22,8 +22,8 @@ public class DefaultSupervisordProvider: SupervisordProvider {
 }
 
 public extension Config {
-    static var outputLog = "/var/log/\(Config.projectName)/out.log"
-    static var errorLog = "/var/log/\(Config.projectName)/err.log"
+    static var outputLog = "/var/log/%%(program_name)s/%%(process_num)s-out.log"
+    static var errorLog = "/var/log/%%(program_name)s/%%(process_num)s-err.log"
 }
 
 // MARK: - SystemdProvider
@@ -125,12 +125,27 @@ class WriteConfTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        let path = provider.confFilePath
+        // Supervisor requires the directories containing the logs to already be created
+        let outputParent = parentDirectory(of: Config.outputLog)
+        let errorParent = parentDirectory(of: Config.outputLog)
+        if let op = outputParent {
+            try server.execute("mkdir -p \(op)")
+        }
+        if let ep = errorParent, errorParent != outputParent {
+            try server.execute("mkdir -p \(ep)")
+        }
         
-        print("Writing \(path)")
-        try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(path)")
+        print("Writing \(provider.confFilePath)")
+        try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)")
         try server.execute("supervisorctl reread")
         try server.execute("supervisorctl update")
+    }
+    
+    private func parentDirectory(of path: String) -> String? {
+        if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
+            return path.substring(to: lastPathComponentIndex.lowerBound)
+        }
+        return nil
     }
     
 }
