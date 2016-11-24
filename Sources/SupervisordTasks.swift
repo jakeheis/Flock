@@ -39,7 +39,6 @@ public extension SupervisordProvider {
             "[program:\(programName)]",
             "command=\(Paths.executable)",
             "process_name=%(process_num)s",
-            "numprocs=2",
             "autostart=false",
             "autorestart=unexpected",
             ""
