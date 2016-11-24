@@ -105,7 +105,7 @@ class DependenciesTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("apt-get install supervisor")
+        try server.execute("apt-get -qq install supervisor")
     }
     
 }
