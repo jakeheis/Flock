@@ -78,7 +78,7 @@ Running `flock deploy` will:
 1. Clone your project onto your server into a timestamped directory (e.g. `/var/www/VaporExample/releases/20161028211084`)
 1. Build your project
 1. Link your built project to the `current` directory (e.g. `/var/www/VaporExample/current`)
-1. If you use `Flock.Server`, Flock will then use systemd to start your executable and run it as a daemon.
+1. If you use `Flock.Server`, Flock will then use Supervisord to start your executable and run it as a daemon.
 
 `Flock.Tools` includes tasks which assist in installing the necessary tools for your swift project to run on the server:
 ```bash
