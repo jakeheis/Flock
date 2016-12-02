@@ -18,7 +18,7 @@ class HelpCommand: SwiftCLI.HelpCommand {
     let unrecognizedOptionsPrintingBehavior = UnrecognizedOptionsPrintingBehavior.printNone
     let helpOnHFlag = false
     
-    var allCommands: [Command] = []
+    var availableCommands: [Command] = []
     var printCLIDescription = true
     
     func setupOptions(options: OptionRegistry) {}
