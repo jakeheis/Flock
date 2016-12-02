@@ -144,7 +144,7 @@ To add a third party dependency, you first add the repository to config/deploy/F
    "dependencies" : [
        {
            "name" : "https://github.com/jakeheis/Flock",
-           "version": "0.0.1"
+           "version": "0.1.0"
        },
        {
            "name" : "https://github.com/jakeheis/VaporFlock",
