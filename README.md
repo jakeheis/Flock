@@ -94,7 +94,7 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
    "dependencies" : [
        {
            "name" : "https://github.com/jakeheis/Flock",
-           "version": "0.0.1"
+           "version": "0.1.1"
        },
        {
            "name" : "https://github.com/jakeheis/VaporFlock",
