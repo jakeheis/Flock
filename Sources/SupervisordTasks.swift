@@ -113,7 +113,7 @@ class DependenciesTask: SupervisordTask {
     
     override func run(on server: Server) throws {
         try server.execute("apt-get -qq install supervisor")
-        try server.execute("service supervisord start")
+        try server.execute("service supervisor start")
     }
     
 }
@@ -157,9 +157,8 @@ class StartTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        if !server.fileExists(provider.confFilePath) {
-            try invoke("\(namespace):write-conf")
-        }
+        try invoke("\(namespace):write-conf")
+        
         print("Starting \(provider.name)")
         
         try server.execute("supervisorctl start \(provider.programName):*")
@@ -191,9 +190,7 @@ class RestartTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        if !server.fileExists(provider.confFilePath) {
-            try invoke("\(namespace):write-conf")
-        }
+        try invoke("\(namespace):write-conf")
         
         print("Restarting \(provider.name)")
         try server.execute("supervisorctl restart \(provider.programName):*")
