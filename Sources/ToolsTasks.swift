@@ -34,7 +34,6 @@ class DependencyInstallationTask: Task {
     let namespace = tools
     
     func run(on server: Server) throws {
-        print("Installing Swift dependencies")
         try server.execute("sudo apt-get -qq update")
         try server.execute("sudo apt-get -qq install clang libicu-dev git libpython2.7 libcurl4-openssl-dev")
     }
@@ -47,9 +46,7 @@ class SwiftInstallationTask: Task {
     private let swiftEnv = "~/.swiftenv"
     
     func run(on server: Server) throws {
-        if server.directoryExists(swiftEnv) {
-            print("swiftenv alrady installed")
-        } else {
+        if !server.directoryExists(swiftEnv) {
             try installSwiftenv(on: server)
         }
         
@@ -60,13 +57,11 @@ class SwiftInstallationTask: Task {
         if let existingSwifts = try server.capture("swiftenv versions"), existingSwifts.contains(swiftVersion) {
             try server.execute("swiftenv global \(swiftVersion)")
         } else {
-            print("Installing Swift")
             try server.execute("swiftenv install \(swiftVersion)")
         }
     }
     
     func installSwiftenv(on server: Server) throws {
-        print("Installing swiftenv")
         try server.execute("git clone https://github.com/kylef/swiftenv.git \(swiftEnv)")
         
         let tmpFile = "/tmp/bashrc"

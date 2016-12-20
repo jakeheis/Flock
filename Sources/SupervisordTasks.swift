@@ -135,7 +135,6 @@ class WriteConfTask: SupervisordTask {
             try server.execute("mkdir -p \(ep)")
         }
         
-        print("Writing \(provider.confFilePath)")
         try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)")
         try server.execute("supervisorctl reread")
         try server.execute("supervisorctl update")
@@ -159,8 +158,6 @@ class StartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        print("Starting \(provider.name)")
-        
         try server.execute("supervisorctl start \(provider.programName):*")
     }
     
@@ -173,7 +170,6 @@ class StopTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        print("Stopping \(provider.name)")
         try server.execute("supervisorctl stop \(provider.programName):*")
     }
     
@@ -192,7 +188,6 @@ class RestartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        print("Restarting \(provider.name)")
         try server.execute("supervisorctl restart \(provider.programName):*")
     }
     
