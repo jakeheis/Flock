@@ -245,7 +245,7 @@ public class DummyServer: ServerCommandExecutor {
     public let id = "DummyServer"
     
     public func createArguments(for call: String) throws -> [String] {
-        return ["/bin/echo"]
+        return ["#"]
     }
     
 }
