@@ -22,8 +22,8 @@ public class DefaultSupervisordProvider: SupervisordProvider {
 }
 
 public extension Config {
-    static var outputLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.out"
-    static var errorLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.err"
+    static var outputLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.out"
+    static var errorLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.err"
 }
 
 // MARK: - SystemdProvider
@@ -112,8 +112,8 @@ class DependenciesTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("apt-get -qq install supervisor")
-        try server.execute("service supervisor start")
+        try server.execute("sudo apt-get -qq install supervisor")
+        try server.execute("sudo service supervisor restart")
     }
     
 }
@@ -135,9 +135,9 @@ class WriteConfTask: SupervisordTask {
             try server.execute("mkdir -p \(ep)")
         }
         
-        try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)")
-        try server.execute("supervisorctl reread")
-        try server.execute("supervisorctl update")
+        try server.execute("echo \"\(provider.confFileContents(for: server))\" | sudo tee -a \(provider.confFilePath)")
+        try server.execute("sudo supervisorctl reread")
+        try server.execute("sudo supervisorctl update")
     }
     
     private func parentDirectory(of path: String) -> String? {
@@ -158,7 +158,7 @@ class StartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try server.execute("supervisorctl start \(provider.programName):*")
+        try server.execute("sudo supervisorctl start \(provider.programName):*")
     }
     
 }
@@ -170,7 +170,7 @@ class StopTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("supervisorctl stop \(provider.programName):*")
+        try server.execute("sudo supervisorctl stop \(provider.programName):*")
     }
     
 }
@@ -188,7 +188,7 @@ class RestartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try server.execute("supervisorctl restart \(provider.programName):*")
+        try server.execute("sudo supervisorctl restart \(provider.programName):*")
     }
     
 }
@@ -200,7 +200,7 @@ class StatusTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("supervisorctl status \(provider.programName):*")
+        try server.execute("sudo supervisorctl status \(provider.programName):*")
     }
     
 }
