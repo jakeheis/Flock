@@ -22,8 +22,10 @@ public class DefaultSupervisordProvider: SupervisordProvider {
 }
 
 public extension Config {
-    static var outputLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.out"
-    static var errorLog = "/var/log/supervisor/%%(program_name)s-%%(process_num)s.err"
+    static var outputLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.out"
+    static var errorLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.err"
+    
+    static var supervisordUser: String? = nil
 }
 
 // MARK: - SystemdProvider
@@ -112,8 +114,15 @@ class DependenciesTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("apt-get -qq install supervisor")
-        try server.execute("service supervisor start")
+        try server.execute("sudo apt-get -qq install supervisor")
+        
+        if let supervisordUser = Config.supervisordUser {
+            try server.execute("sudo sed -i '/\\[unix_http_server\\]/achown=\(supervisordUser)' /etc/supervisor/supervisord.conf")
+            try server.execute("sudo touch \(provider.confFilePath)")
+            try server.execute("sudo chown \(supervisordUser) \(provider.confFilePath)")
+        }
+        
+        try server.execute("sudo service supervisor restart")
     }
     
 }

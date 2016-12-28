@@ -43,7 +43,7 @@ class SwiftInstallationTask: Task {
     let name = "swift"
     let namespace = tools
     
-    private let swiftEnv = "~/.swiftenv"
+    private let swiftEnv = "/usr/local/swiftenv"
     
     func run(on server: Server) throws {
         if !server.directoryExists(swiftEnv) {
@@ -55,26 +55,24 @@ class SwiftInstallationTask: Task {
         }
         
         if let existingSwifts = try server.capture("swiftenv versions"), existingSwifts.contains(swiftVersion) {
-            try server.execute("swiftenv global \(swiftVersion)")
+            try server.execute("sudo swiftenv global \(swiftVersion)")
         } else {
-            try server.execute("swiftenv install \(swiftVersion)")
+            try server.execute("sudo swiftenv install \(swiftVersion)")
+            try server.execute("sudo chmod -R +r \(swiftEnv)")
         }
     }
     
     func installSwiftenv(on server: Server) throws {
-        try server.execute("git clone https://github.com/kylef/swiftenv.git \(swiftEnv)")
+        try server.execute("sudo git clone https://github.com/kylef/swiftenv.git \(swiftEnv)")
         
-        let tmpFile = "/tmp/bashrc"
-        let bashrc = "~/.bashrc"
+        let bashrc = "/etc/bash.bashrc"
         
-        let bashRC = [
-            "export SWIFTENV_ROOT=\"$HOME/.swiftenv\"",
-            "export PATH=\"$SWIFTENV_ROOT/bin:$PATH\"",
-            "eval \"$(swiftenv init -)\""
+        let swiftenvLoad = [
+            "export SWIFTENV_ROOT=\"\(swiftEnv)\"",
+            "export PATH=\"\\$SWIFTENV_ROOT/bin:\\$PATH\"",
+            "eval \"\\$(swiftenv init -)\""
         ].joined(separator: "; ")
-        try server.execute("echo -e '\(bashRC)' > \(tmpFile)")
-        try server.execute("echo >> \(tmpFile)")
-        try server.execute("cat \(bashrc) >> \(tmpFile)")
-        try server.execute("cat \(tmpFile) > \(bashrc)")
+        
+        try server.execute("sudo sed -i '1i \(swiftenvLoad)' \(bashrc)")
     }
 }
