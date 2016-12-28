@@ -24,6 +24,7 @@ Table of Contents
    * [Tasks](#tasks)
        * [Running tasks](#running-tasks)
        * [Writing your own tasks](#writing-your-own-tasks)
+   * [Permissions](#permissions)
    * [Related projects](#related-projects)
 
 # Installation
@@ -297,7 +298,7 @@ Some additional considerations if you are using `Flock.Server`:
 - The deploy user can run `supervisorctl` commands (see [Using supervisorctl with linux permissions but without root or sudo](https://coffeeonthekeyboard.com/using-supervisorctl-with-linux-permissions-but-without-root-or-sudo-977/) for more info)
 - The deploy user has access to the `supervisor` config file (default /etc/supervisor/conf.d/server.conf)
 
-If you use `flock tools`, all of these things will be taken care of for you except for granting the deploy user access to `Config.deployDirectory`.
+Running `flock tools` can take care of most of these things for you, but you must set `Config.supervisordUser` in `config/deploy/Always.swift` to your dedicated deploy user *before* running `flock tools`.
 ### flock tools
 The `tools` task must be run as the root user. This means that in `config/deploy/Production.swift`, in your `Servers.add` call you must pass `user: "root"`. As mentioned above, it is not a good idea to deploy with `user: "root"`, so you should only call `flock tools` with this configuration and then change it to make calls with your dedicated deploy user rather then the root user.
 # Related projects
