@@ -87,6 +87,8 @@ flock tools:dependencies    # Installs dependencies necessary for Swift to work
 flock tools:swift           # Installs Swift using swiftenv
 ```
 
+See [Permissions](#permissions) for information regarding which user these tasks should be executed as on the server.
+
 ### config/deploy/FlockDependencies.json
 This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to specify version):
 ```json
@@ -283,6 +285,21 @@ func run(on server: Server) throws {
       try invoke("other:task")
 }
 ```
+# Permissions
+### flock deploy
+In general, you should create a dedicated deploy user on your server. [Authentication & Authorisation](http://capistranorb.com/documentation/getting-started/authentication-and-authorisation/#) is a great resource for learning how to do this.
+
+To ensure the `deploy` task succeeds, make sure:
+- The deploy user has access to `Config.deployDirectory` (default /var/www)
+- The deploy user has access to the `swift` executable
+
+Some additional considerations if you are using `Flock.Server`:
+- The deploy user can run `supervisorctl` commands (see [Using supervisorctl with linux permissions but without root or sudo](https://coffeeonthekeyboard.com/using-supervisorctl-with-linux-permissions-but-without-root-or-sudo-977/) for more info)
+- The deploy user has access to the `supervisor` config file (default /etc/supervisor/conf.d/server.conf)
+
+If you use `flock tools`, all of these things will be taken care of for you except for granting the deploy user access to `Config.deployDirectory`.
+### flock tools
+The `tools` task must be run as the root user. This means that in `config/deploy/Production.swift`, in your `Servers.add` call you must pass `user: "root"`. As mentioned above, it is not a good idea to deploy with `user: "root"`, so you should only call `flock tools` with this configuration and then change it to make calls with your dedicated deploy user rather then the root user.
 # Related projects
 #### [FlockCLI](https://github.com/jakeheis/FlockCLI) 
 The CLI used to interact with Flock
