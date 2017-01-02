@@ -17,11 +17,11 @@ extension Flock {
     ]
 }
 
-extension Config {
-    public static var projectName = "" // Must be supplied
-    public static var executableName = "" // Must be supplied
-    public static var repoURL = "" // Must be supplied
-    public static var deployDirectory = "/var/www"
+public extension Config {
+    static var projectName = "" // Must be supplied
+    static var executableName = "" // Must be supplied
+    static var repoURL = "" // Must be supplied
+    static var deployDirectory = "/var/www"
 }
 
 private let deploy = "deploy"

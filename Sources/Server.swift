@@ -14,7 +14,6 @@
 
 import Foundation
 import Rainbow
-import SwiftCLI
 import Spawn
 
 public class Servers {
@@ -104,9 +103,13 @@ public class Server {
         return try run(commands: [command], capture: true)
     }
     
+    public func executeWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
+        _ = try run(commands: [command], capture: false, matchers: matchers)
+    }
+    
     // MARK: - Private
     
-    private func run(commands: [String], capture: Bool) throws -> String? {
+    private func run(commands: [String], capture: Bool, matchers: [OutputMatcher]? = nil) throws -> String? {
         let finalCommands = commandStack + commands
         let call = finalCommands.joined(separator: "; ")
         
@@ -121,6 +124,7 @@ public class Server {
             } else {
                 print(output, terminator: "")
             }
+            matchers?.forEach { $0.match(output) }
         })
         
         guard spawned.waitForExit() == 0 else {
@@ -249,3 +253,27 @@ public class DummyServer: ServerCommandExecutor {
     }
     
 }
+
+// MARK: - OutputMatcher
+
+public struct OutputMatcher {
+    
+    let regex: NSRegularExpression?
+    let onMatch: (_ text: String) -> ()
+    
+    init(regex: String, onMatch: @escaping (_ text: String) -> ()) {
+        self.regex = try? NSRegularExpression(pattern: regex, options: [])
+        self.onMatch = onMatch
+    }
+    
+    func match(_ output: String) {
+        guard let regex = regex else {
+            return
+        }
+        if regex.numberOfMatches(in: output, options: [], range: NSRange(location: 0, length: output.utf8.count)) > 0 {
+            onMatch(output)
+        }
+    }
+    
+}
+

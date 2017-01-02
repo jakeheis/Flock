@@ -101,6 +101,13 @@ class SupervisordTask: Task {
         throw TaskError.commandFailed
     }
     
+    func executeSupervisorctl(command: String, on server: Server) throws {
+        let persmissionsMatcher = OutputMatcher(regex: "Permission denied:") { (match) in
+            print("Make sure this user has the ability to run supervisorctl commands -- see https://github.com/jakeheis/Flock#permissions".yellow)
+        }
+        try server.executeWithOutputMatchers("supervisorctl \(command)", matchers: [persmissionsMatcher])
+    }
+    
 }
 
 class DependenciesTask: SupervisordTask {
@@ -117,9 +124,19 @@ class DependenciesTask: SupervisordTask {
         try server.execute("sudo apt-get -qq install supervisor")
         
         if let supervisordUser = Config.supervisordUser {
-            try server.execute("sudo sed -i '/\\[unix_http_server\\]/achown=\(supervisordUser)' /etc/supervisor/supervisord.conf")
+            let chownLine = "chown=\(supervisordUser)"
+            do {
+                try server.execute("sudo grep \"\(chownLine)\" < /etc/supervisor/supervisord.conf")
+            } catch {
+                // grep fails when it has no matches - no matches means line is not in file, so add it
+                try server.execute("sudo sed -i '/\\[unix_http_server\\]/a\(chownLine)' /etc/supervisor/supervisord.conf")
+            }
             try server.execute("sudo touch \(provider.confFilePath)")
-            try server.execute("sudo chown \(supervisordUser) \(provider.confFilePath)")
+            
+            let nonexistentMatcher = OutputMatcher(regex: "invalid user:") { (match) in
+                print("\(supervisordUser) (Config.supervisordUser) must already exist on the server before running `flock tools`".yellow)
+            }
+            try server.executeWithOutputMatchers("sudo chown \(supervisordUser) \(provider.confFilePath)", matchers: [nonexistentMatcher])
         }
         
         try server.execute("sudo service supervisor restart")
@@ -144,9 +161,13 @@ class WriteConfTask: SupervisordTask {
             try server.execute("mkdir -p \(ep)")
         }
         
-        try server.execute("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)")
-        try server.execute("supervisorctl reread")
-        try server.execute("supervisorctl update")
+        let persmissionsMatcher = OutputMatcher(regex: "Permission denied") { (match) in
+            print("Make sure this user has write access to \(self.provider.confFilePath) -- see https://github.com/jakeheis/Flock#permissions".yellow)
+        }
+        try server.executeWithOutputMatchers("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)", matchers: [persmissionsMatcher])
+        
+        try executeSupervisorctl(command: "reread", on: server)
+        try executeSupervisorctl(command: "update", on: server)
     }
     
     private func parentDirectory(of path: String) -> String? {
@@ -167,7 +188,7 @@ class StartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try server.execute("supervisorctl start \(provider.programName):*")
+        try executeSupervisorctl(command: "start \(provider.programName):*", on: server)
     }
     
 }
@@ -179,7 +200,7 @@ class StopTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("supervisorctl stop \(provider.programName):*")
+        try executeSupervisorctl(command: "stop \(provider.programName):*", on: server)
     }
     
 }
@@ -197,7 +218,7 @@ class RestartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try server.execute("supervisorctl restart \(provider.programName):*")
+        try executeSupervisorctl(command: "restart \(provider.programName):*", on: server)
     }
     
 }
@@ -209,7 +230,7 @@ class StatusTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try server.execute("supervisorctl status \(provider.programName):*")
+        try executeSupervisorctl(command: "status \(provider.programName):*", on: server)
     }
     
 }

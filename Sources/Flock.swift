@@ -20,7 +20,7 @@ public class Flock {
     private static var configurations: [ConfigurationTime: Configuration] = [:]
   
     // MARK: - Public
-        
+    
     public static func use(_ tasks: [Task]) {
         self.tasks += tasks
     }

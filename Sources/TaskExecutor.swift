@@ -34,7 +34,7 @@ class TaskExecutor {
                 throw TaskError.error("You must specify servers in your configuration files")
             }
             for server in Servers.servers {
-                if Set(server.roles).intersection(Set(task.serverRoles)).isEmpty {
+                if Set(server.roles).isDisjoint(with: Set(task.serverRoles)) {
                     continue
                 }
                 try task.run(on: server)
