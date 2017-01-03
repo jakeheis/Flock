@@ -63,7 +63,7 @@ class BuildTask: Task {
     let name = "build"
     let namespace = deploy
     
-    func run(on server: Server) throws {        
+    func run(on server: Server) throws {
         let buildPath: String
         if server.directoryExists(Paths.nextDirectory) {
             buildPath = Paths.nextDirectory

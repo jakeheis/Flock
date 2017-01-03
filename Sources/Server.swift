@@ -124,6 +124,7 @@ public class Server {
             } else {
                 print(output, terminator: "")
             }
+            fflush(stdout)
             matchers?.forEach { $0.match(output) }
         })
         
@@ -137,7 +138,7 @@ public class Server {
 }
 
 extension Server: CustomStringConvertible {
-
+    
     public var description: String {
         return commandExecutor.id
     }
@@ -270,10 +271,9 @@ public struct OutputMatcher {
         guard let regex = regex else {
             return
         }
-        if regex.numberOfMatches(in: output, options: [], range: NSRange(location: 0, length: output.utf8.count)) > 0 {
+        if regex.numberOfMatches(in: output, options: [], range: NSRange(location: 0, length: output.characters.count)) > 0 {
             onMatch(output)
         }
     }
     
 }
-

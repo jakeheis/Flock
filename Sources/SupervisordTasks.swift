@@ -40,7 +40,7 @@ public protocol SupervisordProvider {
 public extension SupervisordProvider {
     
     // Defaults
-
+    
     func confFileContents(for server: Server) -> String {
         return [
             "[program:\(programName)]",
