@@ -52,9 +52,11 @@ After this command completes, you should follow the instructions Flock prints. F
 The Flockfile specifies which tasks and configurations you want Flock to use. In order to use some other tasks, just import the task library and tell Flock to use them:
 ```swift
 import Flock
+import SwiftenvFlock
 
 Flock.use(Flock.Tools)
 Flock.use(Flock.Deploy)
+Flock.use(Flock.Swiftenv)
 Flock.use(Flock.Server)
 
 ...
@@ -88,6 +90,8 @@ flock tools:dependencies    # Installs dependencies necessary for Swift to work
 flock tools:swift           # Installs Swift using swiftenv
 ```
 
+See [SwiftenvFlock](https://github.com/jakeheis/SwiftenvFlock) for more information about `Flock.SwiftenvFlock`
+
 See [Permissions](#permissions) for information regarding which user these tasks should be executed as on the server.
 
 ### config/deploy/FlockDependencies.json
@@ -98,6 +102,10 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
        {
            "name" : "https://github.com/jakeheis/Flock",
            "version": "0.1.1"
+       },
+       {
+           "name" : "https://github.com/jakeheis/SwiftenvFlock",
+           "version": "0.0.1"
        },
        {
            "name" : "https://github.com/jakeheis/VaporFlock",
@@ -161,10 +169,12 @@ To add a third party dependency, you first add the repository to config/deploy/F
 In your Flockfile, notify Flock of your new source of tasks:
 ```swift
 import Flock
+import SwiftenvFlock
 import VaporFlock
 
 Flock.use(Flock.Tools)
 Flock.use(Flock.Deploy)
+Flock.use(Flock.Swiftenv)
 Flock.use(Flock.Vapor)
 
 ...
@@ -304,6 +314,8 @@ The `tools` task must be run as the root user. This means that in `config/deploy
 # Related projects
 #### [FlockCLI](https://github.com/jakeheis/FlockCLI) 
 The CLI used to interact with Flock
+#### [SwiftenvFlock](https://github.com/jakeheis/SwiftenvFlock)
+Integration of Swiftenv into Flock deployments
 #### [VaporFlock](https://github.com/jakeheis/VaporFlock)
 Automated deployment of your Vapor server using Flock
 #### [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
