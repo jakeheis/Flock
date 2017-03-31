@@ -11,19 +11,12 @@ import SwiftCLI
 class HelpCommand: SwiftCLI.HelpCommand {
     
     let name = "--help"
-    let signature = "[<opt>] ..."
     let shortDescription = "Prints help information"
-    
-    let failOnUnrecognizedOptions = false
-    let unrecognizedOptionsPrintingBehavior = UnrecognizedOptionsPrintingBehavior.printNone
-    let helpOnHFlag = false
     
     var availableCommands: [Command] = []
     var printCLIDescription = true
-    
-    func setupOptions(options: OptionRegistry) {}
-    
-    func execute(arguments: CommandArguments) throws {
+        
+    func execute() throws {
         print("Available tasks:")
         for task in Flock.tasks {
             print("flock \(task.fullName)")
@@ -51,9 +44,8 @@ class HelpCommand: SwiftCLI.HelpCommand {
 class VersionCommand: Command {
     
     let name = "--version"
-    let signature = ""
     let shortDescription = ""
     
-    func execute(arguments: CommandArguments) throws {}
+    func execute() throws {}
     
 }

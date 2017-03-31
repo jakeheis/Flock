@@ -66,17 +66,17 @@ class ServerTests: FlockTestCase {
     func testFileExists() {
         let server = Server(commandExecutor: TestCommandExecutor(), roles: [.app])
         
-        let exists = server.fileExists("README.md")
+        let exists = server.fileExists("/bin/cat")
         XCTAssert(exists == true)
-        XCTAssert(TestCommandExecutor.lastCall == "test -f README.md")
+        XCTAssert(TestCommandExecutor.lastCall == "test -f /bin/cat")
     }
     
     func testDirectoryExists() {
         let server = Server(commandExecutor: TestCommandExecutor(), roles: [.app])
         
-        let exists = server.directoryExists("Packages")
+        let exists = server.directoryExists("/bin")
         XCTAssert(exists == true)
-        XCTAssert(TestCommandExecutor.lastCall == "test -d Packages")
+        XCTAssert(TestCommandExecutor.lastCall == "test -d /bin")
     }
     
     func testUserServer() {
@@ -116,7 +116,7 @@ class ServerTests: FlockTestCase {
             XCTFail()
             return
         }
-        XCTAssert(call == ["/bin/echo"])
+        XCTAssert(call == ["#"])
     }
     
 }

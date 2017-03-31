@@ -8,35 +8,25 @@
 
 import SwiftCLI
 
-class TaskCommand: OptionCommand {
+class TaskCommand: Command {
   
     let name: String
-    let signature = ""
     let shortDescription = ""
     
     let task: Task
-    
-    private var mode: TaskExecutor.Mode = .execute
-    private var environment = "production"
+      
+    let dryRun = Flag("-n", "--none")
+    let environment = Key<String>("-e", "--enviornment")
   
     init(task: Task) {
         self.name = task.fullName
         self.task = task
     }
     
-    func setupOptions(options: OptionRegistry) {
-        options.add(flags: ["-n", "--none"]) {
-            self.mode = .dryRun
-        }
-        options.add(keys: ["-e", "--enviornment"]) { (value) in
-            self.environment = value
-        }
-    }
-    
-    func execute(arguments: CommandArguments) throws {
-        Flock.configure(for: environment)
+    func execute() throws {
+        Flock.configure(for: (environment.value ?? "production"))
         
-        TaskExecutor.mode = mode
+        TaskExecutor.mode = dryRun.value ? .dryRun : .execute
         
         do {
             try TaskExecutor.run(task: task)

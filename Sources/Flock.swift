@@ -39,9 +39,9 @@ public class Flock {
         CLI.register(commands: commands)
         
         CLI.helpCommand = HelpCommand()
-        CLI.alias(from: "-h", to: "--help")
+        CommandAliaser.alias(from: "-h", to: "--help")
         CLI.versionCommand = VersionCommand()
-        CLI.alias(from: "-v", to: "--version")
+        CommandAliaser.alias(from: "-v", to: "--version")
         
         let result = CLI.go()
         exit(result)

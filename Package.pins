@@ -1,0 +1,24 @@
+{
+  "autoPin": true,
+  "pins": [
+    {
+      "package": "Rainbow",
+      "reason": null,
+      "repositoryURL": "https://github.com/onevcat/Rainbow",
+      "version": "2.0.1"
+    },
+    {
+      "package": "Spawn",
+      "reason": null,
+      "repositoryURL": "https://github.com/jakeheis/Spawn",
+      "version": "0.0.5"
+    },
+    {
+      "package": "SwiftCLI",
+      "reason": null,
+      "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
+      "version": "3.0.0-beta3"
+    }
+  ],
+  "version": 1
+}
