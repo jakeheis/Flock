@@ -37,3 +37,9 @@ public func == (lhs: ConfigurationTime, rhs: ConfigurationTime) -> Bool {
 // MARK: - Config
 
 public struct Config {}
+
+// MARK: -
+
+public extension Config {
+    internal(set) static var environment = ""
+}

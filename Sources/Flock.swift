@@ -50,6 +50,8 @@ public class Flock {
     // MARK: - Internal
     
     static func configure(for environment: String) {
+        Config.environment = environment
+        
         configurations[.always]?.configure()
         configurations[.env(environment)]?.configure()
     }

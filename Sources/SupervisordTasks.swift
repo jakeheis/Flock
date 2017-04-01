@@ -7,8 +7,8 @@
 //
 
 public protocol SupervisordProvider {
-    var namespace: String { get }
-    var programName: String { get }
+    var taskNamespace: String { get }
+    var supervisordName: String { get }
     
     func confFile(for server: Server) -> SupervisordConfFile // Defaults to spawning a single instance of your executable with no arguments
 }
@@ -18,13 +18,13 @@ public extension SupervisordProvider {
     // Defaults
     
     func confFile(for server: Server) -> SupervisordConfFile {
-        return SupervisordConfFile(programName: programName)
+        return SupervisordConfFile(programName: supervisordName)
     }
     
     // Add-ons
     
     var confFilePath: String {
-        return "/etc/supervisor/conf.d/\(programName).conf"
+        return "/etc/supervisor/conf.d/\(supervisordName).conf"
     }
     
 }
@@ -93,7 +93,7 @@ class SupervisordTask: Task {
     let provider: SupervisordProvider
     
     init(provider: SupervisordProvider) {
-        self.namespace = provider.namespace
+        self.namespace = provider.taskNamespace
         self.provider = provider
     }
     
@@ -189,7 +189,7 @@ class StartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try executeSupervisorctl(command: "start \(provider.programName):*", on: server)
+        try executeSupervisorctl(command: "start \(provider.supervisordName):*", on: server)
     }
     
 }
@@ -201,7 +201,7 @@ class StopTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try executeSupervisorctl(command: "stop \(provider.programName):*", on: server)
+        try executeSupervisorctl(command: "stop \(provider.supervisordName):*", on: server)
     }
     
 }
@@ -219,7 +219,7 @@ class RestartTask: SupervisordTask {
     override func run(on server: Server) throws {
         try invoke("\(namespace):write-conf")
         
-        try executeSupervisorctl(command: "restart \(provider.programName):*", on: server)
+        try executeSupervisorctl(command: "restart \(provider.supervisordName):*", on: server)
     }
     
 }
@@ -231,7 +231,7 @@ class StatusTask: SupervisordTask {
     }
     
     override func run(on server: Server) throws {
-        try executeSupervisorctl(command: "status \(provider.programName):*", on: server)
+        try executeSupervisorctl(command: "status \(provider.supervisordName):*", on: server)
     }
     
 }
