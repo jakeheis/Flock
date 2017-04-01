@@ -11,6 +11,12 @@ import XCTest
 
 class TaskScheulerTests: FlockTestCase {
   
+    static var allTests : [(String, (TaskScheulerTests) -> () throws -> Void)] {
+        return [
+            ("testSchedule", testSchedule)
+        ]
+    }
+    
     func testSchedule() {
         let scheduler = TaskScheduler(tasks: TestTasks)
         

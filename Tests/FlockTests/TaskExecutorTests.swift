@@ -11,6 +11,16 @@ import XCTest
 
 class TaskExecutorTests: FlockTestCase {
     
+    static var allTests : [(String, (TaskExecutorTests) -> () throws -> Void)] {
+        return [
+            ("testTask", testTask),
+            ("testNamedTask", testNamedTask),
+            ("testHookedTasks", testHookedTasks),
+            ("testNoServers", testNoServers),
+            ("testRoleExecution", testRoleExecution)
+        ]
+    }
+    
     override func setUp() {
         TaskExecutor.setup(with: TestTasks)
     }

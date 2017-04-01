@@ -24,6 +24,20 @@ class TestCommandExecutor: ServerCommandExecutor {
 
 class ServerTests: FlockTestCase {
     
+    static var allTests : [(String, (ServerTests) -> () throws -> Void)] {
+        return [
+            ("testExecute", testExecute),
+            ("testCapture", testCapture),
+            ("testWithin", testWithin),
+            ("testFileExists", testFileExists),
+            ("testDirectoryExists", testDirectoryExists),
+            ("testUserServer", testUserServer),
+            ("testHostServer", testHostServer),
+            ("testDockerServer", testDockerServer),
+            ("testDummyServer", testDummyServer)
+        ]
+    }
+    
     func testExecute() {
         let server = Server(commandExecutor: TestCommandExecutor(), roles: [.app])
         
