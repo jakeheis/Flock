@@ -11,13 +11,13 @@
       "package": "Spawn",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/Spawn",
-      "version": "0.0.5"
+      "version": "0.0.6"
     },
     {
       "package": "SwiftCLI",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
-      "version": "3.0.0-beta3"
+      "version": "3.0.0"
     }
   ],
   "version": 1

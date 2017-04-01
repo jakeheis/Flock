@@ -44,7 +44,6 @@ class HelpCommand: SwiftCLI.HelpCommand {
 class VersionCommand: Command {
     
     let name = "--version"
-    let shortDescription = ""
     
     func execute() throws {}
     

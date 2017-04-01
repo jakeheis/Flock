@@ -11,8 +11,6 @@ import SwiftCLI
 class TaskCommand: Command {
   
     let name: String
-    let shortDescription = ""
-    
     let task: Task
       
     let dryRun = Flag("-n", "--none")
