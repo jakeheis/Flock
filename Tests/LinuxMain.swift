@@ -1,13 +1,8 @@
 import XCTest
-@testable import SwiftCLITests
+@testable import FlockTests
 
 XCTMain([
-	 testCase(ArgumentListManipulatorTests.allTests),
-	 testCase(ArgumentListTests.allTests),
-	 testCase(CommandMessageGeneratorTests.allTests),
-	 testCase(OptionRecognizerTests.allTests),
-     testCase(OptionRegistryTests.allTests),
-	 testCase(ParameterFillerTests.allTests),
-     testCase(RouterTests.allTests),
-     testCase(SwiftCLITests.allTests)
+	 testCase(ServerTests.allTests),
+	 testCase(TaskExecutorTests.allTests),
+	 testCase(TaskScheulerTests.allTests)
 ])
