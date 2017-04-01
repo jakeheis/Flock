@@ -1,5 +1,7 @@
 # Flock
 
+[![Build Status](https://travis-ci.org/jakeheis/Flock.svg?branch=master)](https://travis-ci.org/jakeheis/Flock)
+
 Automated deployment of Swift projects to servers. Once set up, deploying your project is as simple as:
 ```
 $ flock deploy
