@@ -6,58 +6,58 @@
 //
 //
 
-import Foundation
-
-// MARK: - Default Server functionality
-
-public extension Flock {
-    static let Server = SupervisordTasks(provider: DefaultSupervisordProvider()).createTasks()
-}
-
-public class DefaultSupervisordProvider: SupervisordProvider {
-    public let name = "server"
-    public var programName: String {
-        return Config.projectName
-    }
-}
-
-public extension Config {
-    static var outputLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.out"
-    static var errorLog = "/var/log/supervisor/%(program_name)s-%(process_num)s.err"
-    
-    static var supervisordUser: String? = nil
-}
-
-// MARK: - SystemdProvider
-
 public protocol SupervisordProvider {
-    var name: String { get }
+    var namespace: String { get }
     var programName: String { get }
     
-    func confFileContents(for server: Server) -> String // Defaults to spawning a single instance of your executable with no arguments
+    func confFile(for server: Server) -> SupervisordConfFile // Defaults to spawning a single instance of your executable with no arguments
 }
 
 public extension SupervisordProvider {
     
     // Defaults
     
-    func confFileContents(for server: Server) -> String {
-        return [
-            "[program:\(programName)]",
-            "command=\(Paths.executable)",
-            "process_name=%(process_num)s",
-            "autostart=false",
-            "autorestart=unexpected",
-            "stdout_logfile=\(Config.outputLog)",
-            "stderr_logfile=\(Config.errorLog)",
-            ""
-        ].joined(separator: "\n")
+    func confFile(for server: Server) -> SupervisordConfFile {
+        return SupervisordConfFile(programName: programName)
     }
     
     // Add-ons
     
     var confFilePath: String {
         return "/etc/supervisor/conf.d/\(programName).conf"
+    }
+    
+}
+
+// MARK: - SupervisordConfFile
+
+public struct SupervisordConfFile {
+    
+    public var programName: String
+    public var command = Paths.executable
+    public var processName = "%(process_num)s"
+    public var numProcs = 1
+    public var autoStart = true
+    public var autoRestart = "unexpected"
+    public var stdoutLogfile = Config.outputLog
+    public var stderrLogfile = Config.errorLog
+    
+    init(programName: String) {
+        self.programName = programName
+    }
+    
+    func toString() -> String {
+        return [
+            "[program:\(programName)]",
+            "command=\(command)",
+            "process_name=\(processName)",
+            "numprocs=\(numProcs)",
+            "autostart=\(autoStart)",
+            "autorestart=\(autoRestart)",
+            "stdout_logfile=\(stdoutLogfile)",
+            "stderr_logfile=\(stderrLogfile)",
+            ""
+        ].joined(separator: "\n")
     }
     
 }
@@ -93,7 +93,7 @@ class SupervisordTask: Task {
     let provider: SupervisordProvider
     
     init(provider: SupervisordProvider) {
-        self.namespace = provider.name
+        self.namespace = provider.namespace
         self.provider = provider
     }
     
@@ -136,7 +136,8 @@ class DependenciesTask: SupervisordTask {
             let nonexistentMatcher = OutputMatcher(regex: "invalid user:") { (match) in
                 print("\(supervisordUser) (Config.supervisordUser) must already exist on the server before running `flock tools`".yellow)
             }
-            try server.executeWithOutputMatchers("sudo chown \(supervisordUser) \(provider.confFilePath)", matchers: [nonexistentMatcher])
+            try server.executeWithOutputMatchers("sudo chown \(supervisordUser) \(provider.confFilePath)",
+                matchers: [nonexistentMatcher])
         }
         
         try server.execute("sudo service supervisor restart")
@@ -164,7 +165,7 @@ class WriteConfTask: SupervisordTask {
         let persmissionsMatcher = OutputMatcher(regex: "Permission denied") { (match) in
             print("Make sure this user has write access to \(self.provider.confFilePath) -- see https://github.com/jakeheis/Flock#permissions".yellow)
         }
-        try server.executeWithOutputMatchers("echo \"\(provider.confFileContents(for: server))\" > \(provider.confFilePath)", matchers: [persmissionsMatcher])
+        try server.executeWithOutputMatchers("echo \"\(provider.confFile(for: server).toString())\" > \(provider.confFilePath)", matchers: [persmissionsMatcher])
         
         try executeSupervisorctl(command: "reread", on: server)
         try executeSupervisorctl(command: "update", on: server)

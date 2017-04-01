@@ -15,7 +15,7 @@ class HelpCommand: SwiftCLI.HelpCommand {
     
     var availableCommands: [Command] = []
     var printCLIDescription = true
-        
+    
     func execute() throws {
         print("Available tasks:")
         for task in Flock.tasks {
