@@ -42,7 +42,7 @@ public struct SupervisordConfFile {
     public var stdoutLogfile = Config.outputLog
     public var stderrLogfile = Config.errorLog
     
-    init(programName: String) {
+    public init(programName: String) {
         self.programName = programName
     }
     
