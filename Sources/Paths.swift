@@ -6,8 +6,6 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-import Foundation
-
 public struct Paths {
     
     public static var projectDirectory: String {

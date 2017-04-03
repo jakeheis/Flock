@@ -6,8 +6,6 @@
 //
 //
 
-import Foundation
-
 class Logger {
     
     static func logTaskBegun(_ task: Task) {

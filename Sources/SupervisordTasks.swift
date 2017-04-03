@@ -27,6 +27,16 @@ public extension SupervisordProvider {
         return "/etc/supervisor/conf.d/\(supervisordName).conf"
     }
     
+    func createTasks() -> [Task] {
+        return [
+            DependenciesTask(provider: self),
+            WriteConfTask(provider: self),
+            StartTask(provider: self),
+            StopTask(provider: self),
+            RestartTask(provider: self),
+            StatusTask(provider: self)
+        ]
+    }
 }
 
 // MARK: - SupervisordConfFile
@@ -62,29 +72,6 @@ public struct SupervisordConfFile {
             "stderr_logfile=\(stderrLogfile)"
         ] + extraLines + [""]
         return config.joined(separator: "\n")
-    }
-    
-}
-
-// MARK: - SupervisordTasks
-
-public class SupervisordTasks {
-    
-    let provider: SupervisordProvider
-    
-    public init(provider: SupervisordProvider) {
-        self.provider = provider
-    }
-    
-    public func createTasks() -> [Task] {
-        return [
-            DependenciesTask(provider: provider),
-            WriteConfTask(provider: provider),
-            StartTask(provider: provider),
-            StopTask(provider: provider),
-            RestartTask(provider: provider),
-            StatusTask(provider: provider)
-        ]
     }
     
 }

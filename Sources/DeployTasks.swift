@@ -8,13 +8,13 @@
 
 import Foundation
 
-extension Flock {
-    public static let Deploy: [Task] = [
+public extension TaskSource {
+    static let deploy = TaskSource(tasks: [
         DeployTask(),
         GitTask(),
         BuildTask(),
         LinkTask()
-    ]
+    ])
 }
 
 public extension Config {

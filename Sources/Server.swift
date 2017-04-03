@@ -6,12 +6,6 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-#if os(Linux)
-    import Glibc
-#else
-    import Darwin
-#endif
-
 import Foundation
 import Rainbow
 import Spawn

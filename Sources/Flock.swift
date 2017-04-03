@@ -21,8 +21,8 @@ public class Flock {
   
     // MARK: - Public
     
-    public static func use(_ tasks: [Task]) {
-        self.tasks += tasks
+    public static func use(_ taskSource: TaskSource) {
+        tasks += taskSource.tasks
     }
     
     public static func configure(_ time: ConfigurationTime, with configuration: Configuration) {
@@ -39,9 +39,10 @@ public class Flock {
         CLI.register(commands: commands)
         
         CLI.helpCommand = HelpCommand()
-        CommandAliaser.alias(from: "-h", to: "--help")
         CLI.versionCommand = VersionCommand()
-        CommandAliaser.alias(from: "-v", to: "--version")
+        
+        CommandAliaser.alias(from: "-h", to: CLI.helpCommand.name)
+        CommandAliaser.alias(from: "-v", to: CLI.versionCommand.name)
         
         let result = CLI.go()
         exit(result)

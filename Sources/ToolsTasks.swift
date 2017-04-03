@@ -6,11 +6,11 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
-extension Flock {
-    public static let Tools: [Task] = [
+public extension TaskSource {
+    static let tools = TaskSource(tasks:  [
         ToolsTask(),
         DependencyInstallationTask()
-    ]
+    ])
 }
 
 private let tools = "tools"
