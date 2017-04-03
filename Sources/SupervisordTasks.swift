@@ -36,28 +36,32 @@ public struct SupervisordConfFile {
     public var programName: String
     public var command = Paths.executable
     public var processName = "%(process_num)s"
-    public var numProcs = 1
     public var autoStart = true
     public var autoRestart = "unexpected"
     public var stdoutLogfile = Config.outputLog
     public var stderrLogfile = Config.errorLog
     
+    private var extraLines: [String] = []
+    
     public init(programName: String) {
         self.programName = programName
     }
     
+    public mutating func add(_ line: String) {
+        extraLines.append(line)
+    }
+    
     func toString() -> String {
-        return [
+        let config = [
             "[program:\(programName)]",
             "command=\(command)",
             "process_name=\(processName)",
-            "numprocs=\(numProcs)",
             "autostart=\(autoStart)",
             "autorestart=\(autoRestart)",
             "stdout_logfile=\(stdoutLogfile)",
-            "stderr_logfile=\(stderrLogfile)",
-            ""
-        ].joined(separator: "\n")
+            "stderr_logfile=\(stderrLogfile)"
+        ] + extraLines + [""]
+        return config.joined(separator: "\n")
     }
     
 }

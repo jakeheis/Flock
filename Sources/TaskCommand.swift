@@ -9,13 +9,13 @@
 import SwiftCLI
 
 class TaskCommand: Command {
-  
+    
     let name: String
     let task: Task
-      
+    
     let dryRun = Flag("-n", "--none")
     let environment = Key<String>("-e", "--enviornment")
-  
+    
     init(task: Task) {
         self.name = task.fullName
         self.task = task
