@@ -1,0 +1,9 @@
+#! /bin/sh
+
+DOCK_ID=$(docker create -it --rm swift)
+docker start $DOCK_ID
+docker cp ../TestProject $DOCK_ID:/tmp/TestProject
+echo $DOCK_ID > .test-docker-id
+swift test -s FlockTests.DeployTests
+rm .test-docker-id
+docker stop $DOCK_ID

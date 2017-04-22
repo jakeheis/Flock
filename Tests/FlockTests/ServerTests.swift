@@ -120,7 +120,7 @@ class ServerTests: FlockTestCase {
             XCTFail()
             return
         }
-        XCTAssert(call == ["/usr/bin/env", "docker", "exec", "my_container", "bash", "/tmp/docker_call"])
+        XCTAssert(call == ["/usr/local/bin/docker", "exec", "my_container", "bash", "/tmp/docker_call"])
     }
     
     func testDummyServer() {

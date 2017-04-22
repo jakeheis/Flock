@@ -229,12 +229,12 @@ public class DockerServer: ServerCommandExecutor {
         try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
         
         let copyTask = Process()
-        copyTask.launchPath = "/usr/bin/env"
-        copyTask.arguments = ["docker", "cp", tmpFile, "\(id):\(tmpFile)"]
+        copyTask.launchPath = "/usr/local/bin/docker"
+        copyTask.arguments = ["cp", tmpFile, "\(id):\(tmpFile)"]
         copyTask.launch()
         copyTask.waitUntilExit()
         
-        return ["/usr/bin/env", "docker", "exec", id, "bash", tmpFile]
+        return ["/usr/local/bin/docker", "exec", id, "bash", tmpFile]
     }
     
 }
