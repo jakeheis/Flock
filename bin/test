@@ -1,9 +1,16 @@
 #! /bin/sh
 
 DOCK_ID=$(docker create -it --rm swift)
-docker start $DOCK_ID
-docker cp ../TestProject $DOCK_ID:/tmp/TestProject
+docker start $DOCK_ID  > /dev/null
+
+docker cp Tests/TestProject $DOCK_ID:/tmp/TestProject
+docker exec $DOCK_ID git config --global user.email "test@example.com"
+docker exec $DOCK_ID git config --global user.name "tester"
+docker exec $DOCK_ID git -C /tmp/TestProject init
+docker exec $DOCK_ID git -C /tmp/TestProject add .
+docker exec $DOCK_ID git -C /tmp/TestProject commit -am "Commit"
+
 echo $DOCK_ID > .test-docker-id
-swift test -s FlockTests.DeployTests
+swift test
 rm .test-docker-id
-docker stop $DOCK_ID
+docker stop $DOCK_ID > /dev/null
