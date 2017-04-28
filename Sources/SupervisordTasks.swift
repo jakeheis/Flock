@@ -11,9 +11,6 @@ public protocol SupervisordProvider {
     /// The namespace that the tasks of this provider will be placed under; e.g. if namespace is "svr", tasks will be "svr:start" and the like
     var taskNamespace: String { get }
     
-    /// When calling "supervisortctl start *something*", *something* is replaced this value
-    var supervisordName: String { get }
-    
     /// The supervisorctl configuration for this project
     /// Defaults to spawning a single instance of your executable with no arguments
     ///
@@ -31,6 +28,10 @@ public extension SupervisordProvider {
     }
     
     // Add-ons
+    
+    var supervisordName: String {
+        return Config.supervisordName ?? Config.projectName
+    }
     
     var confFilePath: String {
         return "/etc/supervisor/conf.d/\(supervisordName).conf"
