@@ -6,7 +6,7 @@
 //
 //
 
-public extension Flock {
+public extension TaskSource {
     static let swiftenv = TaskSource(tasks: [
         SwiftenvInstallationTask(),
         SwiftTask()
