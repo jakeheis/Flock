@@ -2,6 +2,18 @@
   "autoPin": true,
   "pins": [
     {
+      "package": "CNMSSH",
+      "reason": null,
+      "repositoryURL": "/Users/jakeheiser/Desktop/Projects/Swift/CNMSSH",
+      "version": "0.0.1"
+    },
+    {
+      "package": "CSSH",
+      "reason": null,
+      "repositoryURL": "/Users/jakeheiser/Desktop/Projects/Swift/CSSH",
+      "version": "0.0.1"
+    },
+    {
       "package": "Rainbow",
       "reason": null,
       "repositoryURL": "https://github.com/onevcat/Rainbow",

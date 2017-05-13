@@ -9,6 +9,7 @@
 import Foundation
 import Rainbow
 import Spawn
+import CNMSSH
 
 public class Servers {
     
@@ -104,6 +105,11 @@ public class Server {
     // MARK: - Private
     
     private func run(commands: [String], capture: Bool, matchers: [OutputMatcher]? = nil) throws -> String? {
+        let session = NMSSHSession.connect(toHost: "104.131.92.157", withUsername: "root")
+        session?.connectToAgent()
+        
+        
+        
         let finalCommands = commandStack + commands
         let call = finalCommands.joined(separator: "; ")
         
