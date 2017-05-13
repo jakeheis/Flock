@@ -4,14 +4,14 @@
     {
       "package": "CNMSSH",
       "reason": null,
-      "repositoryURL": "/Users/jakeheiser/Desktop/Projects/Swift/CNMSSH",
-      "version": "0.0.1"
+      "repositoryURL": "https://github.com/jakeheis/CNMSSH",
+      "version": "1.0.0"
     },
     {
       "package": "CSSH",
       "reason": null,
-      "repositoryURL": "/Users/jakeheiser/Desktop/Projects/Swift/CSSH",
-      "version": "0.0.1"
+      "repositoryURL": "https://github.com/jakeheis/CSSH",
+      "version": "1.0.0"
     },
     {
       "package": "Rainbow",
