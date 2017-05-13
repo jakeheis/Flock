@@ -26,13 +26,14 @@ class TaskExecutor {
     static func run(task: Task) throws {
         try runTasks(scheduled: .before(task.fullName))
         
+        if Servers.servers.isEmpty && mode == .execute {
+            throw TaskError.error("You must specify servers in your configuration files")
+        }
+        
         Logger.logTaskBegun(task)
         
         switch mode {
         case .execute:
-            guard !Servers.servers.isEmpty else {
-                throw TaskError.error("You must specify servers in your configuration files")
-            }
             for server in Servers.servers {
                 if Set(server.roles).isDisjoint(with: Set(task.serverRoles)) {
                     continue
