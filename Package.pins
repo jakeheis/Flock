@@ -5,7 +5,7 @@
       "package": "CNMSSH",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/CNMSSH",
-      "version": "1.0.0"
+      "version": "1.0.2"
     },
     {
       "package": "CSSH",
