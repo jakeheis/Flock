@@ -1,0 +1,3 @@
+#! /bin/sh
+
+swift build -Xlinker -lssh2 -Xlinker -L/usr/local/lib/
