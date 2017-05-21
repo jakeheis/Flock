@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Spawn
 @testable import Flock
 
 class TestCommandExecutor: ServerCommandExecutor {
@@ -15,9 +16,22 @@ class TestCommandExecutor: ServerCommandExecutor {
     
     let id = "test"
     
-    func createArguments(for call: String) throws -> [String] {
-        TestCommandExecutor.lastCall = call
-        return ["/bin/bash", "-c", call]
+    func execute(_ call: String, capture: Bool, matchers: [OutputMatcher]?) throws -> String? {
+        var captured = ""
+        let spawned = try Spawn(args: ["/bin/bash", "-c", call], output: { (output) in
+            if capture {
+                captured += output
+            } else {
+                print(output, terminator: "")
+            }
+            fflush(stdout)
+            matchers?.forEach { $0.match(output) }
+        })
+        
+        guard spawned.waitForExit() == 0 else {
+            throw TaskError.commandFailed
+        }
+        return capture ? captured : nil
     }
     
 }
@@ -30,11 +44,7 @@ class ServerTests: FlockTestCase {
             ("testCapture", testCapture),
             ("testWithin", testWithin),
             ("testFileExists", testFileExists),
-            ("testDirectoryExists", testDirectoryExists),
-            ("testUserServer", testUserServer),
-            ("testHostServer", testHostServer),
-            ("testDockerServer", testDockerServer),
-            ("testDummyServer", testDummyServer)
+            ("testDirectoryExists", testDirectoryExists)
         ]
     }
     
@@ -91,46 +101,6 @@ class ServerTests: FlockTestCase {
         let exists = server.directoryExists("/bin")
         XCTAssert(exists == true)
         XCTAssert(TestCommandExecutor.lastCall == "test -d /bin")
-    }
-    
-    func testUserServer() {
-        let userServer = UserServer(ip: "9.9.9.9", user: "root", authMethod: .key("/path/to/key"))
-        
-        guard let call = try? userServer.createArguments(for: "echo \"testUserServer\"") else {
-            XCTFail()
-            return
-        }
-        XCTAssert(call == ["/usr/bin/ssh", "-l", "root", "-i", "/path/to/key", "9.9.9.9", "echo \"testUserServer\""])
-    }
-    
-    func testHostServer() {
-        let hostServer = SSHHostServer(SSHHost: "MyHost")
-        
-        guard let call = try? hostServer.createArguments(for: "echo \"testHostServer\"") else {
-            XCTFail()
-            return
-        }
-        XCTAssert(call == ["/usr/bin/ssh", "MyHost", "echo \"testHostServer\""])
-    }
-    
-    func testDockerServer() {
-        let dockerServer = DockerServer(container: "my_container")
-        
-        guard let call = try? dockerServer.createArguments(for: "echo \"hello\"") else {
-            XCTFail()
-            return
-        }
-        XCTAssert(call == ["/usr/local/bin/docker", "exec", "my_container", "bash", "/tmp/docker_call"])
-    }
-    
-    func testDummyServer() {
-        let dummyServer = DummyServer()
-        
-        guard let call = try? dummyServer.createArguments(for: "cat \"hello\"") else {
-            XCTFail()
-            return
-        }
-        XCTAssert(call == ["#"])
     }
     
 }
