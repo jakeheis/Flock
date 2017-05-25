@@ -2,12 +2,6 @@
   "autoPin": true,
   "pins": [
     {
-      "package": "CNMSSH",
-      "reason": null,
-      "repositoryURL": "https://github.com/jakeheis/CNMSSH",
-      "version": "1.0.2"
-    },
-    {
       "package": "CSSH",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/CSSH",
@@ -20,6 +14,18 @@
       "version": "2.0.1"
     },
     {
+      "package": "SSH",
+      "reason": null,
+      "repositoryURL": "https://github.com/jakeheis/SSH",
+      "version": "0.0.3"
+    },
+    {
+      "package": "Socket",
+      "reason": null,
+      "repositoryURL": "https://github.com/IBM-Swift/BlueSocket",
+      "version": "0.12.49"
+    },
+    {
       "package": "Spawn",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/Spawn",
@@ -29,7 +35,7 @@
       "package": "SwiftCLI",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
-      "version": "3.0.0"
+      "version": "3.0.1"
     }
   ],
   "version": 1

@@ -13,7 +13,6 @@ import Darwin
 #endif
 
 import SwiftCLI
-import CNMSSH
 
 public class Flock {
   
@@ -35,8 +34,6 @@ public class Flock {
         
         let commands = tasks.map { TaskCommand(task: $0) as Command }
         
-        NMSSHLogger.shared().logLevel = .error
-
         CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
         
         CLI.register(commands: commands)
