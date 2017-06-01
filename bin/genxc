@@ -1,3 +1,0 @@
-#! /bin/sh
-
-swift package generate-xcodeproj --xcconfig-overrides=Flock.xcconfig

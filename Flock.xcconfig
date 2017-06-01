@@ -1,2 +1,0 @@
-LIBRARY_SEARCH_PATHS = $(inherited) /usr/local/lib/
-OTHER_LDFLAGS = $(inherited) -lssh2 -L/usr/local/lib/
