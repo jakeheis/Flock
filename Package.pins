@@ -17,7 +17,7 @@
       "package": "SSH",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/SSH",
-      "version": "0.0.3"
+      "version": "0.0.5"
     },
     {
       "package": "Socket",
