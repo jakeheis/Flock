@@ -11,6 +11,6 @@ docker exec $DOCK_ID git -C /tmp/TestProject add .
 docker exec $DOCK_ID git -C /tmp/TestProject commit -am "Commit"
 
 echo $DOCK_ID > .test-docker-id
-swift test -Xlinker -lssh2 -Xlinker -L/usr/local/lib/
+swift test
 rm .test-docker-id
 docker stop $DOCK_ID > /dev/null

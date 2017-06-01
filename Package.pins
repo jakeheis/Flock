@@ -5,7 +5,7 @@
       "package": "CSSH",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/CSSH",
-      "version": "1.0.0"
+      "version": "1.0.2"
     },
     {
       "package": "Rainbow",
@@ -23,7 +23,7 @@
       "package": "Socket",
       "reason": null,
       "repositoryURL": "https://github.com/IBM-Swift/BlueSocket",
-      "version": "0.12.49"
+      "version": "0.12.50"
     },
     {
       "package": "Spawn",
