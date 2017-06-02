@@ -20,8 +20,8 @@ public class Servers {
         do {
             let server = try Server(ip: ip, user: user, roles: roles, authMethod: authMethod)
             servers.append(server)
-        } catch {
-            print("Couldn't connect to \(user)@\(ip)")
+        } catch let error {
+            print("Couldn't connect to \(user)@\(ip) (error: \(error))")
             exit(1)
         }
     }
@@ -136,19 +136,14 @@ extension Config {
     public static var SSHAuthMethod: SSH.AuthMethod? = nil
 }
 
-enum ServerError: Error {
-    case SSHConnectionFailed
-}
-
 public class UserServer: ServerCommandExecutor {
     
     public let id: String
     let session: SSH.Session
     
     public init(ip: String, user: String, authMethod: SSH.AuthMethod?) throws {
-        guard let session = try? SSH.Session(host: ip) else {
-            throw ServerError.SSHConnectionFailed
-        }
+        let session = try SSH.Session(host: ip)
+        session.ptyType = .vanilla
         
         let auth: SSH.AuthMethod
         if let authMethod = authMethod {
@@ -159,15 +154,9 @@ public class UserServer: ServerCommandExecutor {
             }
             auth = method
         }
-
-        do {
-            try session.authenticate(username: user, authMethod: auth)
-        } catch {
-            throw ServerError.SSHConnectionFailed
-        }
         
-        // session.channel.requestPty = true
-        
+        try session.authenticate(username: user, authMethod: auth)
+                
         self.id = "\(user)@\(ip)"
         self.session = session
     }
