@@ -22,7 +22,7 @@ class TaskCommand: Command {
     }
     
     func execute() throws {
-        Flock.configure(for: (environment.value ?? "production"))
+        Flock.setup(for: (environment.value ?? "production"))
         
         TaskExecutor.mode = dryRun.value ? .dryRun : .execute
         

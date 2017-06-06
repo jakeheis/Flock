@@ -17,7 +17,9 @@ import SwiftCLI
 public class Flock {
   
     private(set) static var tasks: [Task] = []
-    private static var configurations: [ConfigurationTime: Configuration] = [:]
+    
+    private static var baseEnvironment: Environment?
+    private static var keyedEnvironments: [String: Environment] = [:]
   
     // MARK: - Public
     
@@ -25,8 +27,13 @@ public class Flock {
         tasks += taskSource.tasks
     }
     
-    public static func configure(_ time: ConfigurationTime, with configuration: Configuration) {
-        configurations[time] = configuration
+    public static func configure(base: Environment, environments: [Environment]) {
+        baseEnvironment = base
+        
+        for env in environments {
+            let key = String(describing: type(of: env)).lowercased()
+            keyedEnvironments[key] = env
+        }
     }
     
     public static func run() -> Never {
@@ -50,11 +57,11 @@ public class Flock {
     
     // MARK: - Internal
     
-    static func configure(for environment: String) {
+    static func setup(for environment: String) {
         Config.environment = environment
         
-        configurations[.always]?.configure()
-        configurations[.env(environment)]?.configure()
+        baseEnvironment?.configure()
+        keyedEnvironments[environment]?.configure()
     }
     
 }
