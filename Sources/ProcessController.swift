@@ -17,7 +17,7 @@ public class Nohup: ProcessController {
         return TaskSource(tasks: [
             StopTask(framework: framework),
             StartTask(framework: framework),
-            PsTask(framework: framework)
+            StatusTask(framework: framework)
         ])
     }
     
@@ -60,8 +60,8 @@ public class Nohup: ProcessController {
         }
     }
     
-    class PsTask: NohupTask {
-        override var name: String { return "ps" }
+    class StatusTask: NohupTask {
+        override var name: String { return "status" }
         
         override func run(on server: Server) throws {
             if let pid = try Nohup.findServerPid(on: server) {
