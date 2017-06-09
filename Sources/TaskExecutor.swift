@@ -42,7 +42,7 @@ class TaskExecutor {
             }
         case .dryRun:
             do {
-                try task.run(on: Server.createDummyServer())
+                try task.run(on: DummyServer())
             } catch {}
         }
         

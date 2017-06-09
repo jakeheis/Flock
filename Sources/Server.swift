@@ -18,7 +18,7 @@ public class Servers {
     
     public static func add(ip: String, user: String, roles: [ServerRole], authMethod: SSH.AuthMethod? = nil) {
         do {
-            let server = try Server(ip: ip, user: user, roles: roles, authMethod: authMethod)
+            let server = try SSHServer(ip: ip, user: user, roles: roles, authMethod: authMethod)
             servers.append(server)
         } catch let error {
             print("Couldn't connect to \(user)@\(ip) (error: \(error))")
@@ -27,7 +27,7 @@ public class Servers {
     }
     
     public static func add(docker container: String, roles: [ServerRole]) {
-        servers.append(Server(dockerContainer: container, roles: roles))
+        servers.append(DockerServer(container: container, roles: roles))
     }
     
 }
@@ -38,30 +38,20 @@ public enum ServerRole {
     case web
 }
 
-public class Server {
+public protocol Server: class, CustomStringConvertible {
+    var id: String { get }
+    var roles: [ServerRole] { get }
+    var commandStack: [String] { get set }
     
-    let roles: [ServerRole]
-    let commandExecutor: ServerCommandExecutor
-    var commandStack: [String] = []
+    func _internalExecute(_ command: String) throws
+    func _internalCapture(_ command: String) throws -> String
+}
+
+extension Server {
     
-    static func createDummyServer() -> Server {
-        return Server(commandExecutor: DummyServer(), roles: [.app, .db, .web])
+    public var description: String {
+        return id
     }
-    
-    public convenience init(ip: String, user: String, roles: [ServerRole], authMethod: SSH.AuthMethod?) throws {
-        self.init(commandExecutor: try UserServer(ip: ip, user: user, authMethod: authMethod), roles: roles)
-    }
-    
-    public convenience init(dockerContainer: String, roles: [ServerRole]) {
-        self.init(commandExecutor: DockerServer(container: dockerContainer), roles: roles)
-    }
-    
-    public init(commandExecutor: ServerCommandExecutor, roles: [ServerRole]) {
-        self.roles = roles
-        self.commandExecutor = commandExecutor
-    }
-    
-    // MARK: - Public
     
     public func within(_ directory: String, block: () throws -> ()) rethrows {
         commandStack.append("cd \(directory)")
@@ -89,59 +79,46 @@ public class Server {
         return true
     }
     
-    public func execute(_ command: String) throws {
-        _ = try run(commands: [command], capture: false)
-    }
-    
-    public func capture(_ command: String) throws -> String? {
-        return try run(commands: [command], capture: true)
-    }
-    
     public func executeWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
-        _ = try run(commands: [command], capture: false, matchers: matchers)
+        let captured = try capture(command)
+        print(captured)
+        for line in captured.components(separatedBy: "\n") {
+            matchers.forEach { $0.match(line) }
+        }
     }
     
-    // MARK: - Private
+    public func execute(_ command: String) throws {
+        try _internalExecute(prepCommand(command))
+    }
     
-    private func run(commands: [String], capture: Bool, matchers: [OutputMatcher]? = nil) throws -> String? {
-        let finalCommands = commandStack + commands
+    public func capture(_ command: String) throws -> String {
+        return try _internalCapture(prepCommand(command))
+    }
+    
+    private func prepCommand(_ command: String) -> String {
+        let finalCommands = commandStack + [command]
         let call = finalCommands.joined(separator: "; ")
-        
-        Logger.logCall(call, on: commandExecutor.id)
-        
-        return try commandExecutor.execute(call, capture: capture, matchers: matchers)
+        Logger.logCall(call, on: id)
+        return call
     }
     
-}
-
-extension Server: CustomStringConvertible {
-    
-    public var description: String {
-        return commandExecutor.id
-    }
-    
-}
-
-// MARK: - ServerCommandExecutor
-
-public protocol ServerCommandExecutor {
-    var id: String { get }
-    
-    func execute(_ call: String, capture: Bool, matchers: [OutputMatcher]?) throws -> String?
 }
 
 // MARK: - UserServer
 
-extension Config {
-    public static var SSHAuthMethod: SSH.AuthMethod? = nil
+public extension Config {
+    static var SSHAuthMethod: SSH.AuthMethod? = nil
 }
 
-public class UserServer: ServerCommandExecutor {
+public class SSHServer: Server {
     
     public let id: String
+    public let roles: [ServerRole]
+    public var commandStack: [String] = []
+    
     let session: SSH.Session
     
-    public init(ip: String, user: String, authMethod: SSH.AuthMethod?) throws {
+    public init(ip: String, user: String, roles: [ServerRole], authMethod: SSH.AuthMethod?) throws {
         let session = try SSH.Session(host: ip)
         session.ptyType = .vanilla
         
@@ -156,40 +133,58 @@ public class UserServer: ServerCommandExecutor {
         }
         
         try session.authenticate(username: user, authMethod: auth)
-                
+        
         self.id = "\(user)@\(ip)"
+        self.roles = roles
         self.session = session
     }
     
-    public func execute(_ call: String, capture: Bool, matchers: [OutputMatcher]?) throws -> String? {
-        if capture {
-            let (status, output) = try session.capture(call)
-            guard status == 0 else {
-                print(output)
-                throw TaskError.commandFailed
-            }
-            return output
-        } else {
-            guard try session.execute(call) == 0 else {
-                throw TaskError.commandFailed
-            }
-            return nil
+    public func _internalExecute(_ command: String) throws {
+        guard try session.execute(command) == 0 else {
+            throw TaskError.commandFailed
         }
+    }
+    
+    public func _internalCapture(_ command: String) throws -> String {
+        let (status, output) = try session.capture(command)
+        guard status == 0 else {
+            print(output)
+            throw TaskError.commandFailed
+        }
+        return output
     }
     
 }
 
 // MARK: - DockerServer
 
-public class DockerServer: ServerCommandExecutor {
+public class DockerServer: Server {
     
     public let id: String
+    public let roles: [ServerRole]
+    public var commandStack: [String] = []
     
-    public init(container: String) {
+    public init(container: String, roles: [ServerRole]) {
         self.id = container
+        self.roles = roles
     }
     
-    public func execute(_ call: String, capture: Bool, matchers: [OutputMatcher]?) throws -> String? {
+    public func _internalExecute(_ command: String) throws {
+        try makeCall(command) { (output) in
+            print(output, terminator: "")
+            fflush(stdout)
+        }
+    }
+    
+    public func _internalCapture(_ command: String) throws -> String {
+        var captured = ""
+        try makeCall(command) { (output) in
+            captured += output
+        }
+        return captured
+    }
+    
+    private func makeCall(_ call: String, output: @escaping OutputClosure) throws {
         let tmpFile = "/tmp/docker_call"
         try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
         
@@ -199,33 +194,23 @@ public class DockerServer: ServerCommandExecutor {
         copyTask.launch()
         copyTask.waitUntilExit()
         
-        var captured = ""
-        let spawned = try Spawn(args: ["/usr/local/bin/docker", "exec", id, "bash", tmpFile], output: { (output) in
-            if capture {
-                captured += output
-            } else {
-                print(output, terminator: "")
-            }
-            fflush(stdout)
-            matchers?.forEach { $0.match(output) }
-        })
+        let spawned = try Spawn(args: ["/usr/local/bin/docker", "exec", id, "bash", tmpFile], output: output)
         
         guard spawned.waitForExit() == 0 else {
             throw TaskError.commandFailed
         }
-        
-        return captured.isEmpty ? nil : captured
     }
     
 }
 
-public class DummyServer: ServerCommandExecutor {
+public class DummyServer: Server {
     
     public let id = "DummyServer"
+    public let roles: [ServerRole] = []
+    public var commandStack: [String] = []
     
-    public func execute(_ call: String, capture: Bool, matchers: [OutputMatcher]?) throws -> String? {
-        return nil
-    }
+    public func _internalExecute(_ command: String) throws {}
+    public func _internalCapture(_ command: String) throws -> String { return "" }
     
 }
 

@@ -42,8 +42,8 @@ public class ZewoFramework: ServerFramework {
     public func processCount(for server: Server) -> Int {
         var processCount = 1
         do {
-            if let processCountString = try server.capture("nproc")?.trimmingCharacters(in: .whitespacesAndNewlines),
-                let processCountInt = Int(processCountString) {
+            let processCountString = try server.capture("nproc").trimmingCharacters(in: .whitespacesAndNewlines)
+            if let processCountInt = Int(processCountString) {
                 processCount = processCountInt
             }
         } catch {}

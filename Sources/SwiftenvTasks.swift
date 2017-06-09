@@ -67,7 +67,8 @@ class SwiftTask: Task {
             throw TaskError.error("You must specify which Swift version to use either in your configuration file (Config.swiftVersion) or in a `.swift-version` file.")
         }
         
-        if let existingSwifts = try server.capture("swiftenv versions"), !existingSwifts.contains(swiftVersion) {
+        let existingSwifts = try server.capture("swiftenv versions")
+        if !existingSwifts.contains(swiftVersion) {
             try server.execute("swiftenv install \(swiftVersion)")
         }
         

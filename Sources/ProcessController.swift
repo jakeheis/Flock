@@ -73,9 +73,7 @@ public class Nohup: ProcessController {
     }
     
     static private func findServerPid(on server: Server) throws -> String? {
-        guard let processes = try server.capture("ps aux | grep \".build\"") else {
-            return nil
-        }
+        let processes = try server.capture("ps aux | grep \".build\"")
         
         let lines = processes.components(separatedBy: "\n")
         for line in lines where !line.contains("grep") {
