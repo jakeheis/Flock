@@ -12,7 +12,9 @@ public protocol Environment {
 
 // MARK: - Config
 
-public struct Config {}
+public struct Config {
+    private init() {}
+}
 
 // MARK: -
 

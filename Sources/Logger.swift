@@ -8,6 +8,8 @@
 
 class Logger {
     
+    private init() {}
+    
     static func logTaskBegun(_ task: Task) {
         print("Task \(task.fullName) begun:".blue.bold)
     }

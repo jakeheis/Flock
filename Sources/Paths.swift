@@ -8,6 +8,8 @@
 
 public struct Paths {
     
+    private init() {}
+    
     public static var projectDirectory: String {
         return "\(Config.deployDirectory)/\(Config.projectName)"
     }
