@@ -17,9 +17,6 @@ import Rainbow
 public class Flock {
   
     private(set) static var tasks: [Task] = []
-    
-    private static var baseEnvironment: Environment?
-    private static var keyedEnvironments: [String: Environment] = [:]
   
     // MARK: - Public
     
@@ -30,15 +27,15 @@ public class Flock {
         }
         
         if CommandLine.arguments.count == 3 {
-            Config.environment = String(CommandLine.arguments[2].characters.dropFirst()) // Drop : from :staging
+            Config.environment = CommandLine.arguments[2]
         } else {
             Config.environment = "production"
         }
         
-        baseEnvironment = base
+        base.configure()
         
         for env in environments {
-            let key = ":" + String(describing: type(of: env)).lowercased()
+            let key = String(describing: type(of: env)).lowercased()
             if key == Config.environment {
                 env.configure()
                 break
