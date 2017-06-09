@@ -12,7 +12,7 @@ import Glibc
 import Darwin
 #endif
 
-import SwiftCLI
+import Rainbow
 
 public class Flock {
   
@@ -23,45 +23,67 @@ public class Flock {
   
     // MARK: - Public
     
+    public static func configure(base: Environment, environments: [Environment]) {
+        guard Config.environment.isEmpty else {
+            print("`Flock.configure` should only be called once")
+            exit(1)
+        }
+        
+        if CommandLine.arguments.count == 3 {
+            Config.environment = String(CommandLine.arguments[2].characters.dropFirst()) // Drop : from :staging
+        } else {
+            Config.environment = "production"
+        }
+        
+        baseEnvironment = base
+        
+        for env in environments {
+            let key = ":" + String(describing: type(of: env)).lowercased()
+            if key == Config.environment {
+                env.configure()
+                break
+            }
+        }
+    }
+    
     public static func use(_ taskSource: TaskSource) {
         tasks += taskSource.tasks
     }
     
-    public static func configure(base: Environment, environments: [Environment]) {
-        baseEnvironment = base
-        
-        for env in environments {
-            let key = String(describing: type(of: env)).lowercased()
-            keyedEnvironments[key] = env
-        }
-    }
-    
     public static func run() -> Never {
+        guard !Config.environment.isEmpty else {
+            print("Make sure to call `Flock.configure` before `Flock.run`")
+            exit(1)
+        }
+        
+        let task = CommandLine.arguments[1]
+        if task == "--print-tasks" {
+            printTasks()
+            exit(0)
+        }
+        
         TaskExecutor.setup(with: tasks)
         
-        let commands = tasks.map { TaskCommand(task: $0) as Command }
+        do {
+            try TaskExecutor.run(taskNamed: task)
+            exit(0)
+        } catch let TaskError.error(message) {
+            print(message.red)
+        } catch let error {
+            print(error)
+        }
         
-        CLI.setup(name: "flock", version: "0.0.1", description: "Flock: Automated deployment of your Swift app")
-        
-        CLI.register(commands: commands)
-        
-        CLI.helpCommand = HelpCommand()
-        CLI.versionCommand = VersionCommand()
-        
-        CommandAliaser.alias(from: "-h", to: CLI.helpCommand.name)
-        CommandAliaser.alias(from: "-v", to: CLI.versionCommand.name)
-        
-        let result = CLI.go()
-        exit(result)
+        exit(1)
     }
     
-    // MARK: - Internal
-    
-    static func setup(for environment: String) {
-        Config.environment = environment
+    private static func printTasks() {
+        print("Available tasks:")
+        for task in tasks {
+            print("flock \(task.fullName)")
+        }
+        print()
         
-        baseEnvironment?.configure()
-        keyedEnvironments[environment]?.configure()
+        print("To print help information: flock --help")
     }
     
 }

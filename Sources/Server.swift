@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import SwiftCLI
 import Rainbow
 import Spawn
 import SSH

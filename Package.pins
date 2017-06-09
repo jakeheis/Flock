@@ -23,19 +23,13 @@
       "package": "Socket",
       "reason": null,
       "repositoryURL": "https://github.com/IBM-Swift/BlueSocket",
-      "version": "0.12.50"
+      "version": "0.12.53"
     },
     {
       "package": "Spawn",
       "reason": null,
       "repositoryURL": "https://github.com/jakeheis/Spawn",
       "version": "0.0.6"
-    },
-    {
-      "package": "SwiftCLI",
-      "reason": null,
-      "repositoryURL": "https://github.com/jakeheis/SwiftCLI",
-      "version": "3.0.1"
     }
   ],
   "version": 1
