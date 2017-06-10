@@ -22,6 +22,8 @@ public extension ServerFramework {
 
 public class GenericServerFramework: ServerFramework {
     public let name = "server"
+    
+    public init() {}
 }
 
 // MARK: - Vapor
@@ -32,12 +34,16 @@ public class VaporFramework: ServerFramework {
     public var command: String {
         return Paths.executable + " --env=\(Config.environment)"
     }
+    
+    public init() {}
 }
 
 // MARK: - Zewo
 
 public class ZewoFramework: ServerFramework {
     public let name = "zewo"
+    
+    public init() {}
     
     public func processCount(for server: Server) -> Int {
         var processCount = 1
@@ -55,6 +61,8 @@ public class ZewoFramework: ServerFramework {
 
 public class KituraFramework: ServerFramework {
     public let name = "kitura"
+    
+    public init() {}
     
     public var command: String {
         return Paths.executable + " --env=\(Config.environment)"
@@ -102,4 +110,7 @@ public class PerfectFramework: ServerFramework {
         }
         return commandComponents.joined(separator: " ")
     }
+    
+    public init() {}
+    
 }

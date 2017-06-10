@@ -13,6 +13,8 @@ public protocol ProcessController {
 
 public class Nohup: ProcessController {
     
+    public init() {}
+    
     public func tasks(for framework: ServerFramework) -> TaskSource {
         return TaskSource(tasks: [
             StopTask(framework: framework),
@@ -91,6 +93,8 @@ public class Nohup: ProcessController {
 // MARK: - Supervisord
 
 class Supervisord: ProcessController {
+    
+    public init() {}
     
     func tasks(for framework: ServerFramework) -> TaskSource {
         return TaskSource(tasks:  [
