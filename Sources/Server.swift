@@ -232,10 +232,16 @@ public class DummyServer: Server {
 
 public struct OutputMatcher {
     
-    let regex: NSRegularExpression?
-    let onMatch: (_ text: String) -> ()
+    private let regex: NSRegularExpression?
+    private let onMatch: (_ text: String) -> ()
     
-    init(regex: String, onMatch: @escaping (_ text: String) -> ()) {
+    public init(regex: String, likelyCommand: String) {
+        self.init(regex: regex) { (match) in
+            print("Try running: \(likelyCommand)".yellow)
+        }
+    }
+    
+    public init(regex: String, onMatch: @escaping (_ text: String) -> ()) {
         self.regex = try? NSRegularExpression(pattern: regex, options: [])
         self.onMatch = onMatch
     }

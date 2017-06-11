@@ -34,9 +34,8 @@ public class VaporFramework: ServerFramework {
     public let name = "vapor"
     
     public let buildOutputMatchers = [
-        OutputMatcher(regex: "error: 'openssl/conf.h' file not found", onMatch: { (match) in
-             print("Try running: eval \"$(curl -sL https://apt.vapor.sh)\" && sudo apt-get install vapor".yellow)
-        })
+        OutputMatcher(regex: "error: 'openssl/conf.h' file not found",
+                      likelyCommand: "eval \"$(curl -sL https://apt.vapor.sh)\" && sudo apt-get install vapor")
     ]
     
     public var command: String {
@@ -71,9 +70,8 @@ public class KituraFramework: ServerFramework {
     public let name = "kitura"
     
     public let buildOutputMatchers = [
-        OutputMatcher(regex: "error: 'openssl/conf.h' file not found", onMatch: { (match) in
-            print("Try running: sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev".yellow)
-        })
+        OutputMatcher(regex: "error: 'openssl/conf.h' file not found",
+                      likelyCommand: "sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev")
     ]
     
     public init() {}
@@ -102,9 +100,8 @@ public class PerfectFramework: ServerFramework {
     public let name = "perfect"
     
     public let buildOutputMatchers = [
-        OutputMatcher(regex: "fatal error: 'openssl/ssl.h' file not found", onMatch: { (match) in
-            print("Try running: sudo apt-get install openssl libssl-dev uuid-dev".yellow)
-        })
+        OutputMatcher(regex: "fatal error: 'openssl/ssl.h' file not found",
+                      likelyCommand: "sudo apt-get install openssl libssl-dev uuid-dev")
     ]
     
     public var command: String {
