@@ -8,12 +8,14 @@
 public protocol ServerFramework {
     var name: String { get }
     var command: String { get }
+    var buildOutputMatchers: [OutputMatcher] { get }
     
     func processCount(for server: Server) -> Int
 }
 
 public extension ServerFramework {
     var command: String { return Paths.executable }
+    var buildOutputMatchers: [OutputMatcher] { return [] }
     
     func processCount(for server: Server) -> Int { return 1 }
 }
@@ -30,6 +32,12 @@ public class GenericServerFramework: ServerFramework {
 
 public class VaporFramework: ServerFramework {
     public let name = "vapor"
+    
+    public let buildOutputMatchers = [
+        OutputMatcher(regex: "error: 'openssl/conf.h' file not found", onMatch: { (match) in
+             print("Try running: eval \"$(curl -sL https://apt.vapor.sh)\" && sudo apt-get install vapor".yellow)
+        })
+    ]
     
     public var command: String {
         return Paths.executable + " --env=\(Config.environment)"

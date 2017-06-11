@@ -71,7 +71,11 @@ class BuildTask: Task {
             buildPath = Paths.currentDirectory
         }
         try server.within(buildPath) {
-            try server.execute("swift build -c release")
+            let matcher = OutputMatcher(regex: "error while loading shared libraries", onMatch: { (match) in
+                print("Try running: sudo apt-get update && sudo apt-get -y install clang libicu-dev libpython2.7 libcurl4-openssl-dev".yellow)
+            })
+            let matchers = [matcher] + Config.serverFramework.buildOutputMatchers
+            try server.executeWithOutputMatchers("swift build -c release", matchers: matchers)
         }
     }
 }

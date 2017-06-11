@@ -44,6 +44,7 @@ public protocol Server: class, CustomStringConvertible {
     
     func _internalExecute(_ command: String) throws
     func _internalCapture(_ command: String) throws -> String
+    func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws
 }
 
 extension Server {
@@ -79,11 +80,7 @@ extension Server {
     }
     
     public func executeWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
-        let captured = try capture(command)
-        print(captured)
-        for line in captured.components(separatedBy: "\n") {
-            matchers.forEach { $0.match(line) }
-        }
+        try _internalExecuteWithOutputMatchers(prepCommand(command), matchers: matchers)
     }
     
     public func execute(_ command: String) throws {
@@ -153,6 +150,15 @@ public class SSHServer: Server {
         return output
     }
     
+    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
+        let (status, output) = try session.capture(command)
+        print(output)
+        matchers.forEach { $0.match(output) }
+        guard status == 0 else {
+            throw TaskError.commandFailed
+        }
+    }
+    
 }
 
 // MARK: - DockerServer
@@ -183,6 +189,15 @@ public class DockerServer: Server {
         return captured
     }
     
+    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
+        try makeCall(command) { (output) in
+            print(output, terminator: "")
+            fflush(stdout)
+            
+            matchers.forEach { $0.match(output) }
+        }
+    }
+    
     private func makeCall(_ call: String, output: @escaping OutputClosure) throws {
         let tmpFile = "/tmp/docker_call"
         try call.write(toFile: tmpFile, atomically: true, encoding: .utf8)
@@ -210,7 +225,7 @@ public class DummyServer: Server {
     
     public func _internalExecute(_ command: String) throws {}
     public func _internalCapture(_ command: String) throws -> String { return "" }
-    
+    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {}
 }
 
 // MARK: - OutputMatcher

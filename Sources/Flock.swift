@@ -66,8 +66,10 @@ public class Flock {
             exit(0)
         } catch let TaskError.error(message) {
             print(message.red)
+        } catch TaskError.commandFailed {
+            print("A command failed.".red)
         } catch let error {
-            print(error)
+            print(String(describing: error).red)
         }
         
         exit(1)
