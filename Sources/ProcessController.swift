@@ -58,7 +58,7 @@ public class Nohup: ProcessController {
         override func run(on server: Server) throws {
             print("Starting server...")
             try server.execute("nohup \(Paths.executable) > /dev/null 2>&1 | at now &")
-            try invoke("server:status")
+            try invoke("\(namespace):status")
         }
     }
     
