@@ -154,6 +154,7 @@ public class SSHServer: Server {
         var capture = ""
         let status = try session.execute(command, output: { (output) in
             print(output, terminator: "")
+            fflush(stdout)
             capture += output
         })
         matchers.forEach { $0.match(capture) }
