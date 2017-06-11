@@ -57,7 +57,9 @@ public class Nohup: ProcessController {
         
         override func run(on server: Server) throws {
             print("Starting server...")
-            try server.execute("nohup \(Paths.executable) > /dev/null 2>&1 | at now &")
+            try server.within(Paths.currentDirectory) {
+                try server.execute("nohup \(Paths.relativeExecutable) > /dev/null 2>&1 | at now &")
+            }
             try invoke("\(namespace):status")
         }
     }
@@ -75,7 +77,7 @@ public class Nohup: ProcessController {
     }
     
     static private func findServerPid(on server: Server) throws -> String? {
-        let processes = try server.capture("ps aux | grep \"\(Paths.executable)\"")
+        let processes = try server.capture("ps aux | grep \"\(Paths.relativeExecutable)\"")
         
         let lines = processes.components(separatedBy: "\n")
         for line in lines where !line.contains("grep") {

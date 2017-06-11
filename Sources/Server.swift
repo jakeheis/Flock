@@ -151,9 +151,12 @@ public class SSHServer: Server {
     }
     
     public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
-        let (status, output) = try session.capture(command)
-        print(output)
-        matchers.forEach { $0.match(output) }
+        var capture = ""
+        let status = try session.execute(command, output: { (output) in
+            print(output, terminator: "")
+            capture += output
+        })
+        matchers.forEach { $0.match(capture) }
         guard status == 0 else {
             throw TaskError.commandFailed
         }
@@ -190,12 +193,13 @@ public class DockerServer: Server {
     }
     
     public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
+        var captured = ""
         try makeCall(command) { (output) in
             print(output, terminator: "")
             fflush(stdout)
-            
-            matchers.forEach { $0.match(output) }
+            captured += output
         }
+        matchers.forEach { $0.match(captured) }
     }
     
     private func makeCall(_ call: String, output: @escaping OutputClosure) throws {

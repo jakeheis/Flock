@@ -27,7 +27,11 @@ public struct Paths {
     }
     
     public static var executable: String {
-        return "\(currentDirectory)/.build/release/\(Config.executableName)"
+        return "\(currentDirectory)/\(Paths.relativeExecutable)"
+    }
+    
+    public static var relativeExecutable: String {
+        return ".build/release/\(Config.executableName)"
     }
     
 }
