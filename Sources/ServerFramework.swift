@@ -70,6 +70,12 @@ public class ZewoFramework: ServerFramework {
 public class KituraFramework: ServerFramework {
     public let name = "kitura"
     
+    public let buildOutputMatchers = [
+        OutputMatcher(regex: "error: 'openssl/conf.h' file not found", onMatch: { (match) in
+            print("Try running: sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev".yellow)
+        })
+    ]
+    
     public init() {}
     
     public var command: String {
@@ -94,6 +100,12 @@ public extension Config {
 
 public class PerfectFramework: ServerFramework {
     public let name = "perfect"
+    
+    public let buildOutputMatchers = [
+        OutputMatcher(regex: "fatal error: 'openssl/ssl.h' file not found", onMatch: { (match) in
+            print("Try running: sudo apt-get install openssl libssl-dev uuid-dev".yellow)
+        })
+    ]
     
     public var command: String {
         var commandComponents = [Paths.executable]
