@@ -8,14 +8,14 @@
 public protocol ServerFramework {
     var name: String { get }
     var command: String { get }
-    var buildOutputMatchers: [OutputMatcher] { get }
+    var buildErrorSuggestions: [ErrorSuggestion] { get }
     
     func processCount(for server: Server) -> Int
 }
 
 public extension ServerFramework {
     var command: String { return Paths.executable }
-    var buildOutputMatchers: [OutputMatcher] { return [] }
+    var buildErrorSuggestions: [ErrorSuggestion] { return [] }
     
     func processCount(for server: Server) -> Int { return 1 }
 }
@@ -33,9 +33,9 @@ public class GenericServerFramework: ServerFramework {
 public class VaporFramework: ServerFramework {
     public let name = "vapor"
     
-    public let buildOutputMatchers = [
-        OutputMatcher(regex: "error: 'openssl/conf.h' file not found",
-                      likelyCommand: "eval \"$(curl -sL https://apt.vapor.sh)\" && sudo apt-get install vapor")
+    public let buildErrorSuggestions = [
+        ErrorSuggestion(error: "error: 'openssl/conf.h' file not found",
+                        command: "eval \"$(curl -sL https://apt.vapor.sh)\" && sudo apt-get install vapor")
     ]
     
     public var command: String {
@@ -69,9 +69,9 @@ public class ZewoFramework: ServerFramework {
 public class KituraFramework: ServerFramework {
     public let name = "kitura"
     
-    public let buildOutputMatchers = [
-        OutputMatcher(regex: "error: 'openssl/conf.h' file not found",
-                      likelyCommand: "sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev")
+    public let buildErrorSuggestions = [
+        ErrorSuggestion(error: "error: 'openssl/conf.h' file not found",
+                        command: "sudo apt-get install clang libicu-dev libcurl4-openssl-dev libssl-dev")
     ]
     
     public init() {}
@@ -99,9 +99,9 @@ public extension Config {
 public class PerfectFramework: ServerFramework {
     public let name = "perfect"
     
-    public let buildOutputMatchers = [
-        OutputMatcher(regex: "fatal error: 'openssl/ssl.h' file not found",
-                      likelyCommand: "sudo apt-get install openssl libssl-dev uuid-dev")
+    public let buildErrorSuggestions = [
+        ErrorSuggestion(error: "fatal error: 'openssl/ssl.h' file not found",
+                        command: "sudo apt-get install openssl libssl-dev uuid-dev")
     ]
     
     public var command: String {

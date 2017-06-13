@@ -47,10 +47,32 @@ public extension Task {
 
 // MARK: - TaskError
 
-public enum TaskError: Error {
-    case commandFailed
-    case error(String)
+public struct TaskError: Error {
+    
+    let message: String
+    var commandSuggestion: String?
+    
+    init(status: Int32, commandSuggestion: String? = nil) {
+        self.init(message: "a command failed (error \(status))", commandSuggestion: commandSuggestion)
+    }
+    
+    init(message: String, commandSuggestion: String? = nil) {
+        self.message = message
+        self.commandSuggestion = commandSuggestion
+    }
+    
+    func output() {
+        print("Error: ".red + message)
+        if let commandSuggestion = commandSuggestion {
+            print("Try running: ".yellow + commandSuggestion)
+        }
+    }
+    
 }
+
+//public enum TaskError: Error {
+//    case error(String)
+//}
 
 // MARK: - HookTime
 

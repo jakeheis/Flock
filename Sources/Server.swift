@@ -44,7 +44,7 @@ public protocol Server: class, CustomStringConvertible {
     
     func _internalExecute(_ command: String) throws
     func _internalCapture(_ command: String) throws -> String
-    func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws
+    func _internalExecuteWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws
 }
 
 extension Server {
@@ -79,8 +79,8 @@ extension Server {
         return true
     }
     
-    public func executeWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
-        try _internalExecuteWithOutputMatchers(prepCommand(command), matchers: matchers)
+    public func executeWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
+        try _internalExecuteWithSuggestions(prepCommand(command), suggestions: suggestions)
     }
     
     public func execute(_ command: String) throws {
@@ -123,7 +123,7 @@ public class SSHServer: Server {
             auth = authMethod
         } else {
             guard let method = Config.SSHAuthMethod else {
-                throw TaskError.error("You must either pass in a SSH auth method in your `Server.add` call or specify `Config.SSHAuthMethod` in your configuration file")
+                throw TaskError(message: "You must either pass in a SSH auth method in your `Server.add` call or specify `Config.SSHAuthMethod` in your configuration file")
             }
             auth = method
         }
@@ -136,8 +136,9 @@ public class SSHServer: Server {
     }
     
     public func _internalExecute(_ command: String) throws {
-        guard try session.execute(command) == 0 else {
-            throw TaskError.commandFailed
+        let status = try session.execute(command)
+        guard status == 0 else {
+            throw TaskError(status: status)
         }
     }
     
@@ -145,21 +146,21 @@ public class SSHServer: Server {
         let (status, output) = try session.capture(command)
         guard status == 0 else {
             print(output)
-            throw TaskError.commandFailed
+            throw TaskError(status: status)
         }
         return output
     }
     
-    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
-        var capture = ""
+    public func _internalExecuteWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
+        var captured = ""
         let status = try session.execute(command, output: { (output) in
             print(output, terminator: "")
             fflush(stdout)
-            capture += output
+            captured += output
         })
-        matchers.forEach { $0.match(capture) }
         guard status == 0 else {
-            throw TaskError.commandFailed
+            let suggestion = suggestions.first(where: { $0.matches(captured) })
+            throw TaskError(status: status, commandSuggestion: suggestion?.command)
         }
     }
     
@@ -193,14 +194,18 @@ public class DockerServer: Server {
         return captured
     }
     
-    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {
+    public func _internalExecuteWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
         var captured = ""
-        try makeCall(command) { (output) in
-            print(output, terminator: "")
-            fflush(stdout)
-            captured += output
+        do {
+            try makeCall(command) { (output) in
+                print(output, terminator: "")
+                fflush(stdout)
+                captured += output
+            }
+        } catch var error as TaskError {
+            error.commandSuggestion = suggestions.first(where: { $0.matches(captured) })?.command
+            throw error
         }
-        matchers.forEach { $0.match(captured) }
     }
     
     private func makeCall(_ call: String, output: @escaping OutputClosure) throws {
@@ -215,8 +220,9 @@ public class DockerServer: Server {
         
         let spawned = try Spawn(args: ["/usr/local/bin/docker", "exec", id, "bash", tmpFile], output: output)
         
-        guard spawned.waitForExit() == 0 else {
-            throw TaskError.commandFailed
+        let status = spawned.waitForExit()
+        guard status == 0 else {
+            throw TaskError(status: status)
         }
     }
     
@@ -230,34 +236,18 @@ public class DummyServer: Server {
     
     public func _internalExecute(_ command: String) throws {}
     public func _internalCapture(_ command: String) throws -> String { return "" }
-    public func _internalExecuteWithOutputMatchers(_ command: String, matchers: [OutputMatcher]) throws {}
+    public func _internalExecuteWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {}
 }
 
 // MARK: - OutputMatcher
 
-public struct OutputMatcher {
+public struct ErrorSuggestion {
     
-    private let regex: NSRegularExpression?
-    private let onMatch: (_ text: String) -> ()
+    let error: String
+    let command: String
     
-    public init(regex: String, likelyCommand: String) {
-        self.init(regex: regex) { (match) in
-            print("Try running: \(likelyCommand)".yellow)
-        }
-    }
-    
-    public init(regex: String, onMatch: @escaping (_ text: String) -> ()) {
-        self.regex = try? NSRegularExpression(pattern: regex, options: [])
-        self.onMatch = onMatch
-    }
-    
-    func match(_ output: String) {
-        guard let regex = regex else {
-            return
-        }
-        if regex.numberOfMatches(in: output, options: [], range: NSRange(location: 0, length: output.characters.count)) > 0 {
-            onMatch(output)
-        }
+    func matches(_ output: String) -> Bool {
+        return output.contains(error)
     }
     
 }

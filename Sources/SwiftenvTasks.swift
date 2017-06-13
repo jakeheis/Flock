@@ -35,8 +35,8 @@ class SwiftInstallTask: Task {
         }
         
         guard let swiftenvExecutable = optionalSwiftenvExecutable else {
-            // git clone https://github.com/kylef/swiftenv/ \(Config.swiftenvLocation)
-            throw TaskError.error("swiftenv not found at path \(Config.swiftenvLocation). Try running: git clone https://github.com/kylef/swiftenv/ \(Config.swiftenvLocation)")
+            throw TaskError(message: "swiftenv not found at path \(Config.swiftenvLocation)",
+                commandSuggestion: "git clone https://github.com/kylef/swiftenv \(Config.swiftenvLocation)")
         }
         
         let swiftVersion: String
@@ -45,7 +45,7 @@ class SwiftInstallTask: Task {
         if let fileVersion = try? String(contentsOfFile: ".swift-version", encoding: .utf8) {
             let trimmedFileVersion = fileVersion.trimmingCharacters(in: .whitespacesAndNewlines)
             if let configVersion = Config.swiftVersion, configVersion != trimmedFileVersion {
-                throw TaskError.error("Conflicting Swift versions - Config.swiftVersion = \(configVersion), `.swift-version` = \(trimmedFileVersion)")
+                throw TaskError(message: "Conflicting Swift versions - Config.swiftVersion = \(configVersion), `.swift-version` = \(trimmedFileVersion)")
             }
             swiftVersion = trimmedFileVersion
             global = false
@@ -53,7 +53,7 @@ class SwiftInstallTask: Task {
             swiftVersion = configVersion
             global = true
         } else {
-            throw TaskError.error("You must specify which Swift version to use either in your configuration file (Config.swiftVersion) or in a `.swift-version` file.")
+            throw TaskError(message: "You must specify which Swift version to use either in your configuration file (Config.swiftVersion) or in a `.swift-version` file.")
         }
         
         let existingSwifts = try server.capture("\(swiftenvExecutable) versions")

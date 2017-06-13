@@ -27,7 +27,7 @@ class TaskExecutor {
         try runTasks(scheduled: .before(task.fullName))
         
         if Servers.servers.isEmpty && mode == .execute {
-            throw TaskError.error("You must specify servers in your configuration files")
+            throw TaskError(message: "You must specify servers in your configuration files")
         }
         
         Logger.logTaskBegun(task)
@@ -51,7 +51,7 @@ class TaskExecutor {
     
     static func run(taskNamed name: String) throws {
         guard let task = tasks.first(where: { $0.fullName == name }) else {
-            throw TaskError.error("Task \(name) not found")
+            throw TaskError(message: "Task \(name) not found")
         }
         try run(task: task)
     }
@@ -59,10 +59,7 @@ class TaskExecutor {
     // MARK: - Private
     
     private static func runTasks(scheduled scheduleTime: HookTime) throws {
-        guard let scheduler = scheduler else {
-            throw TaskError.error("Something went very very wrong")
-        }
-        let taskNames = scheduler.scheduledTasks(at: scheduleTime)
+        let taskNames = scheduler!.scheduledTasks(at: scheduleTime)
         for name in taskNames {
             try run(taskNamed: name)
         }

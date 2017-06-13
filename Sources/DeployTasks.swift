@@ -42,10 +42,10 @@ class GitTask: Task {
     
     func run(on server: Server) throws {
         guard !Config.projectName.isEmpty else {
-            throw TaskError.error("You must supply a projectName in your configuration")
+            throw TaskError(message: "You must supply a projectName in your configuration")
         }
         guard !Config.repoURL.isEmpty else {
-            throw TaskError.error("You must supply a repoURL in your configuration")
+            throw TaskError(message: "You must supply a repoURL in your configuration")
         }
         
         let currentTime = Date()
@@ -70,12 +70,14 @@ class BuildTask: Task {
         } else {
             buildPath = Paths.currentDirectory
         }
-        let matcher = OutputMatcher(regex: "error while loading shared libraries",
-                                    likelyCommand: "sudo apt-get update && sudo apt-get -y install clang libicu-dev libpython2.7 libcurl4-openssl-dev")
-        let matchers = [matcher] + Config.serverFramework.buildOutputMatchers
+        
+        let suggestion = ErrorSuggestion(error: "error while loading shared libraries",
+                                         command: "sudo apt-get update && sudo apt-get -y install clang libicu-dev libpython2.7 libcurl4-openssl-dev")
+        
+        let suggestions = [suggestion] + Config.serverFramework.buildErrorSuggestions
         
         let pathPrefix = TaskSource.swiftenv.beingUsed ? "PATH=\"\(Config.swiftenvLocation)/shims:${PATH}\" " : ""
-        try server.executeWithOutputMatchers("\(pathPrefix)swift build -C \(buildPath) -c release", matchers: matchers)
+        try server.executeWithSuggestions("\(pathPrefix)swift build -C \(buildPath) -c release", suggestions: suggestions)
     }
 }
 
@@ -85,7 +87,8 @@ class LinkTask: Task {
     
     func run(on server: Server) throws {
         guard let nextDestination = try? server.capture("readlink \(Paths.nextDirectory)").trimmingCharacters(in: .whitespacesAndNewlines) else {
-            throw TaskError.error("Couldn't find location of next directory to link - try running full `flock deploy`")
+            throw TaskError(message: "Couldn't find location of next directory to link",
+                            commandSuggestion: "flock deploy (not just flock deploy:link)")
         }
         try server.execute("ln -sfn \(nextDestination) \(Paths.currentDirectory)")
         try server.execute("rm \(Paths.nextDirectory)")

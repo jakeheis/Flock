@@ -121,14 +121,11 @@ class Supervisord: ProcessController {
         }
         
         func run(on server: Server) throws {
-            throw TaskError.commandFailed
+            fatalError()
         }
         
         func executeSupervisorctl(command: String, on server: Server) throws {
-            let persmissionsMatcher = OutputMatcher(regex: "Permission denied:") { (match) in
-                print("Make sure this user has the ability to run supervisorctl commands -- see https://github.com/jakeheis/Flock#permissions".yellow)
-            }
-            try server.executeWithOutputMatchers("supervisorctl \(command)", matchers: [persmissionsMatcher])
+            try server.execute("supervisorctl \(command)")
         }
         
     }
@@ -150,12 +147,8 @@ class Supervisord: ProcessController {
                 try server.execute("mkdir -p \(ep)")
             }
             
-            let persmissionsMatcher = OutputMatcher(regex: "Permission denied") { (match) in
-                print("Make sure this user has write access to \(Supervisord.confFilePath) -- see https://github.com/jakeheis/Flock#permissions".yellow)
-            }
-            
             let conf = ConfFile(framework: framework, server: server)
-            try server.executeWithOutputMatchers("echo \"\(conf.toString())\" > \(Supervisord.confFilePath)", matchers: [persmissionsMatcher])
+            try server.execute("echo \"\(conf.toString())\" > \(Supervisord.confFilePath)")
             
             try executeSupervisorctl(command: "reread", on: server)
             try executeSupervisorctl(command: "update", on: server)
