@@ -9,6 +9,7 @@
 public class TaskSource {
     
     let tasks: [Task]
+    var beingUsed = false
     
     init(tasks: [Task]) {
         self.tasks = tasks

@@ -45,6 +45,7 @@ public class Flock {
     
     public static func use(_ taskSource: TaskSource) {
         tasks += taskSource.tasks
+        taskSource.beingUsed = true
     }
     
     public static func run() -> Never {

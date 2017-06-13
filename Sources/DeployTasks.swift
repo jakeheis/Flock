@@ -73,7 +73,9 @@ class BuildTask: Task {
         let matcher = OutputMatcher(regex: "error while loading shared libraries",
                                     likelyCommand: "sudo apt-get update && sudo apt-get -y install clang libicu-dev libpython2.7 libcurl4-openssl-dev")
         let matchers = [matcher] + Config.serverFramework.buildOutputMatchers
-        try server.executeWithOutputMatchers("swift build -C \(buildPath) -c release", matchers: matchers)
+        
+        let pathPrefix = TaskSource.swiftenv.beingUsed ? "PATH=\"\(Config.swiftenvLocation)/shims:${PATH}\" " : ""
+        try server.executeWithOutputMatchers("\(pathPrefix)swift build -C \(buildPath) -c release", matchers: matchers)
     }
 }
 

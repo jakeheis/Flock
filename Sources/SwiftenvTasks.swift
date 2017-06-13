@@ -8,46 +8,35 @@
 
 public extension TaskSource {
     static let swiftenv = TaskSource(tasks: [
-        SwiftenvInstallationTask(),
-        SwiftTask()
+        SwiftInstallTask()
     ])
 }
 
 public extension Config {
+    static var swiftenvLocation = "$HOME/.swiftenv"
     static var swiftVersion: String? = nil
 }
 
-private let swiftenv = "swiftenv"
-private let location = "$HOME/.swiftenv"
-
-class SwiftenvInstallationTask: Task {
-    let name = "install-swiftenv"
-    let namespace = swiftenv
+class SwiftInstallTask: Task {
     
-    func run(on server: Server) throws {
-        try server.execute("git clone https://github.com/kylef/swiftenv.git \(location)")
-        
-        let bashrc = "~/.bashrc"
-        
-        let swiftenvLoad = [
-            "export SWIFTENV_ROOT=\"\(location)\"",
-            "export PATH=\"\\$SWIFTENV_ROOT/bin:\\$PATH\"",
-            "eval \"\\$(swiftenv init -)\""
-            ].joined(separator: "; ")
-        
-        try server.execute("sed -i '1i \(swiftenvLoad)' \(bashrc)")
-    }
-}
-
-class SwiftTask: Task {
-    
-    let name = "swift"
-    let namespace = swiftenv
+    let name = "install"
+    let namespace = "swiftenv"
     let hookTimes: [HookTime] = [.before("deploy:build")]
     
     func run(on server: Server) throws {
-        if !server.directoryExists(location) {
-            try invoke("swiftenv:install-swiftenv")
+        var optionalSwiftenvExecutable: String? = nil
+        do {
+            _  = try server.capture("which swiftenv")
+            optionalSwiftenvExecutable = "swiftenv"
+        } catch {
+            if server.directoryExists(Config.swiftenvLocation) {
+                optionalSwiftenvExecutable = Config.swiftenvLocation + "/bin/swiftenv"
+            }
+        }
+        
+        guard let swiftenvExecutable = optionalSwiftenvExecutable else {
+            // git clone https://github.com/kylef/swiftenv/ \(Config.swiftenvLocation)
+            throw TaskError.error("swiftenv not found at path \(Config.swiftenvLocation). Try running: git clone https://github.com/kylef/swiftenv/ \(Config.swiftenvLocation)")
         }
         
         let swiftVersion: String
@@ -67,13 +56,14 @@ class SwiftTask: Task {
             throw TaskError.error("You must specify which Swift version to use either in your configuration file (Config.swiftVersion) or in a `.swift-version` file.")
         }
         
-        let existingSwifts = try server.capture("swiftenv versions")
+        let existingSwifts = try server.capture("\(swiftenvExecutable) versions")
         if !existingSwifts.contains(swiftVersion) {
-            try server.execute("swiftenv install \(swiftVersion)")
+            try server.execute("\(swiftenvExecutable) install \(swiftVersion)")
+            try server.execute("\(swiftenvExecutable) rehash")
         }
         
         if global {
-            try server.execute("swiftenv global \(swiftVersion)")
+            try server.execute("\(swiftenvExecutable) global \(swiftVersion)")
         }
     }
     
