@@ -39,8 +39,8 @@ public extension Task {
         return ""
     }
     
-    func invoke(_ name: String) throws {
-        try TaskExecutor.run(taskNamed: name)
+    func invoke(_ name: String, on server: Server) throws {
+        try TaskExecutor.run(taskNamed: name, on: server)
     }
     
 }
@@ -49,19 +49,19 @@ public extension Task {
 
 public struct TaskError: Error {
     
-    let message: String
-    var commandSuggestion: String?
+    public let message: String
+    public var commandSuggestion: String?
     
-    init(status: Int32, commandSuggestion: String? = nil) {
+    public init(status: Int32, commandSuggestion: String? = nil) {
         self.init(message: "a command failed (error \(status))", commandSuggestion: commandSuggestion)
     }
     
-    init(message: String, commandSuggestion: String? = nil) {
+    public init(message: String, commandSuggestion: String? = nil) {
         self.message = message
         self.commandSuggestion = commandSuggestion
     }
     
-    func output() {
+    public func output() {
         print()
         print("Error: ".red + message)
         if let commandSuggestion = commandSuggestion {

@@ -6,7 +6,9 @@
 //
 
 public protocol ProcessController {
+    
     func tasks(for framework: ServerFramework) -> TaskSource
+    
 }
 
 // MARK: - Nohup
@@ -19,6 +21,7 @@ public class Nohup: ProcessController {
         return TaskSource(tasks: [
             StopTask(framework: framework),
             StartTask(framework: framework),
+            RestartTask(framework: framework),
             StatusTask(framework: framework)
         ])
     }
@@ -60,8 +63,18 @@ public class Nohup: ProcessController {
             try server.within(Paths.currentDirectory) {
                 try server.execute("nohup \(Paths.relativeExecutable) > /dev/null 2>&1 | at now &")
             }
-            try invoke("\(namespace):status")
+            try invoke("\(namespace):status", on: server)
         }
+    }
+    
+    class RestartTask: NohupTask {
+        override var name: String { return "restart" }
+        
+        override func run(on server: Server) throws {
+            try invoke("\(namespace):stop", on: server)
+            try invoke("\(namespace):start", on: server)
+        }
+        
     }
     
     class StatusTask: NohupTask {
@@ -94,13 +107,16 @@ public class Nohup: ProcessController {
 
 // MARK: - Supervisord
 
+public extension Config {
+    static var supervisorConfPath =  "/etc/supervisor/conf.d/\(Config.projectName).conf"
+}
+
 class Supervisord: ProcessController {
     
     public init() {}
     
     func tasks(for framework: ServerFramework) -> TaskSource {
         return TaskSource(tasks:  [
-            WriteConfTask(framework: framework),
             StartTask(framework: framework),
             StopTask(framework: framework),
             RestartTask(framework: framework),
@@ -130,39 +146,6 @@ class Supervisord: ProcessController {
         
     }
     
-    class WriteConfTask: SupervisordTask {
-        
-        override var name: String {
-            return "write-conf"
-        }
-        
-        override func run(on server: Server) throws {
-            // Supervisor requires the directories containing the logs to already be created
-            let outputParent = parentDirectory(of: Config.outputLog)
-            let errorParent = parentDirectory(of: Config.errorLog)
-            if let op = outputParent {
-                try server.execute("mkdir -p \(op)")
-            }
-            if let ep = errorParent, errorParent != outputParent {
-                try server.execute("mkdir -p \(ep)")
-            }
-            
-            let conf = ConfFile(framework: framework, server: server)
-            try server.execute("echo \"\(conf.toString())\" > \(Supervisord.confFilePath)")
-            
-            try executeSupervisorctl(command: "reread", on: server)
-            try executeSupervisorctl(command: "update", on: server)
-        }
-        
-        private func parentDirectory(of path: String) -> String? {
-            if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
-                return path.substring(to: lastPathComponentIndex.lowerBound)
-            }
-            return nil
-        }
-        
-    }
-    
     class StartTask: SupervisordTask {
         
         override var name: String {
@@ -170,7 +153,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try invoke("\(namespace):write-conf")
+            try ConfFile(framework: framework).write(to: server)
             
             try executeSupervisorctl(command: "start \(Config.projectName):*", on: server)
         }
@@ -200,7 +183,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try invoke("\(namespace):write-conf")
+            try ConfFile(framework: framework).write(to: server)
             
             try executeSupervisorctl(command: "restart \(Config.projectName):*", on: server)
         }
@@ -219,15 +202,10 @@ class Supervisord: ProcessController {
         
     }
     
-    private static var confFilePath: String {
-        return "/etc/supervisor/conf.d/\(Config.projectName).conf"
-    }
-    
     public struct ConfFile {
         
         public var programName: String
         public var command: String
-        public var processCount: Int
         
         public var processName = "%(process_num)s"
         public var autoStart = true
@@ -235,13 +213,32 @@ class Supervisord: ProcessController {
         public var stdoutLogfile = Config.outputLog
         public var stderrLogfile = Config.errorLog
         
-        public init(framework: ServerFramework, server: Server) {
+        public var framework: ServerFramework
+        
+        public init(framework: ServerFramework) {
             self.programName = Config.projectName
             self.command = framework.command
-            self.processCount = framework.processCount(for: server)
+            self.framework = framework
         }
         
-        func toString() -> String {
+        func write(to server: Server) throws {
+            let outputParent = parentDirectory(of: stdoutLogfile)
+            let errorParent = parentDirectory(of: stderrLogfile)
+            if let op = outputParent {
+                try server.execute("mkdir -p \(op)")
+            }
+            if let ep = errorParent, errorParent != outputParent {
+                try server.execute("mkdir -p \(ep)")
+            }
+            
+            let processCount = framework.processCount(for: server)
+            try server.execute("echo \"\(toString(processCount: processCount))\" > \(Config.supervisorConfPath)")
+            
+            try server.execute("supervisorctl reread")
+            try server.execute("supervisorctl update")
+        }
+        
+        private func toString(processCount: Int) -> String {
             let config = [
                 "[program:\(programName)]",
                 "command=\(command)",
@@ -254,6 +251,13 @@ class Supervisord: ProcessController {
                 ""
             ]
             return config.joined(separator: "\n")
+        }
+        
+        private func parentDirectory(of path: String) -> String? {
+            if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
+                return path.substring(to: lastPathComponentIndex.lowerBound)
+            }
+            return nil
         }
         
     }

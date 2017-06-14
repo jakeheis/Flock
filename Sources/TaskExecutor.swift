@@ -23,7 +23,7 @@ class TaskExecutor {
         self.scheduler = TaskScheduler(tasks: tasks)
     }
     
-    static func run(task: Task) throws {
+    static func run(task: Task, on server: Server? = nil) throws {
         try runTasks(scheduled: .before(task.fullName))
         
         if Servers.servers.isEmpty && mode == .execute {
@@ -32,28 +32,32 @@ class TaskExecutor {
         
         Logger.logTaskBegun(task)
         
-        switch mode {
-        case .execute:
-            for server in Servers.servers {
-                if Set(server.roles).isDisjoint(with: Set(task.serverRoles)) {
-                    continue
+        if let server = server {
+            try task.run(on: server)
+        } else {
+            switch mode {
+            case .execute:
+                for server in Servers.servers {
+                    if Set(server.roles).isDisjoint(with: Set(task.serverRoles)) {
+                        continue
+                    }
+                    try task.run(on: server)
                 }
-                try task.run(on: server)
+            case .dryRun:
+                do {
+                    try task.run(on: DummyServer())
+                } catch {}
             }
-        case .dryRun:
-            do {
-                try task.run(on: DummyServer())
-            } catch {}
         }
         
         try runTasks(scheduled: .after(task.fullName))
     }
     
-    static func run(taskNamed name: String) throws {
+    static func run(taskNamed name: String, on server: Server? = nil) throws {
         guard let task = tasks.first(where: { $0.fullName == name }) else {
             throw TaskError(message: "Task \(name) not found")
         }
-        try run(task: task)
+        try run(task: task, on: server)
     }
     
     // MARK: - Private

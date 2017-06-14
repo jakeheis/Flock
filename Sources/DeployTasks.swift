@@ -30,9 +30,9 @@ class DeployTask: Task {
     let name = deploy
     
     func run(on server: Server) throws {
-        try invoke("deploy:git")
-        try invoke("deploy:build")
-        try invoke("deploy:link")
+        try invoke("deploy:git", on: server)
+        try invoke("deploy:build", on: server)
+        try invoke("deploy:link", on: server)
     }
 }
 
