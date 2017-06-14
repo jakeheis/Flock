@@ -145,7 +145,9 @@ public class SSHServer: Server {
     public func _internalCapture(_ command: String) throws -> String {
         let (status, output) = try session.capture(command)
         guard status == 0 else {
-            print(output)
+            if !output.isEmpty {
+                print(output)
+            }
             throw TaskError(status: status)
         }
         return output

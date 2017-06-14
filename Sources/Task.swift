@@ -62,17 +62,15 @@ public struct TaskError: Error {
     }
     
     func output() {
+        print()
         print("Error: ".red + message)
         if let commandSuggestion = commandSuggestion {
             print("Try running: ".yellow + commandSuggestion)
         }
+        print()
     }
     
 }
-
-//public enum TaskError: Error {
-//    case error(String)
-//}
 
 // MARK: - HookTime
 
