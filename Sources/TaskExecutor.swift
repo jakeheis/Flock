@@ -7,16 +7,9 @@
 //
 
 class TaskExecutor {
-  
-    enum Mode {
-        case execute
-        case dryRun
-    }
     
     private static var tasks: [Task] = []
     private static var scheduler: TaskScheduler?
-    
-    static var mode: Mode = .execute
     
     static func setup(with tasks: [Task]) {
         self.tasks = tasks
@@ -26,7 +19,7 @@ class TaskExecutor {
     static func run(task: Task, on server: Server? = nil) throws {
         try runTasks(scheduled: .before(task.fullName))
         
-        if Servers.servers.isEmpty && mode == .execute {
+        if Server.servers.isEmpty {
             throw TaskError(message: "You must specify servers in your configuration files")
         }
         
@@ -35,18 +28,9 @@ class TaskExecutor {
         if let server = server {
             try task.run(on: server)
         } else {
-            switch mode {
-            case .execute:
-                for server in Servers.servers {
-                    if Set(server.roles).isDisjoint(with: Set(task.serverRoles)) {
-                        continue
-                    }
-                    try task.run(on: server)
-                }
-            case .dryRun:
-                do {
-                    try task.run(on: DummyServer())
-                } catch {}
+            let taskRoles = Set(task.serverRoles)
+            for server in Server.servers where !Set(server.roles).isDisjoint(with: taskRoles) {
+                try task.run(on: server)
             }
         }
         

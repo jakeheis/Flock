@@ -12,7 +12,7 @@ public protocol Task {
     var name: String { get }
     var namespace: String { get }
     
-    var serverRoles: [ServerRole] { get }
+    var serverRoles: [Server.Role] { get }
     var hookTimes: [HookTime] { get }
     
     func run(on server: Server) throws
@@ -20,7 +20,7 @@ public protocol Task {
 
 public extension Task {
     
-    var serverRoles: [ServerRole] {
+    var serverRoles: [Server.Role] {
         return [.app, .db, .web]
     }
     
