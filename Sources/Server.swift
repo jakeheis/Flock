@@ -41,6 +41,7 @@ public protocol Server: class, CustomStringConvertible {
     var id: String { get }
     var roles: [ServerRole] { get }
     var commandStack: [String] { get set }
+    var ptyType: SSH.PtyType? { get set }
     
     func _internalExecute(_ command: String) throws
     func _internalCapture(_ command: String) throws -> String
@@ -114,6 +115,15 @@ public class SSHServer: Server {
     
     let session: SSH.Session
     
+    public var ptyType: SSH.PtyType? {
+        get {
+            return session.ptyType
+        }
+        set(newValue) {
+            session.ptyType = newValue
+        }
+    }
+    
     public init(ip: String, user: String, roles: [ServerRole], authMethod: SSH.AuthMethod?) throws {
         let session = try SSH.Session(host: ip)
         session.ptyType = .vanilla
@@ -176,6 +186,8 @@ public class DockerServer: Server {
     public let roles: [ServerRole]
     public var commandStack: [String] = []
     
+    public var ptyType: SSH.PtyType?
+    
     public init(container: String, roles: [ServerRole]) {
         self.id = container
         self.roles = roles
@@ -235,6 +247,7 @@ public class DummyServer: Server {
     public let id = "DummyServer"
     public let roles: [ServerRole] = []
     public var commandStack: [String] = []
+    public var ptyType: SSH.PtyType?
     
     public func _internalExecute(_ command: String) throws {}
     public func _internalCapture(_ command: String) throws -> String { return "" }

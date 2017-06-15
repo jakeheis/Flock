@@ -60,9 +60,11 @@ public class Nohup: ProcessController {
         
         override func run(on server: Server) throws {
             print("Starting server...")
+            server.ptyType = nil
             try server.within(Paths.currentDirectory) {
-                try server.execute("nohup \(Paths.relativeExecutable) > /dev/null 2>&1 | at now &")
+                try server.execute("nohup \(Paths.relativeExecutable) > /dev/null 2>&1 &")
             }
+            server.ptyType = .vanilla
             try invoke("\(namespace):status", on: server)
         }
     }
@@ -136,12 +138,11 @@ class Supervisord: ProcessController {
             self.framework = framework
         }
         
-        func run(on server: Server) throws {
-            fatalError()
-        }
+        func run(on server: Server) throws {}
         
         func executeSupervisorctl(command: String, on server: Server) throws {
-            try server.execute("supervisorctl \(command)")
+            try server.executeWithSuggestions("supervisorctl \(command) \(Config.projectName):*",
+                suggestions: [])
         }
         
     }
@@ -155,7 +156,7 @@ class Supervisord: ProcessController {
         override func run(on server: Server) throws {
             try ConfFile(framework: framework).write(to: server)
             
-            try executeSupervisorctl(command: "start \(Config.projectName):*", on: server)
+            try executeSupervisorctl(command: "start", on: server)
         }
         
     }
@@ -167,7 +168,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try executeSupervisorctl(command: "stop \(Config.projectName):*", on: server)
+            try executeSupervisorctl(command: "stop", on: server)
         }
         
     }
@@ -185,7 +186,7 @@ class Supervisord: ProcessController {
         override func run(on server: Server) throws {
             try ConfFile(framework: framework).write(to: server)
             
-            try executeSupervisorctl(command: "restart \(Config.projectName):*", on: server)
+            try executeSupervisorctl(command: "restart", on: server)
         }
         
     }
@@ -197,7 +198,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try executeSupervisorctl(command: "status \(Config.projectName):*", on: server)
+            try executeSupervisorctl(command: "status", on: server)
         }
         
     }

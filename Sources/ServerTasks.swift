@@ -7,9 +7,9 @@
 //
 
 public extension TaskSource {
-    static var server: TaskSource {
+    static let server: TaskSource = {
         return Config.processController.tasks(for: Config.serverFramework)
-    }
+    }()
 }
 
 public extension Config {

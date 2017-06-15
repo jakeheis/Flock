@@ -54,26 +54,24 @@ After this command completes, you should follow the instructions Flock prints. F
 The Flockfile specifies which tasks and configurations you want Flock to use. In order to use some other tasks, just import the task library and tell Flock to use them:
 ```swift
 import Flock
-import SwiftenvFlock
 
-Flock.use(Flock.Tools)
-Flock.use(Flock.Deploy)
-Flock.use(Flock.Swiftenv)
-Flock.use(Flock.Server)
+Flock.use(.deploy)
+Flock.use(.swiftenv)
+Flock.use(.server)
 
 ...
 ```
 
-`Flock.Deploy` includes the following tasks:
+`.deploy` includes the following tasks:
 ```bash
 flock deploy          # Invokes deploy:git, deploy:build, and deploy:link 
 flock deploy:git      # Clones your project onto your server into a timestamped directory
 flock deploy:build    # Builds your project
 flock deploy:link     # Links your newly built project directory as the current directory
 ```
-`Flock.Server` includes:
+`.server` includes:
 ```bash
-flock server:restart  # Hooks after deploy:link
+flock server:restart  # Automatically run after deploy:link
 flock server:start
 flock server:stop
 flock server:status
@@ -83,18 +81,9 @@ Running `flock deploy` will:
 1. Clone your project onto your server into a timestamped directory (e.g. `/var/www/VaporExample/releases/20161028211084`)
 1. Build your project
 1. Link your built project to the `current` directory (e.g. `/var/www/VaporExample/current`)
-1. If you use `Flock.Server`, Flock will then use Supervisord to start your executable and run it as a daemon.
-
-`Flock.Tools` includes tasks which assist in installing the necessary tools for your swift project to run on the server:
-```bash
-flock tools                 # Invokes tools:dependencies, tools:swift       
-flock tools:dependencies    # Installs dependencies necessary for Swift to work
-flock tools:swift           # Installs Swift using swiftenv
-```
+1. If you use `.server`, Flock will then use nohup or Supervisord to start your executable and run it as a daemon.
 
 See [SwiftenvFlock](https://github.com/jakeheis/SwiftenvFlock) for more information about `Flock.SwiftenvFlock`
-
-See [Permissions](#permissions) for information regarding which user these tasks should be executed as on the server.
 
 ### config/deploy/FlockDependencies.json
 This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to specify version):
@@ -134,20 +123,21 @@ Config.repoURL = "URL"
 These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are multiple ways to specify a server:
 ```swift
 func configure() {
-      // For project-wide auth:
-      Config.SSHAuthMethod = .key("/path/to/my/key")
-      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
+    // For project-wide auth:
+    Config.SSHAuthMethod = SSH.Key(
+        privateKey: "~/.ssh/key"
+    )
+    Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
       
-      // For server-specific auth:
-      Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: .key("/path/to/another/key"))
-
-      // Or, if you've added your server to your .ssh/config file, you can use this shorthand:
-      Servers.add(SSHHost: "NamedServer", roles: [.app, .db, .web])
+    // For server-specific auth:
+    Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: SSH.Key(
+        privateKey: "~/.ssh/key"
+    ))
 }
 ```
 
 ### .flock
-You can (in general) ignore all the files in this directory.
+You can ignore all the files in this directory. It is used internally by Flock and should not be checked into version control.
 
 ## Dependencies
 
@@ -158,11 +148,6 @@ To add a third party dependency, you first add the repository to config/deploy/F
        {
            "name" : "https://github.com/jakeheis/Flock",
            "version": "0.1.0"
-       },
-       {
-           "name" : "https://github.com/jakeheis/VaporFlock",
-           "major": 0,
-           "minor": 0
        }
    ]
 }
@@ -171,8 +156,6 @@ To add a third party dependency, you first add the repository to config/deploy/F
 In your Flockfile, notify Flock of your new source of tasks:
 ```swift
 import Flock
-import SwiftenvFlock
-import VaporFlock
 
 Flock.use(Flock.Tools)
 Flock.use(Flock.Deploy)
@@ -195,15 +178,11 @@ If you just want Flock to restart your app after deployment, the built-in `Flock
 
 ## Environments
 
-If you want to add additional configuration environments (beyond "staging" and "production), you can do that in the `Flockfile`. To create a `testing` environment, for example, you would start by running `flock --add-env Testing` and then modify the `Flockfile` as such:
+If you want to add additional configuration environments (beyond "staging" and "production), you can do that in the `Flockfile`. To create a `testing` environment, for example, you would start by running  and then modify the `Flockfile` as such:
 ```swift
 ...
-
-Flock.configure(.always, with: Always()) // Located at config/deploy/Always.swift
-Flock.configure(.env("production"), with: Production()) // Located at config/deploy/Production.swift
-Flock.configure(.env("staging"), with: Staging()) // Located at config/deploy/Staging.swift
-Flock.configure(.env("testing"), with: Testing()) // Located at config/deploy/Testing.swift
-
+// Update this line
+Flock.configure(base: Base(), environments: [Production(), Staging(), Testing()]
 ...
 ```
 
