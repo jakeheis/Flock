@@ -28,13 +28,14 @@ public class Nohup: ProcessController {
     
     class NohupTask: Task {
         
-        let namespace: String
+        let framework: ServerFramework
         
+        var namespace: String { return framework.name }
         var name: String { return "" }
         var hookTimes: [HookTime] { return [] }
         
         init(framework: ServerFramework) {
-            self.namespace = framework.name
+            self.framework = framework
         }
         
         func run(on server: Server) throws {}
@@ -60,11 +61,9 @@ public class Nohup: ProcessController {
         
         override func run(on server: Server) throws {
             print("Starting server...")
-            server.ptyType = nil
-            try server.within(Paths.currentDirectory) {
-                try server.execute("nohup \(Paths.relativeExecutable) > /dev/null 2>&1 &")
+            try server.withPty(nil) {
+                try server.execute("nohup \(framework.command) > /dev/null 2>&1 &")
             }
-            server.ptyType = .vanilla
             try invoke("\(namespace):status", on: server)
         }
     }
@@ -92,7 +91,7 @@ public class Nohup: ProcessController {
     }
     
     static private func findServerPid(on server: Server) throws -> String? {
-        let processes = try server.capture("ps aux | grep \"\(Paths.relativeExecutable)\"")
+        let processes = try server.capture("ps aux | grep \"\(Paths.executable)\"")
         
         let lines = processes.components(separatedBy: "\n")
         for line in lines where !line.contains("grep") {
@@ -113,11 +112,11 @@ public extension Config {
     static var supervisorConfPath =  "/etc/supervisor/conf.d/\(Config.projectName).conf"
 }
 
-class Supervisord: ProcessController {
+public class Supervisord: ProcessController {
     
     public init() {}
     
-    func tasks(for framework: ServerFramework) -> TaskSource {
+    public func tasks(for framework: ServerFramework) -> TaskSource {
         return TaskSource(tasks:  [
             StartTask(framework: framework),
             StopTask(framework: framework),
@@ -128,21 +127,20 @@ class Supervisord: ProcessController {
     
     class SupervisordTask: Task {
         
+        var namespace: String { return framework.name }
         var name: String { return "" }
         var hookTimes: [HookTime] { return [] }
-        let namespace: String
+        
         let framework: ServerFramework
         
         init(framework: ServerFramework) {
-            self.namespace = framework.name
             self.framework = framework
         }
         
         func run(on server: Server) throws {}
         
         func executeSupervisorctl(command: String, on server: Server) throws {
-            try server.executeWithSuggestions("supervisorctl \(command) \(Config.projectName):*",
-                suggestions: [])
+            try server.execute("supervisorctl \(command) \(Config.projectName):*")
         }
         
     }
@@ -154,7 +152,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try ConfFile(framework: framework).write(to: server)
+            try Supervisord.writeConf(of: framework, to: server)
             
             try executeSupervisorctl(command: "start", on: server)
         }
@@ -184,7 +182,7 @@ class Supervisord: ProcessController {
         }
         
         override func run(on server: Server) throws {
-            try ConfFile(framework: framework).write(to: server)
+            try Supervisord.writeConf(of: framework, to: server)
             
             try executeSupervisorctl(command: "restart", on: server)
         }
@@ -203,64 +201,46 @@ class Supervisord: ProcessController {
         
     }
     
-    public struct ConfFile {
-        
-        public var programName: String
-        public var command: String
-        
-        public var processName = "%(process_num)s"
-        public var autoStart = true
-        public var autoRestart = "unexpected"
-        public var stdoutLogfile = Config.outputLog
-        public var stderrLogfile = Config.errorLog
-        
-        public var framework: ServerFramework
-        
-        public init(framework: ServerFramework) {
-            self.programName = Config.projectName
-            self.command = framework.command
-            self.framework = framework
+    private static func writeConf(of framework: ServerFramework, to server: Server) throws {
+        guard server.commandExists("supervisorctl") else {
+            throw TaskError(message: "Supervisor must be installed on your system",
+                            commandSuggestion: "sudo apt-get install supervisor")
         }
         
-        func write(to server: Server) throws {
-            let outputParent = parentDirectory(of: stdoutLogfile)
-            let errorParent = parentDirectory(of: stderrLogfile)
-            if let op = outputParent {
-                try server.execute("mkdir -p \(op)")
-            }
-            if let ep = errorParent, errorParent != outputParent {
-                try server.execute("mkdir -p \(ep)")
-            }
-            
-            let processCount = framework.processCount(for: server)
-            try server.execute("echo \"\(toString(processCount: processCount))\" > \(Config.supervisorConfPath)")
-            
-            try server.execute("supervisorctl reread")
-            try server.execute("supervisorctl update")
+        let outputParent = parentDirectory(of: Config.outputLog)
+        let errorParent = parentDirectory(of: Config.errorLog)
+        if let op = outputParent {
+            try server.execute("mkdir -p \(op)")
+        }
+        if let ep = errorParent, errorParent != outputParent {
+            try server.execute("mkdir -p \(ep)")
         }
         
-        private func toString(processCount: Int) -> String {
-            let config = [
-                "[program:\(programName)]",
-                "command=\(command)",
-                "process_name=\(processName)",
-                "autostart=\(autoStart)",
-                "autorestart=\(autoRestart)",
-                "stdout_logfile=\(stdoutLogfile)",
-                "stderr_logfile=\(stderrLogfile)",
-                "numprocs=\(processCount)",
-                ""
-            ]
-            return config.joined(separator: "\n")
-        }
+        let processCount = framework.processCount(for: server)
         
-        private func parentDirectory(of path: String) -> String? {
-            if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
-                return path.substring(to: lastPathComponentIndex.lowerBound)
-            }
-            return nil
-        }
+        let config = [
+            "[program:\(Config.projectName)]",
+            "command=\(framework.command)",
+            "process_name=%(process_num)s",
+            "autostart=true",
+            "autorestart=unexpected",
+            "stdout_logfile=\(Config.outputLog)",
+            "stderr_logfile=\(Config.errorLog)",
+            "numprocs=\(processCount)",
+            ""
+        ].joined(separator: "\n")
         
+        try server.execute("echo \"\(config)\" > \(Config.supervisorConfPath)")
+        
+        try server.execute("supervisorctl reread")
+        try server.execute("supervisorctl update")
+    }
+    
+    private static func parentDirectory(of path: String) -> String? {
+        if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
+            return path.substring(to: lastPathComponentIndex.lowerBound)
+        }
+        return nil
     }
     
 }

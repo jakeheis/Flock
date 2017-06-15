@@ -24,17 +24,12 @@ class SwiftInstallTask: Task {
     let hookTimes: [HookTime] = [.before("deploy:build")]
     
     func run(on server: Server) throws {
-        var optionalSwiftenvExecutable: String? = nil
-        do {
-            _  = try server.capture("which swiftenv")
-            optionalSwiftenvExecutable = "swiftenv"
-        } catch {
-            if server.directoryExists(Config.swiftenvLocation) {
-                optionalSwiftenvExecutable = Config.swiftenvLocation + "/bin/swiftenv"
-            }
-        }
-        
-        guard let swiftenvExecutable = optionalSwiftenvExecutable else {
+        let swiftenvExecutable: String
+        if server.commandExists("swiftenv") {
+            swiftenvExecutable = "swiftenv"
+        } else if server.directoryExists(Config.swiftenvLocation) {
+            swiftenvExecutable = Config.swiftenvLocation + "/bin/swiftenv"
+        } else {
             throw TaskError(message: "swiftenv not found at path \(Config.swiftenvLocation)",
                 commandSuggestion: "git clone https://github.com/kylef/swiftenv \(Config.swiftenvLocation)")
         }

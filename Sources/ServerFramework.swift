@@ -39,7 +39,7 @@ public class VaporFramework: ServerFramework {
     ]
     
     public var command: String {
-        return Paths.executable + " --env=\(Config.environment)"
+        return Paths.executable + " --env=\(Config.environment) --workDir=\(Paths.currentDirectory)"
     }
     
     public init() {}

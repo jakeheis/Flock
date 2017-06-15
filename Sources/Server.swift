@@ -60,6 +60,14 @@ extension Server {
         commandStack.removeLast()
     }
     
+    public func withPty(_ ptyType: SSH.PtyType?, block: () throws -> ()) rethrows {
+        let oldType = self.ptyType
+        
+        self.ptyType = ptyType
+        try block()
+        self.ptyType = oldType
+    }
+    
     public func fileExists(_ file: String) -> Bool {
         let call = "test -f \(file)"
         do {
@@ -72,6 +80,16 @@ extension Server {
     
     public func directoryExists(_ directory: String) -> Bool {
         let call = "test -d \(directory)"
+        do {
+            try execute(call)
+        } catch {
+            return false
+        }
+        return true
+    }
+    
+    public func commandExists(_ command: String) -> Bool {
+        let call = "command -v foo >/dev/null 2>&1"
         do {
             try execute(call)
         } catch {
