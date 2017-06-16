@@ -14,7 +14,7 @@ class Logger {
         print("Task \(task.fullName) begun:".blue.bold)
     }
     
-    static func logCall(_ call: String, on server: String) {
+    static func logCall(_ call: String, on server: Server) {
         print("On \(server): \(call)".green)
     }
     

@@ -6,9 +6,7 @@
 //
 
 public protocol ProcessController {
-    
     func tasks(for framework: ServerFramework) -> TaskSource
-    
 }
 
 // MARK: - Nohup
@@ -108,10 +106,6 @@ public class Nohup: ProcessController {
 
 // MARK: - Supervisord
 
-public extension Config {
-    static var supervisorConfPath =  "/etc/supervisor/conf.d/\(Config.projectName).conf"
-}
-
 public class Supervisord: ProcessController {
     
     public init() {}
@@ -147,23 +141,20 @@ public class Supervisord: ProcessController {
     
     class StartTask: SupervisordTask {
         
-        override var name: String {
-            return "start"
-        }
+        override var name: String { return "start" }
         
         override func run(on server: Server) throws {
             try Supervisord.writeConf(of: framework, to: server)
             
             try executeSupervisorctl(command: "start", on: server)
+            try invoke("\(namespace):status", on: server)
         }
         
     }
     
     class StopTask: SupervisordTask {
         
-        override var name: String {
-            return "stop"
-        }
+        override var name: String { return "stop" }
         
         override func run(on server: Server) throws {
             try executeSupervisorctl(command: "stop", on: server)
@@ -173,27 +164,21 @@ public class Supervisord: ProcessController {
     
     class RestartTask: SupervisordTask {
         
-        override var name: String {
-            return "restart"
-        }
-        
-        override var hookTimes: [HookTime] {
-            return [.after("deploy:link")]
-        }
+        override var name: String { return "restart" }
+        override var hookTimes: [HookTime] { return [.after("deploy:link")] }
         
         override func run(on server: Server) throws {
             try Supervisord.writeConf(of: framework, to: server)
             
             try executeSupervisorctl(command: "restart", on: server)
+            try invoke("\(namespace):status", on: server)
         }
         
     }
     
     class StatusTask: SupervisordTask {
         
-        override var name: String {
-            return "status"
-        }
+        override var name: String { return "status" }
         
         override func run(on server: Server) throws {
             try executeSupervisorctl(command: "status", on: server)
@@ -230,7 +215,12 @@ public class Supervisord: ProcessController {
             ""
         ].joined(separator: "\n")
         
-        try server.execute("echo \"\(config)\" > \(Config.supervisorConfPath)")
+        let chownLine = "chown=\(server.user)"
+        let path = "/etc/supervisor/conf.d/\(Config.projectName).conf"
+        let suggestion = ErrorSuggestion(error: "Permission denied",
+                                         command: "sudo sed -i '/\\[unix_http_server\\]/a\(chownLine)' /etc/supervisor/supervisord.conf && sudo touch \(path) && sudo chown \(server.user) \(path) && sudo service supervisor restart",
+                                         customMessage: "Supervisor must be configured to be used by the user `\(server.user)`")
+        try server.executeWithSuggestions("echo \"\(config)\" > \(path)", suggestions: [suggestion])
         
         try server.execute("supervisorctl reread")
         try server.execute("supervisorctl update")

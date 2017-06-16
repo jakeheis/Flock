@@ -35,7 +35,8 @@ public class Server {
         }
     }
     
-    public let id: String
+    public let ip: String
+    public let user: String
     public let roles: [Role]
     public var commandStack: [String] = []
     let session: SSH.Session
@@ -56,7 +57,8 @@ public class Server {
         
         try session.authenticate(username: user, authMethod: auth)
         
-        self.id = "\(user)@\(ip)"
+        self.ip = ip
+        self.user = user
         self.roles = roles
         self.session = session
     }
@@ -98,7 +100,7 @@ public class Server {
     }
     
     public func commandExists(_ command: String) -> Bool {
-        let call = "command -v foo >/dev/null 2>&1"
+        let call = "command -v \(command) >/dev/null 2>&1"
         do {
             try execute(call)
         } catch {
@@ -136,14 +138,18 @@ public class Server {
         })
         guard status == 0 else {
             let suggestion = suggestions.first(where: { $0.matches(captured) })
-            throw TaskError(status: status, commandSuggestion: suggestion?.command)
+            if let message = suggestion?.customMessage {
+                throw TaskError(message: message, commandSuggestion: suggestion?.command)
+            } else {
+                throw TaskError(status: status, commandSuggestion: suggestion?.command)
+            }
         }
     }
     
     private func prepCommand(_ command: String) -> String {
         let finalCommands = commandStack + [command]
         let call = finalCommands.joined(separator: "; ")
-        Logger.logCall(call, on: id)
+        Logger.logCall(call, on: self)
         return call
     }
     
@@ -152,7 +158,7 @@ public class Server {
 extension Server: CustomStringConvertible {
     
     public var description: String {
-        return id
+        return "\(user)@\(ip)"
     }
     
 }
@@ -163,6 +169,13 @@ public struct ErrorSuggestion {
     
     let error: String
     let command: String
+    let customMessage: String?
+    
+    init(error: String, command: String, customMessage: String? = nil) {
+        self.error = error
+        self.command = command
+        self.customMessage = customMessage
+    }
     
     func matches(_ output: String) -> Bool {
         return output.contains(error)
