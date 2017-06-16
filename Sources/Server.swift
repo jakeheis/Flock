@@ -9,7 +9,7 @@
 import Foundation
 import Rainbow
 import Spawn
-import SSH
+import Shout
 
 public extension Config {
     static var SSHAuthMethod: SSH.AuthMethod? = nil
@@ -50,7 +50,7 @@ public class Server {
             auth = authMethod
         } else {
             guard let method = Config.SSHAuthMethod else {
-                throw TaskError(message: "You must either pass in a SSH auth method in your `Server.add` call or specify `Config.SSHAuthMethod` in your configuration file")
+                throw TaskError(message: "You must either pass in a SSH auth method in your `Server.create` call or specify `Config.SSHAuthMethod` in your configuration file")
             }
             auth = method
         }

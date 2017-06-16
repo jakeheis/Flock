@@ -8,12 +8,16 @@
 
 import XCTest
 @testable import Flock
+import Shout
+import Foundation
 
 var testServer: Server? = {
-    guard let containerId = try? String(contentsOfFile: ".test-docker-id") else {
+    guard let serverIp = try? String(contentsOfFile: ".test-ip") else {
         return nil
     }
-    return Server(dockerContainer: containerId.trimmingCharacters(in: .whitespacesAndNewlines), roles: [.app, .db, .web])
+    return try? Server(ip: serverIp.trimmingCharacters(in: .whitespacesAndNewlines), user: "root", roles: [.app, .db, .web], authMethod: SSH.Key(
+        privateKey: "~/.ssh/id_rsa"
+    ))
 }()
 
 class FlockTestCase: XCTestCase {
@@ -22,7 +26,7 @@ class FlockTestCase: XCTestCase {
         TestTaskMonitor.reset()
         
         TaskExecutor.setup(with: [])
-        Servers.servers = []
+        Server.servers = []
     }
     
 }

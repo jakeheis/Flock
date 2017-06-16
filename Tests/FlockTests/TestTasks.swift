@@ -33,7 +33,7 @@ class FirstTestTask: Task {
     let name = "first"
     let namespace = "test"
     let hookTimes: [HookTime] = [.before("test:third")]
-    let serverRoles: [ServerRole] = [.app, .db, .web]
+    let serverRoles: [Server.Role] = [.app, .db, .web]
     
     func run(on server: Server) throws {
         TestTaskMonitor.firstExecuted = true
@@ -47,7 +47,7 @@ class SecondTestTask: Task {
     let name = "second"
     let namespace = "test"
     let hookTimes: [HookTime] = [.after("test:third")]
-    let serverRoles: [ServerRole] = [.app]
+    let serverRoles: [Server.Role] = [.app]
     
     func run(on server: Server) throws {
         TestTaskMonitor.secondExecuted = true
@@ -60,7 +60,7 @@ class ThirdTestTask: Task {
     
     let name = "third"
     let namespace = "test"
-    let serverRoles: [ServerRole] = [.db]
+    let serverRoles: [Server.Role] = [.db]
     
     func run(on server: Server) throws {
         TestTaskMonitor.thirdExecuted = true

@@ -7,17 +7,17 @@
 //
 
 #if os(Linux)
-import Glibc
+    import Glibc
 #else
-import Darwin
+    import Darwin
 #endif
 
 import Rainbow
 
 public class Flock {
-  
+    
     private(set) static var tasks: [Task] = []
-  
+    
     // MARK: - Public
     
     public static func configure(base: Environment, environments: [Environment]) {

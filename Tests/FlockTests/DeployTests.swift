@@ -18,8 +18,8 @@ class DeployTests: FlockTestCase {
         }
         
         Config.deployDirectory = "/var/www"
-        Config.projectName = "TestProject"
-        Config.repoURL = "/tmp/TestProject"
+        Config.projectName = "SwiftCLI"
+        Config.repoURL = "https://github.com/jakeheis/SwiftCLI"
         
         git(testServer)
         build(testServer)
@@ -37,13 +37,13 @@ class DeployTests: FlockTestCase {
             return
         }
         
-        XCTAssert(testServer.directoryExists("/var/www/TestProject"))
-        XCTAssert(testServer.directoryExists("/var/www/TestProject/next"))
-        XCTAssert(testServer.directoryExists("/var/www/TestProject/releases"))
+        XCTAssert(testServer.directoryExists("/var/www/SwiftCLI"))
+        XCTAssert(testServer.directoryExists("/var/www/SwiftCLI/next"))
+        XCTAssert(testServer.directoryExists("/var/www/SwiftCLI/releases"))
     }
     
     func build(_ testServer: Server) {
-        XCTAssert(!testServer.fileExists("/var/www/TestProject/next/.build/release/TestProject"))
+        XCTAssert(!testServer.fileExists("/var/www/SwiftCLI/next/.build/release/SwiftCLI.build"))
         
         let git = BuildTask()
         do {
@@ -53,11 +53,11 @@ class DeployTests: FlockTestCase {
             return
         }
         
-        XCTAssert(testServer.fileExists("/var/www/TestProject/next/.build/release/TestProject"))
+        XCTAssert(testServer.fileExists("/var/www/SwiftCLI/next/.build/release/SwiftCLI.build"))
     }
     
     func link(_ testServer: Server) {
-        XCTAssert(!testServer.directoryExists("/var/www/TestProject/current"))
+        XCTAssert(!testServer.directoryExists("/var/www/SwiftCLI/current"))
         
         let git = LinkTask()
         do {
@@ -67,7 +67,7 @@ class DeployTests: FlockTestCase {
             return
         }
         
-        XCTAssert(testServer.directoryExists("/var/www/TestProject/current"))
+        XCTAssert(testServer.directoryExists("/var/www/SwiftCLI/current"))
     }
     
 }

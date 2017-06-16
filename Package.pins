@@ -14,10 +14,10 @@
       "version": "2.0.1"
     },
     {
-      "package": "SSH",
+      "package": "Shout",
       "reason": null,
-      "repositoryURL": "https://github.com/jakeheis/SSH",
-      "version": "0.1.2"
+      "repositoryURL": "https://github.com/jakeheis/Shout",
+      "version": "0.2.1"
     },
     {
       "package": "Socket",
