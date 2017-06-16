@@ -22,6 +22,7 @@ public extension Config {
     static var executableName = "" // Must be supplied
     static var repoURL = "" // Must be supplied
     static var deployDirectory = "/var/www"
+    static var repoBranch: String? = nil
 }
 
 private let deploy = "deploy"
@@ -54,7 +55,14 @@ class GitTask: Task {
         let timestamp = formatter.string(from: currentTime)
         
         let cloneDirectory = "\(Paths.releasesDirectory)/\(timestamp)"
-        try server.execute("git clone \(Config.repoURL) \(cloneDirectory)")
+        
+        let branchSegment: String
+        if let branch = Config.repoBranch {
+            branchSegment = " -b \(branch)"
+        } else {
+            branchSegment = ""
+        }
+        try server.execute("git clone\(branchSegment) --depth 1 \(Config.repoURL) \(cloneDirectory)")
         try server.execute("ln -sfn \(cloneDirectory) \(Paths.nextDirectory)")
     }
 }
