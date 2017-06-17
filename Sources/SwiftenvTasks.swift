@@ -13,7 +13,7 @@ public extension TaskSource {
 }
 
 public extension Config {
-    static var swiftenvLocation = "$HOME/.swiftenv"
+    static var swiftenvLocation = "~/.swiftenv"
     static var swiftVersion: String? = nil
 }
 
