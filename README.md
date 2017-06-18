@@ -74,16 +74,45 @@ flock server:start
 flock server:stop
 flock server:status
 ```
+
+`.swiftenv` includes:
+```bash
+flock swiftenv:install  # Automatically run before deploy:build
+```
+
 Running `flock deploy` will:
 
 1. Clone your project onto your server into a timestamped directory (e.g. `/var/www/VaporExample/releases/20161028211084`)
-1. Build your project
+1. Build your project using the version of Swift specified in the .swift-version file
 1. Link your built project to the `current` directory (e.g. `/var/www/VaporExample/current`)
 1. If you use `.server`, Flock will then use nohup or Supervisord to start your executable and run it as a daemon.
 
-See [SwiftenvFlock](https://github.com/jakeheis/SwiftenvFlock) for more information about `Flock.SwiftenvFlock`
+### config/deploy/Base.swift
+This file contains configuration which will always be used. This is where config which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
+```swift
+Config.projectName = "ProjectName"
+Config.executableName = "ExecutableName"
+Config.repoURL = "URL"
+```
 
-### config/deploy/FlockDependencies.json
+### config/deploy/Production.swift and config/deploy/Staging.swift
+These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock deploy staging`). This is where you'll want to specify your production and staging servers. There are multiple ways to specify a server:
+```swift
+func configure() {
+    // For project-wide auth:
+    Config.SSHAuthMethod = SSH.Key(
+        privateKey: "~/.ssh/key"
+    )
+    Flock.serve(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
+      
+    // For server-specific auth:
+    Flock.serve(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: SSH.Key(
+        privateKey: "~/.ssh/key"
+    ))
+}
+```
+
+### config/deploy/FlockPackage.swift
 This file contains your Flock dependencies. To start this only contains `Flock` itself, but if you want to use third party tasks you can add their repositories here. You specify the repository's URL and version (there are three ways to specify version):
 ```json
 {
@@ -109,30 +138,6 @@ This file contains your Flock dependencies. To start this only contains `Flock` 
 }
 ```
 See the [dependencies](#dependencies) section below for more information on third party dependencies.
-### config/deploy/Always.swift
-This file contains configuration which will always be used. This is where config which is needed regardless of environment should be placed. Some fields you'll need to update before running any Flock tasks:
-```
-Config.projectName = "ProjectName"
-Config.executableName = "ExecutableName"
-Config.repoURL = "URL"
-```
-
-### config/deploy/Production.swift and config/deploy/Staging.swift
-These files contain configuration specific to the production and staging environments, respectively. They will only be run when Flock is executed in their environment (using `flock task -e staging`). Generally this is where you'll want to specify your production and staging servers. There are multiple ways to specify a server:
-```swift
-func configure() {
-    // For project-wide auth:
-    Config.SSHAuthMethod = SSH.Key(
-        privateKey: "~/.ssh/key"
-    )
-    Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web])
-      
-    // For server-specific auth:
-    Servers.add(ip: "9.9.9.9", user: "user", roles: [.app, .db, .web], authMethod: SSH.Key(
-        privateKey: "~/.ssh/key"
-    ))
-}
-```
 
 ### .flock
 You can ignore all the files in this directory. It is used internally by Flock and should not be checked into version control.
