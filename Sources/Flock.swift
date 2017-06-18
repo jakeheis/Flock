@@ -13,10 +13,12 @@
 #endif
 
 import Rainbow
+import Shout
 
 public class Flock {
     
     private(set) static var tasks: [Task] = []
+    private(set) static var servers: [Server] = []
     
     // MARK: - Public
     
@@ -41,6 +43,10 @@ public class Flock {
                 break
             }
         }
+    }
+    
+    public static func serve(ip: String, user: String, roles: [Server.Role], authMethod: SSH.AuthMethod? = nil) {
+        servers.append(Server(ip: ip, user: user, roles: roles, authMethod: authMethod))
     }
     
     public static func use(_ taskSource: TaskSource) {

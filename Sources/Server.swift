@@ -23,39 +23,28 @@ public class Server {
         case web
     }
     
-    public static var servers: [Server] = []
-    
-    public static func create(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod? = nil) {
-        do {
-            let server = try Server(ip: ip, user: user, roles: roles, authMethod: authMethod)
-            servers.append(server)
-        } catch {
-            print("Couldn't connect to \(user)@\(ip) (error: \(error))")
-            exit(1)
-        }
-    }
-    
     public let ip: String
     public let user: String
     public let roles: [Role]
-    public var commandStack: [String] = []
-    let session: SSH.Session
     
-    public init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) throws {
-        let session = try SSH.Session(host: ip)
-        session.ptyType = .vanilla
-        
-        let auth: SSH.AuthMethod
-        if let authMethod = authMethod {
-            auth = authMethod
-        } else {
-            guard let method = Config.SSHAuthMethod else {
-                throw TaskError(message: "You must either pass in a SSH auth method in your `Server.create` call or specify `Config.SSHAuthMethod` in your configuration file")
-            }
-            auth = method
+    private let session: SSH.Session
+    private var commandStack: [String] = []
+    
+    public init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
+        guard let auth = authMethod ?? Config.SSHAuthMethod else {
+            print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `Config.SSHAuthMethod` in your configuration file")
+            exit(1)
         }
         
-        try session.authenticate(username: user, authMethod: auth)
+        let session: SSH.Session
+        do {
+            session = try SSH.Session(host: ip)
+            session.ptyType = .vanilla
+            try session.authenticate(username: user, authMethod: auth)
+        } catch let error {
+            print("Error: ".red + "Couldn't connect to \(user)@\(ip) (\(error))")
+            exit(1)
+        }
         
         self.ip = ip
         self.user = user

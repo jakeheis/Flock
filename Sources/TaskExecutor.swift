@@ -19,7 +19,7 @@ class TaskExecutor {
     static func run(task: Task, on server: Server? = nil) throws {
         try runTasks(scheduled: .before(task.fullName))
         
-        if Server.servers.isEmpty {
+        if Flock.servers.isEmpty {
             throw TaskError(message: "You must specify servers in your configuration files")
         }
         
@@ -29,7 +29,7 @@ class TaskExecutor {
             try task.run(on: server)
         } else {
             let taskRoles = Set(task.serverRoles)
-            for server in Server.servers where !Set(server.roles).isDisjoint(with: taskRoles) {
+            for server in Flock.servers where !Set(server.roles).isDisjoint(with: taskRoles) {
                 try task.run(on: server)
             }
         }
