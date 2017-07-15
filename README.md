@@ -6,8 +6,6 @@ $ flock deploy
 ```
 Flock will clone your project onto your server(s), build it, and start the application (and do anything else you want it to do). Flock already works great with [Vapor](https://github.com/vapor/vapor), [Zewo](https://github.com/Zewo/Zewo), [Perfect](https://github.com/PerfectlySoft/Perfect), and [Kitura](https://github.com/IBM-Swift/Kitura) -- see [below](#server-dependencies) for more information.
 
-Check out [this post](https://medium.com/@jakeheis/flock-f54ae40ce48#.nb22b4plo) for a step by step walkthrough of how to use Flock, or read the documentation below.
-
 Inspired by [Capistrano](https://github.com/capistrano/capistrano).
 
 Table of Contents
@@ -18,8 +16,6 @@ Table of Contents
        * [Manual](#manual)
    * [Setup](#setup)
       * [Init](#init)
-      * [Dependencies](#dependencies)
-         * [Server dependencies](#server-dependencies)
       * [Environments](#environments)
    * [Tasks](#tasks)
        * [Running tasks](#running-tasks)
@@ -245,22 +241,6 @@ To ensure the `deploy` task succeeds, make sure:
 Some additional considerations if you are using `Flock.Server`:
 - The deploy user can run `supervisorctl` commands (see [Using supervisorctl with linux permissions but without root or sudo](https://coffeeonthekeyboard.com/using-supervisorctl-with-linux-permissions-but-without-root-or-sudo-977/) for more info)
 - The deploy user has access to the `supervisor` config file (default /etc/supervisor/conf.d/server.conf)
-
-Running `flock tools` can take care of most of these things for you, but you must set `Config.supervisordUser` in `config/deploy/Always.swift` to your dedicated deploy user *before* running `flock tools`.
-### flock tools
-The `tools` task must be run as the root user. This means that in `config/deploy/Production.swift`, in your `Servers.add` call you must pass `user: "root"`. As mentioned above, it is not a good idea to deploy with `user: "root"`, so you should only call `flock tools` with this configuration and then change it to make calls with your dedicated deploy user rather then the root user.
 # Related projects
 #### [FlockCLI](https://github.com/jakeheis/FlockCLI) 
 The CLI used to interact with Flock
-#### [SwiftenvFlock](https://github.com/jakeheis/SwiftenvFlock)
-Integration of Swiftenv into Flock deployments
-#### [VaporFlock](https://github.com/jakeheis/VaporFlock)
-Automated deployment of your Vapor server using Flock
-#### [PerfectFlock](https://github.com/jakeheis/PerfectFlock)
-Automated deployment of your Perfect server using Flock
-#### [KituraFlock](https://github.com/jakeheis/KituraFlock)
-Automated deployment of your Kitura server using Flock
-#### [ZewoFlock](https://github.com/jakeheis/ZewoFlock)
-Automated deployment of your Zewo server using Flock
-#### [VaporExample](https://github.com/jakeheis/VaporExample)
-An example of a Vapor server deployed with Flock
