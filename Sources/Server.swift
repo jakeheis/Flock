@@ -16,21 +16,33 @@ public extension Config {
 }
 
 public class Server {
-    
+
+    public struct Address {
+        public let ip: String
+        public let port: Int
+
+        public init(ip: String, port: Int) {
+            self.ip = ip
+            self.port = port
+        }
+    }
+
     public enum Role {
         case app
         case db
         case web
     }
     
-    public let ip: String
+    public let address: Address
     public let user: String
     public let roles: [Role]
     
     private let session: SSH.Session
     private var commandStack: [String] = []
+
+
     
-    public init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
+    public init(address: Address, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
         guard let auth = authMethod ?? Config.SSHAuthMethod else {
             print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `Config.SSHAuthMethod` in your configuration file")
             exit(1)
@@ -38,18 +50,22 @@ public class Server {
         
         let session: SSH.Session
         do {
-            session = try SSH.Session(host: ip)
+            session = try SSH.Session(host: address.ip, port: Int32(address.port))
             session.ptyType = .vanilla
             try session.authenticate(username: user, authMethod: auth)
         } catch let error {
-            print("Error: ".red + "Couldn't connect to \(user)@\(ip) (\(error))")
+            print("Error: ".red + "Couldn't connect to \(user)@\(address) (\(error))")
             exit(1)
         }
         
-        self.ip = ip
+        self.address = address
         self.user = user
         self.roles = roles
         self.session = session
+    }
+
+    public convenience init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
+        self.init(address: Address(ip: ip, port: 22), user: user, roles: roles, authMethod: authMethod)
     }
     
     // MARK: - Command helpers
@@ -147,9 +163,15 @@ public class Server {
 extension Server: CustomStringConvertible {
     
     public var description: String {
-        return "\(user)@\(ip)"
+        return "\(user)@\(address)"
     }
     
+}
+
+extension Server.Address: CustomStringConvertible {
+    public var description: String {
+        return "\(ip):\(port)"
+    }
 }
 
 // MARK: - OutputMatcher
