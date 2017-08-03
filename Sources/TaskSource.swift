@@ -11,7 +11,7 @@ public class TaskSource {
     let tasks: [Task]
     var beingUsed = false
     
-    init(tasks: [Task]) {
+    public init(tasks: [Task]) {
         self.tasks = tasks
     }
     
