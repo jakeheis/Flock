@@ -1,14 +1,20 @@
+// swift-tools-version:4.0
+// Managed by ice
+
 import PackageDescription
 
 let package = Package(
     name: "Flock",
-    dependencies: [
-        .Package(url: "https://github.com/onevcat/Rainbow", majorVersion: 2, minor: 0),
-        .Package(url: "https://github.com/jakeheis/Spawn", majorVersion: 0, minor: 0),
-        .Package(url: "https://github.com/jakeheis/Shout", majorVersion: 0)
+    products: [
+        .library(name: "Flock", targets: ["Flock"]),
     ],
-    exclude: [
-        "Tests/TestProject"
+    dependencies: [
+        .package(url: "https://github.com/onevcat/Rainbow", from: "3.0.0"),
+        .package(url: "https://github.com/jakeheis/Shout", from: "0.2.3"),
+        .package(url: "https://github.com/jakeheis/Spawn", from: "0.0.6"),
+    ],
+    targets: [
+        .target(name: "Flock", dependencies: ["Rainbow", "Shout", "Spawn"]),
+        .testTarget(name: "FlockTests", dependencies: ["Flock"]),
     ]
 )
-

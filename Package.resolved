@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CSSH",
+        "repositoryURL": "https://github.com/jakeheis/CSSH",
+        "state": {
+          "branch": null,
+          "revision": "579a20508ab598f78713a60fed95706efd06bbcb",
+          "version": "1.0.3"
+        }
+      },
+      {
+        "package": "Rainbow",
+        "repositoryURL": "https://github.com/onevcat/Rainbow",
+        "state": {
+          "branch": null,
+          "revision": "dfe579abc72347618e0ffde4faa36fa085c5f3bc",
+          "version": "3.0.0"
+        }
+      },
+      {
+        "package": "Shout",
+        "repositoryURL": "https://github.com/jakeheis/Shout",
+        "state": {
+          "branch": null,
+          "revision": "2c3778681de4a215f215b87dd1ad1820e76b9180",
+          "version": "0.2.4"
+        }
+      },
+      {
+        "package": "Socket",
+        "repositoryURL": "https://github.com/IBM-Swift/BlueSocket",
+        "state": {
+          "branch": null,
+          "revision": "5aae4f88a4c80b6bd6461e3ff4e37df100779422",
+          "version": "0.12.72"
+        }
+      },
+      {
+        "package": "Spawn",
+        "repositoryURL": "https://github.com/jakeheis/Spawn",
+        "state": {
+          "branch": null,
+          "revision": "737435e81917f9120552b04164293b66520ade77",
+          "version": "0.0.6"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -228,7 +228,7 @@ public class Supervisord: ProcessController {
     
     private static func parentDirectory(of path: String) -> String? {
         if let lastPathComponentIndex = path.range(of: "/", options: .backwards, range: nil, locale: nil) {
-            return path.substring(to: lastPathComponentIndex.lowerBound)
+            return String(path[..<lastPathComponentIndex.lowerBound])
         }
         return nil
     }
