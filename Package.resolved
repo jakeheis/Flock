@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/onevcat/Rainbow",
         "state": {
           "branch": null,
-          "revision": "dfe579abc72347618e0ffde4faa36fa085c5f3bc",
-          "version": "3.0.0"
+          "revision": "f69961599ad524251d677fbec9e4bac57385d6fc",
+          "version": "3.1.1"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/jakeheis/Shout",
         "state": {
           "branch": null,
-          "revision": "2c3778681de4a215f215b87dd1ad1820e76b9180",
-          "version": "0.2.4"
+          "revision": "e6d2baa8b8d06ab7c44413db630bdc2892d56ff9",
+          "version": "0.4.1"
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/IBM-Swift/BlueSocket",
         "state": {
           "branch": null,
-          "revision": "5aae4f88a4c80b6bd6461e3ff4e37df100779422",
-          "version": "0.12.72"
+          "revision": "26c8f4e4e3000421a0c97aaf0c7b5e9aa5475222",
+          "version": "0.12.94"
         }
       },
       {

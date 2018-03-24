@@ -12,7 +12,7 @@ import Spawn
 import Shout
 
 public extension Config {
-    static var SSHAuthMethod: SSH.AuthMethod? = nil
+    static var SSHAuthMethod: SSHAuthMethod? = nil
 }
 
 public class Server {
@@ -37,22 +37,20 @@ public class Server {
     public let user: String
     public let roles: [Role]
     
-    private let session: SSH.Session
+    private let ssh: SSH
     private var commandStack: [String] = []
-
-
     
-    public init(address: Address, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
+    public init(address: Address, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
         guard let auth = authMethod ?? Config.SSHAuthMethod else {
             print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `Config.SSHAuthMethod` in your configuration file")
             exit(1)
         }
         
-        let session: SSH.Session
+        let ssh: SSH
         do {
-            session = try SSH.Session(host: address.ip, port: Int32(address.port))
-            session.ptyType = .vanilla
-            try session.authenticate(username: user, authMethod: auth)
+            ssh = try SSH(host: address.ip, port: Int32(address.port))
+            ssh.ptyType = .vanilla
+            try ssh.authenticate(username: user, authMethod: auth)
         } catch let error {
             print("Error: ".red + "Couldn't connect to \(user)@\(address) (\(error))")
             exit(1)
@@ -61,10 +59,10 @@ public class Server {
         self.address = address
         self.user = user
         self.roles = roles
-        self.session = session
+        self.ssh = ssh
     }
 
-    public convenience init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
+    public convenience init(ip: String, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
         self.init(address: Address(ip: ip, port: 22), user: user, roles: roles, authMethod: authMethod)
     }
     
@@ -77,11 +75,11 @@ public class Server {
     }
     
     public func withPty(_ newType: SSH.PtyType?, block: () throws -> ()) rethrows {
-        let oldType = session.ptyType
+        let oldType = ssh.ptyType
         
-        session.ptyType = newType
+        ssh.ptyType = newType
         try block()
-        session.ptyType = oldType
+        ssh.ptyType = oldType
     }
     
     public func fileExists(_ file: String) -> Bool {
@@ -117,14 +115,14 @@ public class Server {
     // MARK: - Comamnd execution
     
     public func execute(_ command: String) throws {
-        let status = try session.execute(prepCommand(command))
+        let status = try ssh.execute(prepCommand(command))
         guard status == 0 else {
             throw TaskError(status: status)
         }
     }
     
     public func capture(_ command: String) throws -> String {
-        let (status, output) = try session.capture(prepCommand(command))
+        let (status, output) = try ssh.capture(prepCommand(command))
         guard status == 0 else {
             if !output.isEmpty {
                 print(output)
@@ -136,7 +134,7 @@ public class Server {
     
     public func executeWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
         var captured = ""
-        let status = try session.execute(prepCommand(command), output: { (output) in
+        let status = try ssh.execute(prepCommand(command), output: { (output) in
             print(output, terminator: "")
             fflush(stdout)
             captured += output

@@ -45,11 +45,11 @@ public class Flock {
         }
     }
     
-    public static func serve(ip: String, user: String, roles: [Server.Role], authMethod: SSH.AuthMethod? = nil) {
+    public static func serve(ip: String, user: String, roles: [Server.Role], authMethod: SSHAuthMethod? = nil) {
         servers.append(Server(ip: ip, user: user, roles: roles, authMethod: authMethod))
     }
 
-    public static func serve(address: Server.Address, user: String, roles: [Server.Role], authMethod: SSH.AuthMethod? = nil) {
+    public static func serve(address: Server.Address, user: String, roles: [Server.Role], authMethod: SSHAuthMethod? = nil) {
         servers.append(Server(address: address, user: user, roles: roles, authMethod: authMethod))
     }
     
