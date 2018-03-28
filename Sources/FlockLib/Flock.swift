@@ -33,9 +33,15 @@ public protocol FlockConfig {
 
 public class Flock {
     
-    public static func go(_ config: FlockConfig, _ each: (_ server: Server) -> ()) {
+    public static func go(_ config: FlockConfig, _ each: (_ server: Server) throws -> ()) {
         let servers = config.servers.map { Server(ip: $0.ip, user: $0.user, roles: [], authMethod: $0.auth)}
-        servers.forEach(each)
+        servers.forEach { (server) in
+            do {
+                try each(server)
+            } catch let error {
+                print("Failed: \(error)")
+            }
+        }
     }
     
     private(set) static var tasks: [Task] = []
