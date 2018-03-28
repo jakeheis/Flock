@@ -62,23 +62,17 @@ public extension Environment {
 
 public class Flock {
     
-    public static func go(in env: Environment, _ each: (_ server: Server) throws -> ()) {
+    public static func run(in env: Environment, _ each: (_ server: Server) throws -> ()) {
         let servers = env.servers.map { Server(ip: $0.ip, port: $0.port, user: $0.user, roles: [], authMethod: $0.auth)}
         servers.forEach { (server) in
             do {
                 try each(server)
+            } catch let error as TaskError {
+                error.output()
             } catch let error {
-                print("Failed: \(error)")
+                print("Error: \(error)")
             }
         }
     }
-    
-//    public static func serve(ip: String, user: String, roles: [Server.Role], authMethod: SSHAuthMethod? = nil) {
-//        servers.append(Server(ip: ip, user: user, roles: roles, authMethod: authMethod))
-//    }
-//
-//    public static func serve(address: Server.Address, user: String, roles: [Server.Role], authMethod: SSHAuthMethod? = nil) {
-//        servers.append(Server(address: address, user: user, roles: roles, authMethod: authMethod))
-//    }
     
 }

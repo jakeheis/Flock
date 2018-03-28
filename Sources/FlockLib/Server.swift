@@ -135,23 +135,6 @@ public class Server {
         return output
     }
     
-    public func executeWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
-        var captured = ""
-        let status = try ssh.execute(prepCommand(command), output: { (output) in
-            print(output, terminator: "")
-            fflush(stdout)
-            captured += output
-        })
-        guard status == 0 else {
-            let suggestion = suggestions.first(where: { $0.matches(captured) })
-            if let message = suggestion?.customMessage {
-                throw TaskError(message: message, commandSuggestion: suggestion?.command)
-            } else {
-                throw TaskError(status: status, commandSuggestion: suggestion?.command)
-            }
-        }
-    }
-    
     private func prepCommand(_ command: String) -> String {
         let finalCommands = commandStack + [command]
         let call = finalCommands.joined(separator: "; ")
@@ -171,44 +154,21 @@ extension Server: CustomStringConvertible {
 
 // MARK: - OutputMatcher
 
-public struct ErrorSuggestion {
-    
-    let error: String
-    let command: String
-    let customMessage: String?
-    
-    init(error: String, command: String, customMessage: String? = nil) {
-        self.error = error
-        self.command = command
-        self.customMessage = customMessage
-    }
-    
-    func matches(_ output: String) -> Bool {
-        return output.contains(error)
-    }
-    
-}
-
 public struct TaskError: Error {
     
     public let message: String
-    public var commandSuggestion: String?
     
-    public init(status: Int32, commandSuggestion: String? = nil) {
-        self.init(message: "a command failed (error \(status))", commandSuggestion: commandSuggestion)
+    public init(status: Int32) {
+        self.init(message: "a command failed (error \(status))")
     }
     
-    public init(message: String, commandSuggestion: String? = nil) {
+    public init(message: String) {
         self.message = message
-        self.commandSuggestion = commandSuggestion
     }
     
     public func output() {
         print()
         print("Error: ".red + message)
-        if let commandSuggestion = commandSuggestion {
-            print("Try running: ".yellow + commandSuggestion)
-        }
         print()
     }
     
