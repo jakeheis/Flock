@@ -11,21 +11,26 @@ import Rainbow
 import Spawn
 import Shout
 
-public extension Config {
-    static var SSHAuthMethod: SSHAuthMethod? = nil
+public struct ServerLogin {
+    public let ip: String
+    public let port: Int
+    public let user: String
+    public let auth: SSHAuthMethod?
+    
+    public init(ip: String, user: String, auth: SSHAuthMethod? = nil) {
+        self.init(ip: ip, port: 22, user: user, auth: auth)
+    }
+    
+    public init(ip: String, port: Int, user: String, auth: SSHAuthMethod? = nil) {
+        self.ip = ip
+        self.port = port
+        self.user = user
+        self.auth = auth
+    }
+    
 }
 
 public class Server {
-
-    public struct Address {
-        public let ip: String
-        public let port: Int
-
-        public init(ip: String, port: Int) {
-            self.ip = ip
-            self.port = port
-        }
-    }
 
     public enum Role {
         case app
@@ -33,37 +38,35 @@ public class Server {
         case web
     }
     
-    public let address: Address
+    public let ip: String
+    public let port: Int
     public let user: String
     public let roles: [Role]
     
     private let ssh: SSH
     private var commandStack: [String] = []
     
-    public init(address: Address, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
-        guard let auth = authMethod ?? Config.SSHAuthMethod else {
-            print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `Config.SSHAuthMethod` in your configuration file")
+    public init(ip: String, port: Int, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
+        guard let auth = authMethod else {
+            print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `environment.SSHAuthMethod`")
             exit(1)
         }
         
         let ssh: SSH
         do {
-            ssh = try SSH(host: address.ip, port: Int32(address.port))
+            ssh = try SSH(host: ip, port: Int32(port))
             ssh.ptyType = .vanilla
             try ssh.authenticate(username: user, authMethod: auth)
         } catch let error {
-            print("Error: ".red + "Couldn't connect to \(user)@\(address) (\(error))")
+            print("Error: ".red + "Couldn't connect to \(user)@\(ip):\(port) (\(error))")
             exit(1)
         }
         
-        self.address = address
+        self.ip = ip
+        self.port = port
         self.user = user
         self.roles = roles
         self.ssh = ssh
-    }
-
-    public convenience init(ip: String, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
-        self.init(address: Address(ip: ip, port: 22), user: user, roles: roles, authMethod: authMethod)
     }
     
     // MARK: - Command helpers
@@ -161,15 +164,9 @@ public class Server {
 extension Server: CustomStringConvertible {
     
     public var description: String {
-        return "\(user)@\(address)"
+        return "\(user)@\(ip):\(port)"
     }
     
-}
-
-extension Server.Address: CustomStringConvertible {
-    public var description: String {
-        return "\(ip):\(port)"
-    }
 }
 
 // MARK: - OutputMatcher
@@ -188,6 +185,31 @@ public struct ErrorSuggestion {
     
     func matches(_ output: String) -> Bool {
         return output.contains(error)
+    }
+    
+}
+
+public struct TaskError: Error {
+    
+    public let message: String
+    public var commandSuggestion: String?
+    
+    public init(status: Int32, commandSuggestion: String? = nil) {
+        self.init(message: "a command failed (error \(status))", commandSuggestion: commandSuggestion)
+    }
+    
+    public init(message: String, commandSuggestion: String? = nil) {
+        self.message = message
+        self.commandSuggestion = commandSuggestion
+    }
+    
+    public func output() {
+        print()
+        print("Error: ".red + message)
+        if let commandSuggestion = commandSuggestion {
+            print("Try running: ".yellow + commandSuggestion)
+        }
+        print()
     }
     
 }

@@ -4,7 +4,7 @@
 //
 //  Created by Jake Heiser on 6/8/17.
 //
-
+/*
 public protocol ProcessController {
     func tasks(for framework: ServerFramework) -> TaskSource
 }
@@ -234,3 +234,4 @@ public class Supervisord: ProcessController {
     }
     
 }
+*/

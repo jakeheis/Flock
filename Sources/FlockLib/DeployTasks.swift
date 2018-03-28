@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+/*
 public extension TaskSource {
     static let deploy = TaskSource(tasks: [
         DeployTask(),
@@ -102,3 +102,4 @@ class LinkTask: Task {
         try server.execute("rm \(Paths.nextDirectory)")
     }
 }
+*/

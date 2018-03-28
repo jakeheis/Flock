@@ -6,6 +6,7 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+/*
 public struct Paths {
     
     private init() {}
@@ -35,3 +36,4 @@ public struct Paths {
     }
     
 }
+*/

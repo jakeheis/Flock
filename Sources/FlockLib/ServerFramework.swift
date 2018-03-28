@@ -4,7 +4,7 @@
 //
 //  Created by Jake Heiser on 6/8/17.
 //
-
+/*
 public protocol ServerFramework {
     var name: String { get }
     var command: String { get }
@@ -131,3 +131,4 @@ public class PerfectFramework: ServerFramework {
     public init() {}
     
 }
+*/

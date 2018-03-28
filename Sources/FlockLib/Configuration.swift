@@ -6,6 +6,7 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+/*
 public protocol Environment {
     func configure()
 }
@@ -21,3 +22,4 @@ public struct Config {
 public extension Config {
     internal(set) static var environment = ""
 }
+*/
