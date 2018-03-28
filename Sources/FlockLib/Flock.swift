@@ -27,7 +27,7 @@ public protocol FlockConfig {
 
 public class Flock {
     
-    public static func go(_ config: FlockConfig, _ each: (server: Server) -> ()) {
+    public static func go(_ config: FlockConfig, _ each: (_ server: Server) -> ()) {
         let servers = config.servers.map { Server(ip: $0.ip, user: $0.user, roles: [], authMethod: $0.auth)}
         servers.forEach(each)
     }
