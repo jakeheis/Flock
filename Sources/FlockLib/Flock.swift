@@ -15,7 +15,22 @@
 import Rainbow
 import Shout
 
+public struct ServerAddress {
+    let ip: String
+    let user: String
+    let auth: SSHAuthMethod?
+}
+
+public protocol FlockConfig {
+    var servers: [ServerAddress] { get }
+}
+
 public class Flock {
+    
+    public static func go(_ config: FlockConfig, _ each: (server: Server) -> ()) {
+        let servers = config.servers.map { Server(ip: $0.ip, user: $0.user, roles: [], authMethod: $0.auth)}
+        servers.forEach(each)
+    }
     
     private(set) static var tasks: [Task] = []
     private(set) static var servers: [Server] = []
