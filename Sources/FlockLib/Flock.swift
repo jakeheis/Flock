@@ -16,9 +16,15 @@ import Rainbow
 import Shout
 
 public struct ServerAddress {
-    let ip: String
-    let user: String
-    let auth: SSHAuthMethod?
+    public let ip: String
+    public let user: String
+    public let auth: SSHAuthMethod?
+    
+    public init(ip: String, user: String, auth: SSHAuthMethod? = nil) {
+        self.ip = ip
+        self.user = user
+        self.auth = auth
+    }
 }
 
 public protocol FlockConfig {
