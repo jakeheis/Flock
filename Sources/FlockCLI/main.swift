@@ -1,9 +1,18 @@
 import SwiftCLI
 
+class FlockOptionRecognizer: OptionRecognizer {
+    
+    func recognizeOptions(from optionRegistry: OptionRegistry, in arguments: ArgumentList) throws {
+        // no-op
+    }
+    
+}
+
 let flock = CLI(name: "flock", version: "0.0.1")
 
 flock.router = FlockRouter()
 flock.helpMessageGenerator = FlockHelpMessageGenerator()
+flock.optionRecognizer = FlockOptionRecognizer()
 
 flock.commands = [
     InitCommand()
