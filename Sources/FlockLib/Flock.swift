@@ -22,7 +22,7 @@ public struct Project {
     
     public init(name: String, repoURL: String) {
         self.name = name
-        self.repo = repoURL
+        self.repoURL = repoURL
     }
 }
 
