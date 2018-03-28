@@ -17,15 +17,20 @@ import Shout
 import Foundation
 
 public struct Project {
-    let name: String
-    let repoURL: String
+    public let name: String
+    public let repoURL: String
+    
+    public init(name: String, repoURL: String) {
+        self.name = name
+        self.repo = repoURL
+    }
 }
 
 public struct Environment {
-    let project: Project
-    let servers: [ServerLogin]
-    let SSHAuthMethod: SSHAuthMethod?
-    let deployDirectory: String
+    public let project: Project
+    public let servers: [ServerLogin]
+    public let SSHAuthMethod: SSHAuthMethod?
+    public let deployDirectory: String
     
     public init(project: Project, servers: [ServerLogin], SSHAuthMethod: SSHAuthMethod? = nil, deployDirectory: String = "/var/www") {
         self.project = project
@@ -35,7 +40,7 @@ public struct Environment {
     }
 }
 
-extension Environment {
+public extension Environment {
     
     var projectDirectory: String {
         return "\(deployDirectory)/\(project.name)"
