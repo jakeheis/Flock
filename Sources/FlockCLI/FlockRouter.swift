@@ -18,15 +18,10 @@ class FlockRouter: Router {
             return .failure(partialPath: path, notFound: nil)
         }
         
-        // Ran something like `flock --init`
+        // Ran something like `flock init`
         if let command = cli.children.first(where: { $0.name == name.value }) as? Command {
             arguments.remove(node: name)
             return .success(path.appending(command))
-        }
-        
-        // Ran something like `flock --notreal`
-        if name.value.hasPrefix("-") {
-            return .failure(partialPath: path, notFound: name.value)
         }
         
         // Ran something like `flock deploy`
