@@ -54,6 +54,7 @@ public class Server {
         
         let ssh: SSH
         do {
+            print("Connecting to \(user)@\(ip):\(port)...")
             ssh = try SSH(host: ip, port: Int32(port))
             ssh.ptyType = .vanilla
             try ssh.authenticate(username: user, authMethod: auth)
@@ -159,7 +160,7 @@ public struct TaskError: Error {
     public let message: String
     
     public init(status: Int32) {
-        self.init(message: "a command failed (error \(status))")
+        self.init(message: "a command failed (code: \(status))")
     }
     
     public init(message: String) {
@@ -168,7 +169,7 @@ public struct TaskError: Error {
     
     public func output() {
         print()
-        print("Error: ".red + message)
+        print("Error: ".red.bold + message)
         print()
     }
     

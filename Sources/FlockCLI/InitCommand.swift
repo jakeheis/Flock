@@ -6,11 +6,9 @@
 //
 //
 
-import Foundation
-import SwiftCLI
-import Rainbow
 import PathKit
-import Spawn
+import Rainbow
+import SwiftCLI
 
 class InitCommand: FlockCommand {
   
@@ -22,12 +20,55 @@ class InitCommand: FlockCommand {
             throw CLI.Error(message: "Error: ".red + "Flock has already been initialized")
         }
         
-        try Path.flockfile.write("""
-        public func deploy() {
-            print("deploying")
+        print("Creating Flock.swift")
+        try Path.flockfile.write(defaultFlockfile)
+        
+        print("Building dependencies")
+        do {
+            try executeBeak(args: ["run", "--path", "Flock.swift"])
+        } catch {
+            print("Dependency build failed".red)
+            return
         }
-
-        """)
+        
+        print("Successfully initialized Flock".green)
     }
     
 }
+
+let defaultFlockfile = """
+// beak: jakeheis/Flock FlockLib @ .branch("beak")
+
+import FlockLib
+import Foundation
+import Shout
+
+// MARK: - Environments
+
+let myProject = Project(
+    name: "MyProject",
+    repoURL: "https://github.com/me/Project"
+)
+
+public let production = Environment(
+    project: myProject,
+    servers: [
+        ServerLogin(ip: "1.1.1.1", user: "deploy", auth: SSHKey(privateKey: "aKey"))
+    ]
+)
+
+public func deploy(env: Environment = production) {
+    Flock.run(in: env) { (server) in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "YYYYMMddHHMMSS"
+        let timestamp = formatter.string(from: Date())
+
+        let cloneDirectory = "\\(env.releasesDirectory)/\\(timestamp)"
+        try server.execute("git clone --depth 1 \\(env.project.repoURL) \\(cloneDirectory)")
+
+        try server.execute("swift build -C \\(cloneDirectory) -c release")
+
+        try server.execute("ln -sfn \\(cloneDirectory) \\(env.currentDirectory)")
+    }
+}
+"""
