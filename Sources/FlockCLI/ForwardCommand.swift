@@ -19,7 +19,7 @@ class ForwardCommand: FlockCommand {
         try guardFlockIsInitialized()
         
         do {
-            try executeBeak(args: ["run", "--path", "Flock.swift"] + args.value)
+            try Beak.execute(args: ["run", "--path", "Flock.swift"] + args.value)
         } catch {}
     }
     

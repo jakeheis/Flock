@@ -8,7 +8,6 @@
 
 import Foundation
 import Rainbow
-import Spawn
 import Shout
 
 public struct ServerLogin {

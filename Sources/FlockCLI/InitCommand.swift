@@ -6,7 +6,6 @@
 //
 //
 
-import PathKit
 import Rainbow
 import SwiftCLI
 
@@ -21,11 +20,12 @@ class InitCommand: FlockCommand {
         }
         
         print("Creating Flock.swift")
-        try Path.flockfile.write(defaultFlockfile)
+        
+        try defaultFlockfile.write(toFile: flockPath, atomically: true, encoding: .utf8)
         
         print("Building dependencies")
         do {
-            try executeBeak(args: ["run", "--path", "Flock.swift"])
+            try Beak.execute(args: ["run", "--path", "Flock.swift"])
         } catch {
             print("Dependency build failed".red)
             return
@@ -57,6 +57,8 @@ public let production = Environment(
     ]
 )
 
+// MARK: - Tasks
+
 public func deploy(env: Environment = production) {
     Flock.run(in: env) { (server) in
         let formatter = DateFormatter()
@@ -71,4 +73,5 @@ public func deploy(env: Environment = production) {
         try server.execute("ln -sfn \\(cloneDirectory) \\(env.currentDirectory)")
     }
 }
+
 """
