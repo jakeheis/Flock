@@ -11,20 +11,23 @@ import Rainbow
 import Shout
 
 public struct ServerLogin {
+    
     public let ip: String
     public let port: Int
     public let user: String
     public let auth: SSHAuthMethod?
+    public let roles: [Server.Role]
     
-    public init(ip: String, user: String, auth: SSHAuthMethod? = nil) {
+    public init(ip: String, user: String, auth: SSHAuthMethod? = nil, roles: [Server.Role] = []) {
         self.init(ip: ip, port: 22, user: user, auth: auth)
     }
     
-    public init(ip: String, port: Int, user: String, auth: SSHAuthMethod? = nil) {
+    public init(ip: String, port: Int, user: String, auth: SSHAuthMethod? = nil, roles: [Server.Role] = []) {
         self.ip = ip
         self.port = port
         self.user = user
         self.auth = auth
+        self.roles = roles
     }
     
 }
@@ -85,34 +88,25 @@ public class Server {
         ssh.ptyType = oldType
     }
     
-    public func fileExists(_ file: String) -> Bool {
-        let call = "test -f \(file)"
+    public func commandSucceeds(_ command: String) -> Bool {
         do {
-            try execute(call)
+            try execute(command)
         } catch {
             return false
         }
         return true
+    }
+    
+    public func fileExists(_ file: String) -> Bool {
+        return commandSucceeds("test -f \(file)")
     }
     
     public func directoryExists(_ directory: String) -> Bool {
-        let call = "test -d \(directory)"
-        do {
-            try execute(call)
-        } catch {
-            return false
-        }
-        return true
+        return commandSucceeds("test -d \(directory)")
     }
     
     public func commandExists(_ command: String) -> Bool {
-        let call = "command -v \(command) >/dev/null 2>&1"
-        do {
-            try execute(call)
-        } catch {
-            return false
-        }
-        return true
+        return commandSucceeds("command -v \(command) >/dev/null 2>&1")
     }
     
     // MARK: - Comamnd execution
@@ -138,7 +132,7 @@ public class Server {
     private func prepCommand(_ command: String) -> String {
         let finalCommands = commandStack + [command]
         let call = finalCommands.joined(separator: "; ")
-        Logger.logCall(call, on: self)
+        print("On \(description): \(call)".green)
         return call
     }
     
@@ -148,28 +142,6 @@ extension Server: CustomStringConvertible {
     
     public var description: String {
         return "\(user)@\(ip):\(port)"
-    }
-    
-}
-
-// MARK: - OutputMatcher
-
-public struct TaskError: Error {
-    
-    public let message: String
-    
-    public init(status: Int32) {
-        self.init(message: "a command failed (code: \(status))")
-    }
-    
-    public init(message: String) {
-        self.message = message
-    }
-    
-    public func output() {
-        print()
-        print("Error: ".red.bold + message)
-        print()
     }
     
 }
