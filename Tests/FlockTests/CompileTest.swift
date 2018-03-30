@@ -46,8 +46,6 @@ public let staging = Environment(
 // MARK: - Tasks
 
 /// Deploy the project
-/// - Parameters:
-///   - env: the env to execute this task in
 public func deploy(env: Environment = production) {
     Flock.run(in: env) { (server) in
         let formatter = DateFormatter()
@@ -69,8 +67,6 @@ public func deploy(env: Environment = production) {
 }
 
 /// Start the server
-/// - Parameters:
-///   - env: the env to execute this task in
 public func startServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try startServer(on: server, env: env)
@@ -78,8 +74,6 @@ public func startServer(env: Environment = production) {
 }
 
 /// Print the status of the server
-/// - Parameters:
-///   - env: the env to execute this task in
 public func status(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try status(on: server, env: env)
@@ -87,8 +81,6 @@ public func status(env: Environment = production) {
 }
 
 /// Stop the server
-/// - Parameters:
-///   - env: the env to execute this task in
 public func stopServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try stopServer(on: server, env: env)
@@ -96,8 +88,6 @@ public func stopServer(env: Environment = production) {
 }
 
 /// Restart the server
-/// - Parameters:
-///   - env: the env to execute this task in
 public func restartServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try restartServer(on: server, env: env)
