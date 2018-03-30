@@ -57,6 +57,7 @@ public class Server {
         let ssh: SSH
         do {
             print("Connecting to \(user)@\(ip):\(port)...")
+            fflush(stdout)
             ssh = try SSH(host: ip, port: Int32(port))
             ssh.ptyType = .vanilla
             try ssh.authenticate(username: user, authMethod: auth)
