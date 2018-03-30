@@ -30,8 +30,24 @@ public let production = Environment(
     ]
 )
 
+//
+// Uncomment if you have a staging environment:
+//
+/*
+public let staging = Environment(
+    project: myProject,
+    name: "staging",
+    servers: [
+        ServerLogin(ip: "1.1.1.1", user: "deploy", auth: SSHKey(privateKey: "aKey"))
+    ]
+)
+*/
+
 // MARK: - Tasks
 
+/// Deploy the project
+/// - Parameters:
+///   - env: the env to execute this task in
 public func deploy(env: Environment = production) {
     Flock.run(in: env) { (server) in
         let formatter = DateFormatter()
@@ -52,24 +68,36 @@ public func deploy(env: Environment = production) {
     }
 }
 
+/// Start the server
+/// - Parameters:
+///   - env: the env to execute this task in
 public func startServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try startServer(on: server, env: env)
     }
 }
 
+/// Print the status of the server
+/// - Parameters:
+///   - env: the env to execute this task in
 public func status(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try status(on: server, env: env)
     }
 }
 
+/// Stop the server
+/// - Parameters:
+///   - env: the env to execute this task in
 public func stopServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try stopServer(on: server, env: env)
     }
 }
 
+/// Restart the server
+/// - Parameters:
+///   - env: the env to execute this task in
 public func restartServer(env: Environment = production) {
     Flock.run(in: env) { (server) in
         try restartServer(on: server, env: env)
