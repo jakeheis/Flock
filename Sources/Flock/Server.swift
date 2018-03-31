@@ -89,6 +89,12 @@ public class Server {
         ssh.ptyType = oldType
     }
     
+    public func onRoles(_ roles: [Role], block: () throws -> ()) rethrows {
+        if !Set(roles).intersection(Set(self.roles)).isEmpty {
+            try block()
+        }
+    }
+    
     public func commandSucceeds(_ command: String) -> Bool {
         do {
             try execute(command)
