@@ -6,9 +6,12 @@
 //  Copyright © 2015 jakeheis. All rights reserved.
 //
 
+import Rainbow
+
 public class Flock {
     
     public static func run(in env: Environment, _ each: (_ server: Server) throws -> ()) {
+        Rainbow.outputTarget = .console
         let servers = env.servers.map { Server(ip: $0.ip, port: $0.port, user: $0.user, roles:$0.roles, authMethod: $0.auth)}
         servers.forEach { (server) in
             do {
