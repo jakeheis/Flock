@@ -50,7 +50,7 @@ public class Server {
     
     public init(ip: String, port: Int, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
         guard let auth = authMethod else {
-            print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `environment.SSHAuthMethod`")
+            TaskError(message: "You must either pass in a SSH auth method in your `Server()` initialization or specify `environment.SSHAuthMethod`").output()
             exit(1)
         }
         
@@ -62,7 +62,7 @@ public class Server {
             ssh.ptyType = .vanilla
             try ssh.authenticate(username: user, authMethod: auth)
         } catch let error {
-            print("Error: ".red + "Couldn't connect to \(user)@\(ip):\(port) (\(error))")
+            TaskError(message: "Couldn't connect to \(user)@\(ip):\(port) (\(error))").output()
             exit(1)
         }
         
