@@ -6,14 +6,17 @@ import PackageDescription
 let package = Package(
     name: "Flock",
     products: [
-        .library(name: "Flock", targets: ["Flock"]),
+        .executable(name: "flock", targets: ["FlockCLI"]),
+        .library(name: "FlockKit", targets: ["FlockKit"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/yonaskolb/Beak", from: "0.4.0"),
         .package(url: "https://github.com/onevcat/Rainbow", from: "3.0.0"),
         .package(url: "https://github.com/jakeheis/Shout", from: "0.2.3"),
+        .package(url: "https://github.com/jakeheis/SwiftCLI", from: "5.1.1"),
     ],
     targets: [
-        .target(name: "Flock", dependencies: ["Rainbow", "Shout"]),
-        .testTarget(name: "FlockTests", dependencies: ["Flock"]),
+        .target(name: "FlockCLI", dependencies: ["BeakCore", "Rainbow", "SwiftCLI"]),
+        .target(name: "FlockKit", dependencies: ["Rainbow", "Shout"]),
     ]
 )
