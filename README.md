@@ -26,13 +26,13 @@ Table of Contents
 ### [Mint](https://github.com/yonaskolb/mint) (recommended)
 
 ```bash
-mint install jakeheis/FlockCLI
+mint install jakeheis/Flock
 ```
 
 ### Manual
 ```bash
-git clone https://github.com/jakeheis/FlockCLI
-cd FlockCLI
+git clone https://github.com/jakeheis/Flock
+cd Flock
 swift build -c release
 mv .build/release/flock /usr/bin/local/flock
 ```
