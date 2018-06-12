@@ -61,9 +61,9 @@ class InitCommand: FlockCommand {
 
 private func generateFlockfile(name: String, url: String) -> String {
     return """
-// beak: jakeheis/Flock @ .branch("beak")
+// beak: jakeheis/Flock FlockKit @ 0.5.0
 
-import Flock
+import FlockKit
 import Foundation
 import Shout
 
