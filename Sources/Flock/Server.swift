@@ -8,24 +8,31 @@
 
 import Foundation
 import Rainbow
-import Spawn
 import Shout
 
-public extension Config {
-    static var SSHAuthMethod: SSH.AuthMethod? = nil
+public struct ServerLogin {
+    
+    public let ip: String
+    public let port: Int
+    public let user: String
+    public let auth: SSHAuthMethod?
+    public let roles: [Server.Role]
+    
+    public init(ip: String, user: String, auth: SSHAuthMethod? = nil, roles: [Server.Role] = []) {
+        self.init(ip: ip, port: 22, user: user, auth: auth)
+    }
+    
+    public init(ip: String, port: Int, user: String, auth: SSHAuthMethod? = nil, roles: [Server.Role] = []) {
+        self.ip = ip
+        self.port = port
+        self.user = user
+        self.auth = auth
+        self.roles = roles
+    }
+    
 }
 
 public class Server {
-
-    public struct Address {
-        public let ip: String
-        public let port: Int
-
-        public init(ip: String, port: Int) {
-            self.ip = ip
-            self.port = port
-        }
-    }
 
     public enum Role {
         case app
@@ -33,39 +40,37 @@ public class Server {
         case web
     }
     
-    public let address: Address
+    public let ip: String
+    public let port: Int
     public let user: String
     public let roles: [Role]
     
-    private let session: SSH.Session
+    private let ssh: SSH
     private var commandStack: [String] = []
-
-
     
-    public init(address: Address, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
-        guard let auth = authMethod ?? Config.SSHAuthMethod else {
-            print("Error: ".red + "You must either pass in a SSH auth method in your `Server()` initialization or specify `Config.SSHAuthMethod` in your configuration file")
+    public init(ip: String, port: Int, user: String, roles: [Role], authMethod: SSHAuthMethod?) {
+        guard let auth = authMethod else {
+            TaskError(message: "You must either pass in a SSH auth method in your `Server()` initialization or specify `environment.SSHAuthMethod`").output()
             exit(1)
         }
         
-        let session: SSH.Session
+        let ssh: SSH
         do {
-            session = try SSH.Session(host: address.ip, port: Int32(address.port))
-            session.ptyType = .vanilla
-            try session.authenticate(username: user, authMethod: auth)
+            print("Connecting to \(user)@\(ip):\(port)...")
+            fflush(stdout)
+            ssh = try SSH(host: ip, port: Int32(port))
+            ssh.ptyType = .vanilla
+            try ssh.authenticate(username: user, authMethod: auth)
         } catch let error {
-            print("Error: ".red + "Couldn't connect to \(user)@\(address) (\(error))")
+            TaskError(message: "Couldn't connect to \(user)@\(ip):\(port) (\(error))").output()
             exit(1)
         }
         
-        self.address = address
+        self.ip = ip
+        self.port = port
         self.user = user
         self.roles = roles
-        self.session = session
-    }
-
-    public convenience init(ip: String, user: String, roles: [Role], authMethod: SSH.AuthMethod?) {
-        self.init(address: Address(ip: ip, port: 22), user: user, roles: roles, authMethod: authMethod)
+        self.ssh = ssh
     }
     
     // MARK: - Command helpers
@@ -77,54 +82,51 @@ public class Server {
     }
     
     public func withPty(_ newType: SSH.PtyType?, block: () throws -> ()) rethrows {
-        let oldType = session.ptyType
+        let oldType = ssh.ptyType
         
-        session.ptyType = newType
+        ssh.ptyType = newType
         try block()
-        session.ptyType = oldType
+        ssh.ptyType = oldType
+    }
+    
+    public func onRoles(_ roles: [Role], block: () throws -> ()) rethrows {
+        if !Set(roles).intersection(Set(self.roles)).isEmpty {
+            try block()
+        }
+    }
+    
+    public func commandSucceeds(_ command: String) -> Bool {
+        do {
+            try execute(command)
+        } catch {
+            return false
+        }
+        return true
     }
     
     public func fileExists(_ file: String) -> Bool {
-        let call = "test -f \(file)"
-        do {
-            try execute(call)
-        } catch {
-            return false
-        }
-        return true
+        return commandSucceeds("test -f \(file)")
     }
     
     public func directoryExists(_ directory: String) -> Bool {
-        let call = "test -d \(directory)"
-        do {
-            try execute(call)
-        } catch {
-            return false
-        }
-        return true
+        return commandSucceeds("test -d \(directory)")
     }
     
     public func commandExists(_ command: String) -> Bool {
-        let call = "command -v \(command) >/dev/null 2>&1"
-        do {
-            try execute(call)
-        } catch {
-            return false
-        }
-        return true
+        return commandSucceeds("command -v \(command) >/dev/null 2>&1")
     }
     
     // MARK: - Comamnd execution
     
     public func execute(_ command: String) throws {
-        let status = try session.execute(prepCommand(command))
+        let status = try ssh.execute(prepCommand(command))
         guard status == 0 else {
             throw TaskError(status: status)
         }
     }
     
     public func capture(_ command: String) throws -> String {
-        let (status, output) = try session.capture(prepCommand(command))
+        let (status, output) = try ssh.capture(prepCommand(command))
         guard status == 0 else {
             if !output.isEmpty {
                 print(output)
@@ -134,27 +136,10 @@ public class Server {
         return output
     }
     
-    public func executeWithSuggestions(_ command: String, suggestions: [ErrorSuggestion]) throws {
-        var captured = ""
-        let status = try session.execute(prepCommand(command), output: { (output) in
-            print(output, terminator: "")
-            fflush(stdout)
-            captured += output
-        })
-        guard status == 0 else {
-            let suggestion = suggestions.first(where: { $0.matches(captured) })
-            if let message = suggestion?.customMessage {
-                throw TaskError(message: message, commandSuggestion: suggestion?.command)
-            } else {
-                throw TaskError(status: status, commandSuggestion: suggestion?.command)
-            }
-        }
-    }
-    
     private func prepCommand(_ command: String) -> String {
         let finalCommands = commandStack + [command]
         let call = finalCommands.joined(separator: "; ")
-        Logger.logCall(call, on: self)
+        print("On \(description): \(call)".green)
         return call
     }
     
@@ -163,33 +148,7 @@ public class Server {
 extension Server: CustomStringConvertible {
     
     public var description: String {
-        return "\(user)@\(address)"
-    }
-    
-}
-
-extension Server.Address: CustomStringConvertible {
-    public var description: String {
-        return "\(ip):\(port)"
-    }
-}
-
-// MARK: - OutputMatcher
-
-public struct ErrorSuggestion {
-    
-    let error: String
-    let command: String
-    let customMessage: String?
-    
-    init(error: String, command: String, customMessage: String? = nil) {
-        self.error = error
-        self.command = command
-        self.customMessage = customMessage
-    }
-    
-    func matches(_ output: String) -> Bool {
-        return output.contains(error)
+        return "\(user)@\(ip):\(port)"
     }
     
 }
